@@ -16,20 +16,20 @@ for k = 1 : numImages
     blueImage = rgbImage(:, :, 3);
     figure; % plot image file in each color Image
     set(gcf, 'Position', get(0, 'ScreenSize'));
-    subplot(3, 4, 1);
+    subplot(4, 4, 1);
     imshow(rgbImage);
     title('RGB Image', 'FontSize', fontSize);
-    subplot(3, 4, 2);
+    subplot(4, 4, 2);
     imshow(redImage);
     title('Red Image', 'FontSize', fontSize);
-    subplot(3, 4, 3);
+    subplot(4, 4, 3);
     imshow(greenImage);
     title('Green Image', 'FontSize', fontSize);
-    subplot(3, 4, 4);
+    subplot(4, 4, 4);
     imshow(blueImage);
     title('Blue Image', 'FontSize', fontSize);
     
-    hR = subplot(3, 4, 6);
+    hR = subplot(4, 4, 6);
 	[countsR, grayLevelsR] = imhist(redImage);
 	[maxGLValueR, maxGLRLocation] = max(countsR);
 	maxCountR = max(countsR);
@@ -39,7 +39,7 @@ for k = 1 : numImages
 	title('Histogram of Red Image', 'FontSize', fontSize);
     
 	% Compute and plot the green histogram.
-	hG = subplot(3, 4, 7);
+	hG = subplot(4, 4, 7);
 	[countsG, grayLevelsG] = imhist(greenImage);
     [maxGLValueG, maxGLGLocation] = max(countsG);
 	maxCountG = max(countsG);
@@ -49,7 +49,7 @@ for k = 1 : numImages
 	title('Histogram of Green Image', 'FontSize', fontSize);
 	
 	% Compute and plot the blue histogram.
-	hB = subplot(3, 4, 8);
+	hB = subplot(4, 4, 8);
 	[countsB, grayLevelsB] = imhist(blueImage);
     [maxGLValueB, maxGLBLocation] = max(countsB);
 	maxCountB = max(countsB);
@@ -59,7 +59,7 @@ for k = 1 : numImages
 	title('Histogram of Blue Image', 'FontSize', fontSize);
     
 	% Plot all 3 histograms in one plot.
-	gRGB = subplot(3, 4, 5);
+	gRGB = subplot(4, 4, 5);
 	plot(grayLevelsR, countsR, 'r', 'LineWidth', 2);
 	grid on;
 	xlabel('Gray Levels');
@@ -75,7 +75,7 @@ for k = 1 : numImages
 	axis([hR hG hB gRGB], [0 255 0 maxCount]);
     
     % find thrsehold level
-    subplot(3, 4, 6);
+    subplot(4, 4, 6);
     hold on;
     redThreshold = graythresh(redImage) * 255;
     yAxisRangeValues = ylim;
@@ -84,7 +84,7 @@ for k = 1 : numImages
 	text(redThreshold + 5, double(0.7 * yAxisRangeValues(2)), "Threshold");
 %     text(maxGLRLocation + 5, double(0.9 * yAxisRangeValues(2)), "Peak");
     
-    subplot(3, 4, 7);
+    subplot(4, 4, 7);
     hold on;
     greenThreshold = graythresh(greenImage) * 255;
     yAxisRangeValues = ylim;
@@ -93,7 +93,7 @@ for k = 1 : numImages
 	text(greenThreshold + 5, double(0.7 * yAxisRangeValues(2)), "Threshold");
 %     text(maxGLGLocation + 5, double(0.9 * yAxisRangeValues(2)), "Peak");
     
-    subplot(3, 4, 8);
+    subplot(4, 4, 8);
     hold on;
     blueThreshold = graythresh(blueImage) * 255;
     yAxisRangeValues = ylim;
@@ -108,7 +108,7 @@ for k = 1 : numImages
     else
         redMask = (redImage > redThreshold);
     end
-    subplot(3, 4, 10);
+    subplot(4, 4, 10);
     redMask = morphological(redMask);
 	imshow(redMask .* rgbImage);
 	title('Red Mask', 'FontSize', fontSize);
@@ -118,7 +118,7 @@ for k = 1 : numImages
     else
         greenMask = (greenImage > greenThreshold);
     end
-    subplot(3, 4, 11);
+    subplot(4, 4, 11);
     greenMask = morphological(greenMask);
 	imshow(greenMask .* rgbImage);
 	title('Green Mask', 'FontSize', fontSize);
@@ -128,18 +128,38 @@ for k = 1 : numImages
     else
         blueMask = (blueImage > blueThreshold);
     end
-    subplot(3, 4, 12);
+    subplot(4, 4, 12);
     blueMask = morphological(blueMask);
 	imshow(blueMask .* rgbImage);
 	title('Blue Mask', 'FontSize', fontSize);
     
-    subplot(3, 4, 9);
+    subplot(4, 4, 9);
     imshow(rgbImage);
     title('Original Image', 'FontSize', fontSize);
+    
+    subplot(4, 4, 13);
+    blueScore = evaluateMask(blueThreshold, countsB);
+%     greenScore = evaluateMask(greenThreshold, countsG);
+    redScore = evaluateMask(redThreshold, countsR);
+    if blueScore < redScore
+        bestMask = blueMask;
+    else
+        bestMask = redMask;
+    end
+    imshow(rgbImage .* bestMask);
+    title('Masked Image', 'FontSize', fontSize);
 end
 
+
+
 function finalMask = morphological(imageMask)
-    mark = imclose(imageMask, strel('disk', 2));
+    mark = imclose(imageMask, strel('disk', 6));
+    mark = imdilate(mark, strel('disk', 6));
     mark = imfill(mark, 'holes');
     finalMask = uint8(mark);
+end
+
+function score = evaluateMask(threshold, counts)
+    range = 25; % range of calculation
+    score = mean(counts(threshold-range : threshold+range));
 end
