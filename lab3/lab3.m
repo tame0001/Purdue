@@ -146,15 +146,16 @@ for k = 1 : numImages
     else
         bestMask = redMask;
     end
-    imshow(rgbImage .* bestMask);
+    maskedImage = rgbImage .* bestMask;
+    imshow(maskedImage);
     title('Masked Image', 'FontSize', fontSize);
 end
 
 
 
 function finalMask = morphological(imageMask)
-    mark = imclose(imageMask, strel('disk', 6));
-    mark = imdilate(mark, strel('disk', 6));
+    mark = imclose(imageMask, strel('disk', 4));
+    mark = imdilate(mark, strel('disk', 2));
     mark = imfill(mark, 'holes');
     finalMask = uint8(mark);
 end
