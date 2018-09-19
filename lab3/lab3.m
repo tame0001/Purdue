@@ -159,6 +159,20 @@ for k = 1 : numImages
     axis image; 
     title("Labeled Image", 'FontSize', fontSize);
     
+    beanMeasurements = regionprops(logical(bestMask), 'all');
+    numberOfBeans = size(beanMeasurements, 1);
+    boundaries = bwboundaries(bestMask);
+    numberOfBoundaries = size(boundaries, 1);
+    subplot(4, 4, 15);
+    imshow(rgbImage);
+    title('Outlines', 'FontSize', fontSize); 
+    axis image; % Make sure image is not artificially stretched because of screen's aspect ratio.
+    hold on;
+    for m = 1 : numberOfBoundaries
+        thisBoundary = boundaries{m};
+        plot(thisBoundary(:,2), thisBoundary(:,1));
+    end
+    hold off;
 end
 
 
