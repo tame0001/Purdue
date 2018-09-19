@@ -149,14 +149,25 @@ for k = 1 : numImages
     maskedImage = rgbImage .* bestMask;
     imshow(maskedImage);
     title('Masked Image', 'FontSize', fontSize);
+    
+    labeledImage = bwlabel(bestMask);
+    coloredLabels = label2rgb (labeledImage, 'hsv', 'k', 'shuffle');
+    subplot(4, 4, 14);
+    imshow(coloredLabels);
+%     Make sure image is not artificially 
+%     stretched because of screen's aspect ratio.
+    axis image; 
+    title("Labeled Image", 'FontSize', fontSize);
+    
 end
 
 
 
 function finalMask = morphological(imageMask)
-    mark = imclose(imageMask, strel('disk', 4));
+    mark = imclose(imageMask, strel('disk', 5));
     mark = imdilate(mark, strel('disk', 2));
     mark = imfill(mark, 'holes');
+    mark(:, 1:10) = 0; % trim left border
     finalMask = uint8(mark);
 end
 
