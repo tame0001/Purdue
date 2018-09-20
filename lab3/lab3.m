@@ -8,6 +8,14 @@ srcFiles = dir(filePattern);
 numImages = size(srcFiles,1);
 fontSize = 12;
 beanCount = 1;
+classArray = cell([1 400]);
+indexArray = zeros([1 400]);
+areaArray = zeros([1 400]); 
+perimeterArray = zeros([1 400]);
+majorAxisArray = zeros([1 400]);
+minorAxisArray = zeros([1 400]);
+eccentricityArray = zeros([1 400]);
+solidityArray = zeros([1 400]);
 
 for k = 1 : numImages
     % load image file one by one
@@ -180,15 +188,36 @@ for k = 1 : numImages
     
     for i = 1 : numberOfBeans
         classArray{beanCount} = beanClass;
-        indexArray(beanCount) = 25 * (str2num(imageSet{1}) - 1) + i;
+        indexArray(beanCount) = 25 * (str2double(imageSet{1}) - 1) + i;
         areaArray(beanCount) = beanMeasurements(i).Area;
+        perimeterArray(beanCount) = beanMeasurements(i).Perimeter;
+        majorAxisArray(beanCount) = beanMeasurements(i).MajorAxisLength;
+        minorAxisArray(beanCount) = beanMeasurements(i).MinorAxisLength;
+        eccentricityArray(beanCount) = beanMeasurements(i).Eccentricity;
+        solidityArray(beanCount) = beanMeasurements(i).Solidity;
         beanCount = beanCount + 1;
     end
 end
-varNames = {'Class','Index','Area'};
+
+aspectRatioArray = majorAxisArray ./ minorAxisArray;
+compactnessArray = (perimeterArray .^2) ./ areaArray;
+rEqArray = (perimeterArray ./ (2 * pi)) + 0.5;
+roundnessArray = areaArray ./ ((rEqArray .^2) .* pi);
+
+varNames = {'Class', 'Index', 'Area', 'Perimeter', 'MajorAxis', ...
+            'MinorAxis', 'Eccentricity', 'Solidity', 'AspectRatio', ...
+            'Compactness', 'Roundness'};
 featureTable = table(classArray', ...
                      indexArray', ...
                      areaArray', ...
+                     perimeterArray', ...
+                     majorAxisArray', ...
+                     minorAxisArray', ...
+                     eccentricityArray', ...
+                     solidityArray', ...
+                     aspectRatioArray', ...
+                     compactnessArray', ...
+                     roundnessArray', ...
                      'VariableNames',varNames);
 elapsedTime = toc;
 
