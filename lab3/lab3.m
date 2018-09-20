@@ -1,3 +1,4 @@
+tic;
 clc; % Clear command window.
 clearvars; % Get rid of variables from prior run of this m-file.
 
@@ -6,10 +7,13 @@ filePattern = fullfile(folder, '*.tif');
 srcFiles = dir(filePattern);
 numImages = size(srcFiles,1);
 fontSize = 12;
+beanCount = 1;
 
 for k = 1 : numImages
     % load image file one by one
     fullFileName = fullfile(srcFiles(k).folder, srcFiles(k).name);
+    beanClass = srcFiles(k).name(1 : regexp(srcFiles(k).name, '(\d.tif)') - 1);
+    imageSet = regexp(srcFiles(k).name, '(\d)', 'match');
     rgbImage = imread(fullFileName);
     redImage = rgbImage(:, :, 1);
     greenImage = rgbImage(:, :, 2);
@@ -166,14 +170,27 @@ for k = 1 : numImages
     subplot(4, 4, 15);
     imshow(rgbImage);
     title('Outlines', 'FontSize', fontSize); 
-    axis image; % Make sure image is not artificially stretched because of screen's aspect ratio.
+    axis image; 
     hold on;
     for m = 1 : numberOfBoundaries
         thisBoundary = boundaries{m};
         plot(thisBoundary(:,2), thisBoundary(:,1));
     end
     hold off;
+    
+    for i = 1 : numberOfBeans
+        classArray{beanCount} = beanClass;
+        indexArray(beanCount) = 25 * (str2num(imageSet{1}) - 1) + i;
+        areaArray(beanCount) = beanMeasurements(i).Area;
+        beanCount = beanCount + 1;
+    end
 end
+varNames = {'Class','Index','Area'};
+featureTable = table(classArray', ...
+                     indexArray', ...
+                     areaArray', ...
+                     'VariableNames',varNames);
+elapsedTime = toc;
 
 
 
