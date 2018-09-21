@@ -16,6 +16,8 @@ majorAxisArray = zeros([1 400]);
 minorAxisArray = zeros([1 400]);
 eccentricityArray = zeros([1 400]);
 solidityArray = zeros([1 400]);
+hueArray = zeros([1 400]);
+intensityArray = zeros([1 400]);
 
 for k = 1 : numImages
     % load image file one by one
@@ -195,6 +197,21 @@ for k = 1 : numImages
         minorAxisArray(beanCount) = beanMeasurements(i).MinorAxisLength;
         eccentricityArray(beanCount) = beanMeasurements(i).Eccentricity;
         solidityArray(beanCount) = beanMeasurements(i).Solidity;
+        beanImage = imcrop(maskedImage,beanMeasurements(1).BoundingBox);
+        beanImage = double(beanImage) / 255; 
+        R = beanImage(:, :, 1);
+        G = beanImage(:, :, 2);
+        B = beanImage(:, :, 3);
+%         numerator =  0.5 * ((R - G) + (R - B)); 
+%         denominator = sqrt((R - G).^2 + (R - B).*(G - B));
+%         hue = acosd(numerator./(denominator + eps));
+%         hue(B > G) = 360 - hue( B > G);
+%         hue = hue / 360;
+        hsv = rgb2hsv(beanImage);
+        hue = hsv(:, :, 1);
+        hueArray(beanCount) = mean(hue(hue>0));
+        intensity = (R + G +B)./3;
+        intensityArray(beanCount) = mean(intensity(intensity>0));
         beanCount = beanCount + 1;
     end
 end
@@ -204,12 +221,14 @@ compactnessArray = (perimeterArray .^2) ./ areaArray;
 rEqArray = (perimeterArray ./ (2 * pi)) + 0.5;
 roundnessArray = areaArray ./ ((rEqArray .^2) .* pi);
 
-varNames = {'Class', 'Index', 'Area', 'Perimeter', 'MajorAxis', ...
-            'MinorAxis', 'Eccentricity', 'Solidity', 'AspectRatio', ...
-            'Compactness', 'Roundness'};
+varNames = {'Class', 'Index', 'Area', 'Hue', 'Intensity', 'Perimeter', ...
+            'MajorAxis', 'MinorAxis', 'Eccentricity', 'Solidity', ...
+            'AspectRatio', 'Compactness', 'Roundness'};
 featureTable = table(classArray', ...
                      indexArray', ...
                      areaArray', ...
+                     hueArray', ...
+                     intensityArray', ...
                      perimeterArray', ...
                      majorAxisArray', ...
                      minorAxisArray', ...
