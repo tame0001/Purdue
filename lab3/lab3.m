@@ -327,9 +327,27 @@ for i = 1:numel(classArray)
     
 end
                  
+
+tScoreArray = zeros([8 8 12]);
+featureList = string(featureTable.Properties.VariableNames(3:14));
+numberOfBean = 50;
+for i = 1:numel(featureList)
+    feature = char(featureList(i));
+    for m = 1:numel(classArray)
+        className1 = char(classArray(m));
+        mean1 =  statsTable{className1, [feature, 'Mean']};
+        varince1 = statsTable{className1, [feature, 'Variance']};
+        for n = m+1:numel(classArray)
+            className2 = char(classArray(n));
+            mean2 =  statsTable{className2, [feature, 'Mean']};
+            varince2 = statsTable{className2, [feature, 'Variance']};
+            tScore = (mean1 - mean2) / sqrt((varince1/50) + (varince2/50));
+            tScoreArray(m, n, i) = tScore; 
+        end
+    end
+end
+
 elapsedTime = toc;
-
-
 
 function finalMask = morphological(imageMask)
     mark = imclose(imageMask, strel('disk', 5));
