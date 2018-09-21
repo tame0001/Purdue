@@ -18,6 +18,7 @@ eccentricityArray = zeros([1 400]);
 solidityArray = zeros([1 400]);
 hueArray = zeros([1 400]);
 intensityArray = zeros([1 400]);
+elongationArray = zeros([1 400]);
 
 for k = 1 : numImages
     % load image file one by one
@@ -198,6 +199,7 @@ for k = 1 : numImages
         eccentricityArray(beanCount) = beanMeasurements(i).Eccentricity;
         solidityArray(beanCount) = beanMeasurements(i).Solidity;
         beanImage = imcrop(maskedImage,beanMeasurements(1).BoundingBox);
+        beanImageGray = rgb2gray(beanImage);
         beanImage = double(beanImage) / 255; 
         R = beanImage(:, :, 1);
         G = beanImage(:, :, 2);
@@ -212,6 +214,12 @@ for k = 1 : numImages
         hueArray(beanCount) = mean(hue(hue>0));
         intensity = (R + G +B)./3;
         intensityArray(beanCount) = mean(intensity(intensity>0));
+        d = 0;
+        while(any(any(beanImageGray)))
+            d = d + 1;
+            beanImageGray = imerode(beanImageGray, strel('disk', 1));
+        end
+        elongationArray(beanCount) = beanMeasurements(i).Area / ((2*d)^2);
         beanCount = beanCount + 1;
     end
 end
@@ -223,7 +231,7 @@ roundnessArray = areaArray ./ ((rEqArray .^2) .* pi);
 
 varNames = {'Class', 'Index', 'Area', 'Hue', 'Intensity', 'Perimeter', ...
             'MajorAxis', 'MinorAxis', 'Eccentricity', 'Solidity', ...
-            'AspectRatio', 'Compactness', 'Roundness'};
+            'Elongation', 'AspectRatio', 'Compactness', 'Roundness'};
 featureTable = table(classArray', ...
                      indexArray', ...
                      areaArray', ...
@@ -234,6 +242,7 @@ featureTable = table(classArray', ...
                      minorAxisArray', ...
                      eccentricityArray', ...
                      solidityArray', ...
+                     elongationArray', ...
                      aspectRatioArray', ...
                      compactnessArray', ...
                      roundnessArray', ...
