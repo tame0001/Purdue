@@ -29,7 +29,7 @@ for k = 1 : numImages
     redImage = rgbImage(:, :, 1);
     greenImage = rgbImage(:, :, 2);
     blueImage = rgbImage(:, :, 3);
-    figure; % plot image file in each color Image
+%     figure; % plot image file in each color Image
     set(gcf, 'Position', get(0, 'ScreenSize'));
     subplot(4, 4, 1);
     imshow(rgbImage);
@@ -232,7 +232,7 @@ roundnessArray = areaArray ./ ((rEqArray .^2) .* pi);
 varNames = {'Class', 'Index', 'Area', 'Hue', 'Intensity', 'Perimeter', ...
             'MajorAxis', 'MinorAxis', 'Eccentricity', 'Solidity', ...
             'Elongation', 'AspectRatio', 'Compactness', 'Roundness'};
-featureTable = table(classArray', ...
+featureTable = table(string(classArray'), ...
                      indexArray', ...
                      areaArray', ...
                      hueArray', ...
@@ -247,6 +247,9 @@ featureTable = table(classArray', ...
                      compactnessArray', ...
                      roundnessArray', ...
                      'VariableNames',varNames);
+                 
+classArray = unique(featureTable.Class);
+                 
 elapsedTime = toc;
 
 
@@ -263,3 +266,5 @@ function score = evaluateMask(threshold, counts)
     range = 25; % range of calculation
     score = mean(counts(threshold-range : threshold+range));
 end
+
+        
