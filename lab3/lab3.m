@@ -347,37 +347,22 @@ for i = 1:numel(featureList)
     end
 end
 
-[row2,col2] = size(featureTable);
-stats = zeros(7,12);
-for y = 3:col2
-    a = featureTable{1:50,y};
-    b1 = featureTable{51:100,y};
-    [h1,p1] = ttest2(a,b1);
-    a2 = featureTable{101:150,y};
-    b2 = featureTable{151:200,y};
-    [h2,p2] = ttest2(a,a2);
-    a3 = featureTable{201:250,y};
-    b3 = featureTable{251:300,y};
-    [h3,p3] = ttest2(a,b2);
-    a4 = featureTable{300:350,y};
-    b4 = featureTable{351:400,y};
-    [h4,p4] = ttest2(a,a3);
+trainDataRatio = 70; 
+numberOfBean = 50;
+numberOfClass = numel(classArray);
+numberOfTrainData = numberOfBean * trainDataRatio / 100;
+trainDataSet = featureTable;  
+testDataSet = featureTable;
 
-    [h5,p5] = ttest2(a,b3);
-
-    [h6,p6] = ttest2(a,a4);
-
-    [h7,p7] = ttest2(a,b4);
-
-    stats(1,y-2) = p1;
-    stats(2,y-2) = p2;
-    stats(3,y-2) = p3;
-    stats(4,y-2) = p4;
-    stats(5,y-2) = p5;
-    stats(6,y-2) = p6;
-    stats(7,y-2) = p7;
-  
-end 
+for i = 1:numberOfClass
+    className = char(classArray(i));
+    notTrainRows = trainDataSet.Class == className & ...
+                   trainDataSet.Index > numberOfTrainData;
+    notTestRows = testDataSet.Class == className & ...
+                  testDataSet.Index <= numberOfTrainData;
+    trainDataSet(notTrainRows, :) = [];
+    testDataSet(notTestRows, :) = [];
+end
 
 elapsedTime = toc;
 
