@@ -363,6 +363,9 @@ for i = 1:numberOfClass
     trainDataSet(notTrainRows, :) = [];
     testDataSet(notTestRows, :) = [];
 end
+trainDataSet = removevars(trainDataSet, {'Index'});
+testDataSet = removevars(testDataSet, {'Class', 'Index'});
+naiveBayesModel = fitcnb(trainDataSet, 'Class');
 
 elapsedTime = toc;
 
