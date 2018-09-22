@@ -364,9 +364,23 @@ for i = 1:numberOfClass
     testDataSet(notTestRows, :) = [];
 end
 trainDataSet = removevars(trainDataSet, {'Index'});
+correctResult = testDataSet.Class;
 testDataSet = removevars(testDataSet, {'Class', 'Index'});
 naiveBayesModel = fitcnb(trainDataSet, 'Class');
+predictionResult = predict(naiveBayesModel, testDataSet);
 
+classificationTable = zeros([numberOfClass numberOfClass]);
+
+for i = 1:numel(predictionResult)
+    row = find(classArray == correctResult(i));
+    column = find(classArray == predictionResult{i});
+    classificationTable(row, column) = classificationTable(row, column) + 1;
+end
+
+classificationTable = array2table(classificationTable, ...
+                      'VariableNames', statsTable.Properties.RowNames', ...
+                      'RowNames', statsTable.Properties.RowNames);
+                  
 elapsedTime = toc;
 
 function finalMask = morphological(imageMask)
