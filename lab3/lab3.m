@@ -261,6 +261,7 @@ statsTable = table('Size', [8 24], ...
                     'VariableNames', varNames, ...
                     'RowNames', classArray);
 classArray = string(classArray);
+featureList = string(featureTable.Properties.VariableNames(3:14));
 
 for i = 1:numel(classArray)
     className = char(classArray(i));
@@ -330,7 +331,6 @@ end
 
 pValueArray = zeros([8 8 12]);
 pValueArray(pValueArray == 0) = NaN;
-featureList = string(featureTable.Properties.VariableNames(3:14));
 for i = 1:numel(featureList)
     feature = char(featureList(i));
     for m = 1:numel(classArray)
@@ -349,40 +349,27 @@ end
 
 trainDataRatio = 70; 
 numberOfBean = 50;
-numberOfClass = numel(classArray);
 numberOfTrainData = numberOfBean * trainDataRatio / 100;
-trainDataSet = featureTable;  
-testDataSet = featureTable;
 
-for i = 1:numberOfClass
-    className = char(classArray(i));
-    notTrainRows = trainDataSet.Class == className & ...
-                   trainDataSet.Index > numberOfTrainData;
-    notTestRows = testDataSet.Class == className & ...
-                  testDataSet.Index <= numberOfTrainData;
-    trainDataSet(notTrainRows, :) = [];
-    testDataSet(notTestRows, :) = [];
-end
-trainDataSet = removevars(trainDataSet, {'Index'});
-correctResult = testDataSet.Class;
-testDataSet = removevars(testDataSet, {'Class', 'Index'});
-naiveBayesModel = fitcnb(trainDataSet, 'Class');
-predictionResult = predict(naiveBayesModel, testDataSet);
+[trainDataSet, testDataSet, correctResult] = ...
+generateTrainDataSet(classArray, numberOfTrainData, featureTable);
 
-classificationTable = zeros([numberOfClass numberOfClass]);
+classTable = statsTable.Properties.RowNames;
 
-for i = 1:numel(predictionResult)
-    column = find(classArray == correctResult(i));
-    row = find(classArray == predictionResult{i});
-    classificationTable(row, column) = classificationTable(row, column) + 1;
-end
-
-classificationTable = array2table(classificationTable, ...
-                      'VariableNames', statsTable.Properties.RowNames', ...
-                      'RowNames', statsTable.Properties.RowNames);
+classificationTable = classification( ...
+trainDataSet, testDataSet, correctResult, classTable);
                   
 featureMatrix = featureTable{:, 3:14};
 [coeff,score,latent,~,explained] = pca(featureMatrix);
+
+pcTable = featureTable(:, {'Class', 'Index'});
+pcTable.PC1 = score(:, 1);
+
+[trainDataSetPCA, testDataSetPCA, correctResult] = ...
+         generateTrainDataSet(classArray, numberOfTrainData, pcTable);
+     
+classificationTablePCA = classification( ...
+trainDataSetPCA, testDataSetPCA, correctResult, classTable);
                   
 elapsedTime = toc;
 
@@ -399,4 +386,44 @@ function score = evaluateMask(threshold, counts)
     score = mean(counts(threshold-range : threshold+range));
 end
 
-        
+function [trainDataSet, testDataSet, correctResult] = ...
+         generateTrainDataSet(classArray, numberOfTrainData, featureTable)
+     
+    numberOfClass = numel(classArray);
+    trainDataSet = featureTable;  
+    testDataSet = featureTable;
+
+    for i = 1:numberOfClass
+        className = char(classArray(i));
+        notTrainRows = trainDataSet.Class == className & ...
+                       trainDataSet.Index > numberOfTrainData;
+        notTestRows = testDataSet.Class == className & ...
+                      testDataSet.Index <= numberOfTrainData;
+        trainDataSet(notTrainRows, :) = [];
+        testDataSet(notTestRows, :) = [];
+    end
+
+    trainDataSet = removevars(trainDataSet, {'Index'});
+    correctResult = testDataSet.Class;
+    testDataSet = removevars(testDataSet, {'Class', 'Index'});
+end    
+
+function classificationTable = classification( ...
+         trainDataSet, testDataSet, correctResult, classTable)
+     
+    naiveBayesModel = fitcnb(trainDataSet, 'Class');
+    predictionResult = predict(naiveBayesModel, testDataSet);
+    numberOfClass = numel(classTable);
+    classArray = string(classTable);
+    classificationTable = zeros([numberOfClass numberOfClass]);
+
+    for i = 1:numel(predictionResult)
+        column = find(classArray == correctResult(i));
+        row = find(classArray == predictionResult{i});
+        classificationTable(row, column) = classificationTable(row, column) + 1;
+    end
+
+    classificationTable = array2table(classificationTable, ...
+                          'VariableNames', classTable', ...
+                          'RowNames', classTable);
+end
