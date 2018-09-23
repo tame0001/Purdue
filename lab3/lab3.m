@@ -265,67 +265,15 @@ featureList = string(featureTable.Properties.VariableNames(3:14));
 
 for i = 1:numel(classArray)
     className = char(classArray(i));
-    
-    u = mean(featureTable.Area(featureTable.Class == classArray(i)));
-    statsTable(className, 'AreaMean') = {u};
-    v = var(featureTable.Area(featureTable.Class == classArray(i)));
-    statsTable(className, 'AreaVariance') = {v};
-    
-    u = mean(featureTable.Hue(featureTable.Class == classArray(i)));
-    statsTable(className, 'HueMean') = {u};
-    v = var(featureTable.Hue(featureTable.Class == classArray(i)));
-    statsTable(className, 'HueVariance') = {v};
-    
-    u = mean(featureTable.Intensity(featureTable.Class == classArray(i)));
-    statsTable(className, 'IntensityMean') = {u};
-    v = var(featureTable.Intensity(featureTable.Class == classArray(i)));
-    statsTable(className, 'IntensityVariance') = {v};
-    
-    u = mean(featureTable.Perimeter(featureTable.Class == classArray(i)));
-    statsTable(className, 'PerimeterMean') = {u};
-    v = var(featureTable.Perimeter(featureTable.Class == classArray(i)));
-    statsTable(className, 'PerimeterVariance') = {v};
-    
-    u = mean(featureTable.MajorAxis(featureTable.Class == classArray(i)));
-    statsTable(className, 'MajorAxisMean') = {u};
-    v = var(featureTable.MajorAxis(featureTable.Class == classArray(i)));
-    statsTable(className, 'MajorAxisVariance') = {v};
-    
-    u = mean(featureTable.MinorAxis(featureTable.Class == classArray(i)));
-    statsTable(className, 'MinorAxisMean') = {u};
-    v = var(featureTable.MinorAxis(featureTable.Class == classArray(i)));
-    statsTable(className, 'MinorAxisVariance') = {v};
-    
-    u = mean(featureTable.Eccentricity(featureTable.Class == classArray(i)));
-    statsTable(className, 'EccentricityMean') = {u};
-    v = var(featureTable.Eccentricity(featureTable.Class == classArray(i)));
-    statsTable(className, 'EccentricityVariance') = {v};
-    
-    u = mean(featureTable.Solidity(featureTable.Class == classArray(i)));
-    statsTable(className, 'SolidityMean') = {u};
-    v = var(featureTable.Solidity(featureTable.Class == classArray(i)));
-    statsTable(className, 'SolidityVariance') = {v};
-    
-    u = mean(featureTable.Elongation(featureTable.Class == classArray(i)));
-    statsTable(className, 'ElongationMean') = {u};
-    v = var(featureTable.Elongation(featureTable.Class == classArray(i)));
-    statsTable(className, 'ElongationVariance') = {v};
-    
-    u = mean(featureTable.AspectRatio(featureTable.Class == classArray(i)));
-    statsTable(className, 'AspectRatioMean') = {u};
-    v = var(featureTable.AspectRatio(featureTable.Class == classArray(i)));
-    statsTable(className, 'AspectRatioVariance') = {v};
-    
-    u = mean(featureTable.Compactness(featureTable.Class == classArray(i)));
-    statsTable(className, 'CompactnessMean') = {u};
-    v = var(featureTable.Compactness(featureTable.Class == classArray(i)));
-    statsTable(className, 'CompactnessVariance') = {v};
-    
-    u = mean(featureTable.Roundness(featureTable.Class == classArray(i)));
-    statsTable(className, 'RoundnessMean') = {u};
-    v = var(featureTable.Roundness(featureTable.Class == classArray(i)));
-    statsTable(className, 'RoundnessVariance') = {v};
-    
+    classData = featureTable(featureTable.Class == classArray(i), :);
+    for j = 1:numel(featureList)
+        feature = char(featureList(j));
+        featureData = classData{:, {feature}};
+        u = mean(featureData);
+        statsTable(className, [feature, 'Mean']) = {u};
+        v = var(featureData);
+        statsTable(className, [feature ,'Variance']) = {v};
+    end    
 end
                  
 
