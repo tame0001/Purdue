@@ -29,7 +29,7 @@ for k = 1 : numImages
     redImage = rgbImage(:, :, 1);
     greenImage = rgbImage(:, :, 2);
     blueImage = rgbImage(:, :, 3);
-%     figure; % plot image file in each color Image
+    figure; % plot image file in each color Image
     set(gcf, 'Position', get(0, 'ScreenSize'));
     subplot(4, 4, 1);
     imshow(rgbImage);
