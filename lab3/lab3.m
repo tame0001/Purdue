@@ -169,8 +169,6 @@ for k = 1 : numImages
     coloredLabels = label2rgb (labeledImage, 'hsv', 'k', 'shuffle');
     subplot(4, 4, 14);
     imshow(coloredLabels);
-%     Make sure image is not artificially 
-%     stretched because of screen's aspect ratio.
     axis image; 
     title("Labeled Image", 'FontSize', fontSize);
     
@@ -299,25 +297,96 @@ trainDataRatio = 70;
 numberOfBean = 50;
 numberOfTrainData = numberOfBean * trainDataRatio / 100;
 
+% Training with original data
 [trainDataSet, testDataSet, correctResult] = ...
-generateTrainDataSet(classArray, numberOfTrainData, featureTable);
-
+    generateTrainDataSet(classArray, numberOfTrainData, featureTable);
 classTable = statsTable.Properties.RowNames;
-
 classificationTable = classification( ...
-trainDataSet, testDataSet, correctResult, classTable);
-                  
+    trainDataSet, testDataSet, correctResult, classTable);
+
+%Train with only major axis
+majorAxisTable = featureTable(:, {'Class', 'Index', 'MajorAxis'});
+[trainDataSet, testDataSet, correctResult] = ...
+    generateTrainDataSet(classArray, numberOfTrainData, majorAxisTable); 
+classificationTablemajorAxis = classification( ...
+    trainDataSet, testDataSet, correctResult, classTable);
+
+%Train with only major axis and hue
+majorHueTable = featureTable(:, ...
+    {'Class', 'Index', 'MajorAxis', 'Hue'});
+[trainDataSet, testDataSet, correctResult] = ...
+    generateTrainDataSet(classArray, numberOfTrainData, majorHueTable); 
+classificationTablemajorHue = classification( ...
+    trainDataSet, testDataSet, correctResult, classTable);
+
+%Train with only major axis and peri
+majorPeriTable = featureTable(:, ...
+    {'Class', 'Index', 'MajorAxis', 'Perimeter'});
+[trainDataSet, testDataSet, correctResult] = ...
+    generateTrainDataSet(classArray, numberOfTrainData, majorPeriTable); 
+classificationTablemajorPeri = classification( ...
+    trainDataSet, testDataSet, correctResult, classTable);
+
+% Apply PCA
 featureMatrix = featureTable{:, 3:14};
 [coeff,score,latent,~,explained] = pca(featureMatrix);
 
+% Training with 1 PC 
 pcTable = featureTable(:, {'Class', 'Index'});
 pcTable.PC1 = score(:, 1);
-
 [trainDataSetPCA, testDataSetPCA, correctResult] = ...
-         generateTrainDataSet(classArray, numberOfTrainData, pcTable);
-     
-classificationTablePCA = classification( ...
-trainDataSetPCA, testDataSetPCA, correctResult, classTable);
+    generateTrainDataSet(classArray, numberOfTrainData, pcTable); 
+classificationTablePCA1 = classification( ...
+    trainDataSetPCA, testDataSetPCA, correctResult, classTable);
+
+% Training with 2 PC 
+pcTable = featureTable(:, {'Class', 'Index'});
+pcTable.PC1 = score(:, 1);
+pcTable.PC2 = score(:, 2);
+[trainDataSetPCA, testDataSetPCA, correctResult] = ...
+    generateTrainDataSet(classArray, numberOfTrainData, pcTable); 
+classificationTablePCA2 = classification( ...
+    trainDataSetPCA, testDataSetPCA, correctResult, classTable);
+
+% Training with 3 PC 
+pcTable = featureTable(:, {'Class', 'Index'});
+pcTable.PC1 = score(:, 1);
+pcTable.PC2 = score(:, 2);
+pcTable.PC3 = score(:, 3);
+[trainDataSetPCA, testDataSetPCA, correctResult] = ...
+    generateTrainDataSet(classArray, numberOfTrainData, pcTable); 
+classificationTablePCA3 = classification( ...
+    trainDataSetPCA, testDataSetPCA, correctResult, classTable);
+
+% Training with 4 PC 
+pcTable = featureTable(:, {'Class', 'Index'});
+pcTable.PC1 = score(:, 1);
+pcTable.PC2 = score(:, 2);
+pcTable.PC3 = score(:, 3);
+pcTable.PC4 = score(:, 4);
+[trainDataSetPCA, testDataSetPCA, correctResult] = ...
+    generateTrainDataSet(classArray, numberOfTrainData, pcTable); 
+classificationTablePCA4 = classification( ...
+    trainDataSetPCA, testDataSetPCA, correctResult, classTable);
+
+% Training with 5 PC 
+pcTable = featureTable(:, {'Class', 'Index'});
+pcTable.PC1 = score(:, 1);
+pcTable.PC2 = score(:, 2);
+pcTable.PC3 = score(:, 3);
+pcTable.PC4 = score(:, 4);
+pcTable.PC5 = score(:, 5);
+[trainDataSetPCA, testDataSetPCA, correctResult] = ...
+    generateTrainDataSet(classArray, numberOfTrainData, pcTable); 
+classificationTablePCA5 = classification( ...
+    trainDataSetPCA, testDataSetPCA, correctResult, classTable);
+
+% Training with PC 1&2&5 
+pcTable = removevars(pcTable,{'PC3', 'PC4'});
+[trainDataSetPCA, testDataSetPCA, correctResult] = ...
+    generateTrainDataSet(classArray, numberOfTrainData, pcTable); 
+classificationTablePCA125 = classification( ...
+    trainDataSetPCA, testDataSetPCA, correctResult, classTable);
                   
 elapsedTime = toc;
 
