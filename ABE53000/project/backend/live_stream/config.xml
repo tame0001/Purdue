@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<config>
+    <camera type='rgb'>
+        <scale>0.71</scale>
+        <top>10</top>
+        <bottom>230</bottom>
+        <left>10</left>
+        <right>300</right>
+    </camera>
+    <camera type='nir'>
+        <scale>1</scale>
+        <top>64</top>
+        <bottom>234</bottom>
+        <left>49</left>
+        <right>276</right>
+    </camera>
+</config>

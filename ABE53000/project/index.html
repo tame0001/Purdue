@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html ng-app="index_app">
+<head>
+    <meta charset="utf-8" />
+    <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
+    <title>Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <script src="js/angular.min.js"></script>
+</head>
+<body ng-controller="index_ctrl">
+    <div class="container" >
+        <div class="row" style="padding: 5px;" ng-hide="live_process"></div>
+        <center>
+            <img ng-src="http://localhost:5050/video_feed" ng-hide="capturing"
+            ng-click="toggle_live()"></img>
+            <img ng-src="{{filename}}" ng-click="end_preview()" 
+            ng-show="preview" style="width:auto; height:180">
+        </center>
+        <div class="row" style="padding: 5px;" ng-hide="capturing||live_process">
+            <div class="col-12" style="text-align: center;">
+                <button ng-click="toggle_live()">Live Processing</button>
+            </div>
+        </div>
+        <div class="row" ng-hide="capturing||live_process">
+            <div class="col-12" style="text-align: center;">
+                <button ng-click="capture()">Save Image</button>
+            </div>
+        </div>
+        <div class="row" style="padding: 5px;" ng-show="capturing">
+            <div class="col-12" style="text-align: center;">
+                <h1>{{message}}</h1>
+            </div>
+        </div>
+        <div class="row" style="padding: 5px;" ng-show="live_process && !calibrating">
+            <div class="col-12" style="text-align: center;">
+                    <button ng-click="toggle_calibrate()">Calibrate</button>
+            </div>
+        </div>
+        <div class="row" style="padding: 5px;" ng-show="calibrating">
+            <div class="col-5" style="text-align: center;">
+                <div class="row" style="padding: 2px;">
+                    <div class="col-4" style="text-align: center;">Right:</div>
+                    <div class="col-4" style="text-align: center;" 
+                    ng-click="calibrate(221)">coarse</div>
+                    <div class="col-4" style="text-align: center;" 
+                    ng-click="calibrate(220)">fine</div>
+                </div>
+                <div class="row" style="padding: 2px;">
+                    <div class="col-4" style="text-align: center;">Left:</div>
+                    <div class="col-4" style="text-align: center;" 
+                    ng-click="calibrate(241)">coarse</div>
+                    <div class="col-4" style="text-align: center;" 
+                    ng-click="calibrate(240)">fine</div>
+                </div>
+            </div>
+            <div class="col-2" style="text-align: center;">
+                <button ng-click="toggle_calibrate()">Done</button>
+            </div>
+            <div class="col-5" style="text-align: center;">
+                <div class="row" style="padding: 2px;">
+                    <div class="col-4" style="text-align: center;">Top:</div>
+                    <div class="col-4" style="text-align: center;" 
+                    ng-click="calibrate(211)">coarse</div>
+                    <div class="col-4" style="text-align: center;" 
+                    ng-click="calibrate(210)">fine</div>
+                </div>
+                <div class="row" style="padding: 2px;">
+                    <div class="col-4" style="text-align: center;">Bottom:</div>
+                    <div class="col-4" style="text-align: center;" 
+                    ng-click="calibrate(231)">coarse</div>
+                    <div class="col-4" style="text-align: center;" 
+                    ng-click="calibrate(230)">fine</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>
+
+<script>
+angular.module('index_app', []);
+angular.module('index_app').controller('index_ctrl', ['$scope', '$http', function($scope, $http) {
+    $scope.capturing = false;
+    $scope.preview = false;
+    $scope.live_process = false;
+    $scope.calibrating = false;
+    $scope.capture = function () {
+        $scope.message = 'Capturing';
+        $scope.capturing = true;
+        $http({
+            method: 'GET',
+            url: 'http://localhost:5000/capture'
+            // url: 'http://192.168.137.130:5000/capture'
+        }).then(function(response){
+            if(response.data.code == 0) {
+                $scope.filename = response.data.filename;
+                // console.log($scope.filename);
+                $scope.message = $scope.filename;
+            }
+            else{
+                $scope.message = 'Error!!';
+            }
+        $scope.preview = true;    
+        })
+    }
+    $scope.end_preview = function(){
+        $scope.preview = false;
+        $scope.capturing = false;
+    }
+    $scope.toggle_live = function(){
+        if(!$scope.calibrating){
+            $scope.live_process = !$scope.live_process;
+            $http({
+                method: 'GET',
+                url: 'http://localhost:5000/live'
+            })
+        }
+        
+    }
+    $scope.toggle_calibrate = function(){
+        $scope.calibrating = !$scope.calibrating;
+        $http({
+            method: 'GET',
+            url: 'http://localhost:5000/calibrate'
+        })
+    }
+    $scope.calibrate = function(code){
+        payload = {"code": code};
+        console.log(payload)
+
+        $http({
+            method: 'POST',
+            url: 'http://localhost:5000/calibrate',
+            data: payload,
+            header: {'Content-Type': 'application/json'}
+        })
+    }
+}]);
+</script>
