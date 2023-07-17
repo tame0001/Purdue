@@ -1,0 +1,12 @@
+*.jpg
+*.png
+*.db
+data
+*txt
+*pt
+saved_model*
+*.yml
+*.csv
+*.pyc
+*.pth
+*.json
