@@ -1,0 +1,380 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./ece661_pics/hw8_image/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{indentfirst}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{ECE 661: Homework 7}}
+
+Thirawat Bureetes
+
+(Fall 2020)
+\end{center}
+	
+ 
+%-----------------------------------------------------------------------------------
+
+
+\section*{Implimentation}
+
+
+\subsection*{Convolution Filter}
+
+The $M$ x $M$ kernel is used as a filter to an image. The value of each element is range from [-1, 1]. In addition, the summation of entire kernal is 0. To constuct the kernal, first, generate random $M^2$ numbers. Then subtract each element with the mean of entire kernal. This will make sure that the summation of the kernal is equal to 0. Next, devine each element with an absolute value of the maximum element's value of the kernal. This will normalize the value in each element to [-1, 1]. Each kernal will convolve with an image to produce a layer for extracting feature. In this experiment, $M$ is set to 3.
+ 
+%-----------------------------------------------------------------------------------
+
+\subsection*{Gram Matrix}
+
+Repeat previous step $C$ times to every images with the same filter. There will be $C$ layers for each image. For this experiment, $C$ is set to 10. For each layers, scale down to 16 x 16 pixels image. Therefore, there are 10 vectors which 256 elements each. Take inner-product to each of 10 vectors. The result is 10 x 10 matrix called Gram Matrix. Since the Gram matrix is sysmmetrc, the upper and lower triangle elements are duplicated. Only either upper or lower triange is used as a feature vector of the image. 
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Support Vector Machine}
+
+Instead of finding a distance between the feature of testing image to each training image, Support Vector Machine is used to find the decision criteria to classify the testing image. The training set is composed with 70$\%$ of images in training folder where remaining 30 $\%$ are used for valiation. In this experiment, SVM function in OpenCV is used. The kernel type is set to linear.
+
+%-----------------------------------------------------------------------------------
+
+\section*{Results}
+
+The filters that used are shown as following.
+
+
+\begin{align*}
+\begin{bmatrix}
+0.53 & -0.527 & -0.948 \\ 
+0.241 & 0.633  & 1\\ 
+-0.875 &  0.615 & -0.669 \\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+\begin{bmatrix}
+-0.638 &  0.233  & 0.586 \\ 
+0.823 & -0.533 & -0.674\\ 
+-0.077 &  1 &   -0.72 \\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+\begin{bmatrix}
+-0.315 & 0.032 & 0.446 \\ 
+-0.446 & -0.322 & -0.199\\ 
+0.403 &  1 &  -0.598\\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+\begin{bmatrix}
+-0.279 & 1  &  -0.405 \\ 
+0.191 & -0.133 &  0.86\\ 
+-0.193 & -0.401 & -0.639 \\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+\begin{bmatrix}
+0.75  & 0.348 & -0.833 \\ 
+0.09  & -0.653 & -0.714\\ 
+-0.442 &  0.454 &  1 \\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+\begin{bmatrix}
+-0.985 & -0.916 &  0.787 \\ 
+0.934 &  0.975 & 0.76\\ 
+-0.558  & -1 & 0.004 \\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+\begin{bmatrix}
+0.246 &  0.472  & 1 \\ 
+-0.824 & 0.839 & 0.092\\ 
+-0.935 & -0.598 & -0.291 \\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+\begin{bmatrix}
+-0.483  & -0.881 & -0.285 \\ 
+0.463 &  0.707  & -0.024\\ 
+0.326 & -0.822 & 1 \\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+\begin{bmatrix}
+-0.361 & -0.54 &  0.466 \\ 
+1 &  0.009 & -0.477\\ 
+-0.264 & -0.595  & 0.762 \\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+\begin{bmatrix}
+0.248 & -0.518 & 0.246 \\ 
+0.643 & -0.122 & -0.221\\ 
+0.342 &  0.382  & -1 \\
+\end{bmatrix}
+\end{align*}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{result_1}
+\caption{Confusion matrix}
+\label{}
+\end{figure}
+
+The overall accuracy is 35\%
+
+%-----------------------------------------------------------------------------------
+
+\section*{Extra Credit}
+
+Apply implimentation in Homework 7 to the dataset. The result is shown below.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{result_2}
+\caption{Confusion matrix}
+\label{}
+\end{figure}
+
+The overall accuracy is 65\%
+
+%-----------------------------------------------------------------------------------
+
+\section*{Observation}
+
+With Gram Matrix and SVM, the accuracy is in the range around 35\%. When set the number of filters more than 10, the accuracy doesn't improve. However, the processing time is noticibly longer. The classification model performance is not accurate. The images that belong to go class "Shine" can't be identiified correctly at all. 
+
+Using implimation from previous homework, the accuacy is 65\%. It is significant better than Gram matrix and SVM. However, the training time and classification time take much longer. Since each testing image has to be compared with every training images. The time requiere will be higher propotional to number of trainning image.
+
+
+%-----------------------------------------------------------------------------------
+
+\section*{Source Code}
+
+\begin{lstlisting}
+
+# Import necessary libraries
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt
+from os import listdir
+import re
+import math
+from sklearn.metrics import confusion_matrix
+
+FILEPATH = 'ece661_pics\\hw8_image\\'
+
+class Image():
+    ''' 
+        Class for storing images.
+    '''
+    
+    def __init__(self, name):
+        self.name = name    
+        self.image = None  
+        self.feature = None
+
+    def load(self):
+        self.image = cv.imread(self.name)
+        self.image_gray = cv.cvtColor(self.image, cv.COLOR_BGR2GRAY)
+
+    def show(self):
+        if self.image is None:
+            self.load()
+        plt.imshow(cv.cvtColor(self.image, cv.COLOR_BGR2RGB))
+
+    def compute_gram_matrix(self, filters):
+        ''' 
+            Compute Gram Matrix and 
+            return only lower triangle part.
+        '''
+        
+        if self.image is None:
+            self.load()
+
+        img = self.image_gray
+        k = 16
+        C = filters.shape[2]
+        vectors = np.empty((k**2, C))
+        for c in range(C):
+            kernel = filters[:, :, c]
+            # Convolve with each filter
+            convolved = cv.filter2D(img, -1, kernel)
+            # Down scale to 16 x 16
+            down_scale = cv.resize(convolved, (k, k))
+            # vectorize to 256 element vector
+            vectors[:, c] = down_scale.ravel()
+
+        feature = []
+        for c in range(C):
+            for i in range(c):
+                # Inner product of each pair
+                feature.append(np.dot(vectors[:, c].T, vectors[:, i]))
+
+        self.feature = np.array(feature)
+
+        return self.feature
+
+def load_image(img_classes):
+    '''
+        Load images from database.
+    '''
+
+    trainning_set = {}
+    testing_set = {}
+    valid_set = {}
+    
+    for img_class in img_classes:
+        trainning_set[img_class] = []
+        testing_set[img_class] = []
+        valid_set[img_class] = []
+        # Load training sets
+        directory = f'{FILEPATH}training'
+        imgs = listdir(directory)
+        imgs_in_class = [re.findall(f'{img_class}.*', img) for img in imgs]
+        for img in imgs_in_class:
+            if img:
+                full_path = f'{directory}\\{img[0]}'
+                trainning_set[img_class].append(Image(full_path))
+
+        # Load testing set
+        directory = f'{FILEPATH}testing'
+        imgs = listdir(directory)
+        imgs_in_class = [re.findall(f'{img_class}.*', img) for img in imgs]
+        for img in imgs_in_class:
+            if img:
+                full_path = f'{directory}\\{img[0]}'
+                testing_set[img_class].append(Image(full_path))
+
+        # Create validation list
+        total_imgs = len(trainning_set[img_class])
+        valiation_ratio = 0.25
+        for i in range(int(valiation_ratio * total_imgs)):
+            idx = np.random.randint(0, total_imgs-i)
+            valid_set[img_class].append(trainning_set[img_class].pop(idx))
+
+    return trainning_set, testing_set, valid_set
+
+img_classes = ['rain', 'cloudy', 'shine', 'sunrise']
+[imgs_train, imgs_test, imgs_valid] = load_image(img_classes)
+
+def create_filter(C):
+    '''
+        Create 3 x 3 x C filter which vaule range from [-1, 1]
+        and the sum is 0.
+    '''
+    m = 3
+    filters = np.empty((m, m, C))
+    for c in range(C):
+        sample = np.random.rand(m**2)
+        sample -= sample.mean()
+        sample /= np.abs(sample).max()
+        filters[:, :, c] = sample.reshape((m ,m))
+
+    return filters
+
+filters = create_filter(10)
+feature_size = imgs_train['rain'][0].compute_gram_matrix(filters).shape[0]
+
+# Create training dataset
+train_data = []
+labels = []
+for i, img_class in enumerate(img_classes):
+    for img in imgs_train[img_class]:
+        labels.append(i)
+        train_data.append(img.compute_gram_matrix(filters))
+
+labels = np.array(labels)
+train_data = np.array(train_data).astype(np.float32)
+
+# SVM parameters
+svm = cv.ml.SVM_create()
+svm.setType(cv.ml.SVM_C_SVC)
+svm.setKernel(cv.ml.SVM_LINEAR)
+svm.setTermCriteria((cv.TERM_CRITERIA_MAX_ITER, 100, 1e-6))
+svm.train(train_data, cv.ml.ROW_SAMPLE, labels);
+
+# Create validation  dataset
+valid_data = []
+true_labels = []
+for i, img_class in enumerate(img_classes):
+    for img in imgs_valid[img_class]:
+        true_labels.append(i)
+        valid_data.append(img.compute_gram_matrix(filters))
+
+true_labels = np.array(true_labels)
+valid_data = np.array(valid_data).astype(np.float32)
+response = svm.predict(valid_data)[1]
+
+validation = []
+for i in range(len(response)):
+    validation.append(response[i][0] == true_labels[i])
+
+validation = np.array(validation, dtype=np.uint8)
+print(f'Validation accuracy = {validation.mean()*100:.2f} %')
+confusion_matrix(true_labels, response[:, 0])
+
+
+# Create testing dataset
+test_data = []
+true_labels = []
+for i, img_class in enumerate(img_classes):
+    for img in imgs_test[img_class]:
+        true_labels.append(i)
+        test_data.append(img.compute_gram_matrix(filters))
+
+true_labels = np.array(true_labels)
+test_data = np.array(test_data).astype(np.float32)
+response = svm.predict(test_data)[1]
+
+result = []
+for i in range(len(response)):
+    # print(f' Truth {true_labels[i]} Predicted {response[i][0]} {response[i][0] == true_labels[i]}')
+    result.append(response[i][0] == true_labels[i])
+
+result = np.array(result, dtype=np.uint8)
+print(f'Testing accuracy = {result.mean()*100:.2f} %')
+confusion_matrix(true_labels, response[:, 0])
+
+# Save model
+svm.save(f'{FILEPATH}model.xml')
+\end{lstlisting}
+
+%-----------------------------------------------------------------------------------
+
+\end{document}
+

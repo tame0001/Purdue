@@ -1,0 +1,558 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./ece661_pics/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{ECE 661: Homework 2}}
+
+Thirawat Bureetes
+
+(Fall 2020)
+\end{center}
+	
+ 
+%-----------------------------------------------------------------------------------
+
+\subsection*{Method to find homography}
+
+To project one image into another image, the homography coordinate can be used to find the corresponding pixels between the pair of images. Let's defind $p = (x, y)$ as a coordinate pixel of the destination image. Its homogeneous coordinates can be defined as $p = \begin{pmatrix} x\\ y\\ 1\end{pmatrix}$. In the similiar way, the source image can be defined as $p' = (x', y')$ or in homogeneous coordinate as $p' = \begin{pmatrix} x'\\ y'\\ 1\end{pmatrix}$. The relationship between these two points are:
+
+\begin{align*}
+p' &= \mathbf{H} p \\
+\begin{pmatrix} x'\\ y'\\ 1\end{pmatrix} &= 
+\mathbf{H} 
+\begin{pmatrix} x\\ y\\ 1\end{pmatrix}
+\end{align*}
+
+Let's define homography matrix $\mathbf{H}$ as
+
+\begin{align*}
+\mathbf{H} &= 
+\begin{bmatrix}
+h_{11} & h_{12} & h_{13}\\
+h_{21} & h_{22} & h_{23} \\
+h_{31} & h_{32} & 1
+\end{bmatrix} \\
+\begin{pmatrix} x'\\ y'\\ 1\end{pmatrix} &= 
+\mathbf{H} 
+\begin{pmatrix} x\\ y\\ 1\end{pmatrix} \\
+\begin{pmatrix} x'\\ y'\\ 1\end{pmatrix} &= 
+\begin{bmatrix}
+h_{11} & h_{12} & h_{13}\\
+h_{21} & h_{22} & h_{23} \\
+h_{31} & h_{32} & 1
+\end{bmatrix}
+\begin{pmatrix} x\\ y\\ 1\end{pmatrix} \\
+x' &= h_{11}x + h_{12}y + h_{13}\\
+y' &= h_{21}x + h_{22}y + h_{23}\\
+1 &= h_{31}x + h_{32}y + 1\\
+\end{align*}
+
+Any homogeneous coordinates $\begin{pmatrix} x_h\\ y_h\\ z_h\end{pmatrix}$ is coresponding to physical coordinate $(x_p,y_p)$ following these relationships:
+\begin{align*}
+x_p &= \frac{x_h}{z_h}\\
+y_p &= \frac{y_h}{z_h}\\
+\end{align*}
+
+From this reletionship, we get:
+\begin{align*}
+\frac{x'}{1} &= \frac{ h_{11}x + h_{12}y + h_{13}}{h_{31}x + h_{32}y + 1}\\
+x'(h_{31}x + h_{32}y + 1) &= h_{11}x + h_{12}y + h_{13} \\
+x' &= h_{11}x + h_{12}y + h_{13} - h_{31}xx' -  h_{32}yx' \\
+\frac{y'}{1} &= \frac{ h_{21}x + h_{22}y + h_{23}}{h_{31}x + h_{32}y + 1}\\
+y'(h_{31}x + h_{32}y + 1) &= h_{21}x + h_{22}y + h_{23} \\
+y' &= h_{21}x + h_{22}y + h_{23} - h_{31}xy' -  h_{32}yy' \\
+\end{align*}
+
+As a result, there are 8 unknown variables. To find the values of these unknown, at least 8 equations are needed. As each pixel has both $x$ and $y$, 4 pairs of corresponding are needed. The final system of linear equation is as below.
+\begin{align*}
+\begin{bmatrix}
+x_1^{'}\\ x_2^{'}\\ x_3^{'} \\ x_4^{'} \\ y_1^{'} \\ y_2^{'} \\ y_3^{'} \\ y_4^{'}
+\end{bmatrix} &=
+\begin{bmatrix}
+x_{1} & y_{1} & 1  & 0 & 0 & 0 & -x_{1}x_1^{'} & -y_{1}x_1^{'}\\ 
+x_{2} & y_{2} & 1  & 0 & 0 & 0 & -x_{2}x_2^{'} & -y_{2}x_2^{'}\\ 
+x_{3} & y_{3} & 1  & 0 & 0 & 0 & -x_{3}x_3^{'} & -y_{3}x_3^{'}\\ 
+x_{4} & y_{4} & 1  & 0 & 0 & 0 & -x_{4}x_4^{'} & -y_{4}x_4^{'}\\ 
+0 & 0 & 0 & x_{1} & y_{1} & 1 & -x_{1}y_1^{'} & -y_{1}y_1^{'}\\ 
+0 & 0 & 0 & x_{2} & y_{2} & 1 & -x_{2}y_2^{'} & -y_{2}y_2^{'}\\ 
+0 & 0 & 0 & x_{3} & y_{3} & 1 & -x_{3}y_3^{'} & -y_{3}y_3^{'}\\ 
+0 & 0 & 0 & x_{4} & y_{4} & 1 & -x_{4}y_4^{'} & -y_{4}y_4^{'}
+\end{bmatrix}
+\begin{bmatrix}
+h_{11} \\ h_{12}\\ h_{13} \\ h_{21} \\ h_{22} \\ h_{23} \\ h_{31} \\ h_{32}
+\end{bmatrix} \\
+\begin{bmatrix}
+h_{11} \\ h_{12}\\ h_{13} \\ h_{21} \\ h_{22} \\ h_{23} \\ h_{31} \\ h_{32}
+\end{bmatrix} &=
+\begin{bmatrix}
+x_{1} & y_{1} & 1  & 0 & 0 & 0 & -x_{1}x_1^{'} & -y_{1}x_1^{'}\\ 
+x_{2} & y_{2} & 1  & 0 & 0 & 0 & -x_{2}x_2^{'} & -y_{2}x_2^{'}\\ 
+x_{3} & y_{3} & 1  & 0 & 0 & 0 & -x_{3}x_3^{'} & -y_{3}x_3^{'}\\ 
+x_{4} & y_{4} & 1  & 0 & 0 & 0 & -x_{4}x_4^{'} & -y_{4}x_4^{'}\\ 
+0 & 0 & 0 & x_{1} & y_{1} & 1 & -x_{1}y_1^{'} & -y_{1}y_1^{'}\\ 
+0 & 0 & 0 & x_{2} & y_{2} & 1 & -x_{2}y_2^{'} & -y_{2}y_2^{'}\\ 
+0 & 0 & 0 & x_{3} & y_{3} & 1 & -x_{3}y_3^{'} & -y_{3}y_3^{'}\\ 
+0 & 0 & 0 & x_{4} & y_{4} & 1 & -x_{4}y_4^{'} & -y_{4}y_4^{'}
+\end{bmatrix}^{-1}
+\begin{bmatrix}
+x_1^{'}\\ x_2^{'}\\ x_3^{'} \\ x_4^{'} \\ y_1^{'} \\ y_2^{'} \\ y_3^{'} \\ y_4^{'}
+\end{bmatrix}
+\end{align*}
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Task 1}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{painting1}
+\caption{Frame picture A}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{painting2}
+\caption{Frame picture B}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{painting3}
+\caption{Frame picture C}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{kittens}
+\caption{Image D}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{painting1}
+  \caption{Original image}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_task1_1_1}
+  \caption{Projected image}
+  \label{}
+\end{subfigure}
+\caption{Projected image D into frame of image A. Coordinates used for homography (298, 511), (1774, 357), (1686, 1826), (238, 1605).}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{painting2}
+  \caption{Original image}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_task1_1_2}
+  \caption{Projected image}
+  \label{}
+\end{subfigure}
+\caption{Projected image D into frame of image B. Coordinates used for homography (342, 690), (1888, 750), (1886, 2002), (334, 2334).}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{painting3}
+  \caption{Original image}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_task1_1_3}
+  \caption{Projected image}
+  \label{}
+\end{subfigure}
+\caption{Projected image D into frame of image C.  Coordinates used for homography (106, 444), (1224, 306), (1098, 1862), (120, 1364).}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_task1_2_1}
+\caption{Projected image A into frame of image C}
+\label{}
+\end{figure}
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Task 2}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{DSC_1473}
+\caption{Plane image E}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{DSC_1474}
+\caption{Plane image F}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{DSC_1475}
+\caption{Plane image G}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{manu}
+\caption{Image H}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{DSC_1473}
+  \caption{Original image}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_task2_1_1}
+  \caption{Projected image}
+  \label{}
+\end{subfigure}
+\caption{Projected image H into frame of image E. Coordinates used for homography (1483, 537), (3999, 457), (4112, 2362), (1260, 2405).}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{DSC_1474}
+  \caption{Original image}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_task2_1_2}
+  \caption{Projected image}
+  \label{}
+\end{subfigure}
+\caption{Projected image H into frame of image F. Coordinates used for homography (1808, 855), (3905, 83), (4106, 2295), (1648, 2408).}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{DSC_1475}
+  \caption{Original image}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_task2_1_3}
+  \caption{Projected image}
+  \label{}
+\end{subfigure}
+\caption{Projected image H into frame of image G. Coordinates used for homography (2360, 194), (4656, 521), (4935, 2295), (2376, 2355).}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_task2_2_1}
+\caption{Projected image E into frame of image G}
+\label{}
+\end{figure}
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Code for part 1}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+# Import necessary libraries
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt  
+
+def compute_h (coordinates):
+    ''' This function will compute the homography matrix
+        Input: A list of 4 lists following this format [x, y, x', y']
+        where x and y are pixel from destination image
+        and x' and y' are the pixel from source image
+        Output: A homograply 3x3 matrix'''
+
+        # Create Ax=b where x is the solution
+    A = np.zeros((8, 8))
+    b = np.zeros((8, 1))
+    for i in range(len(coordinates)):
+        A[i][0] = coordinates[i][0]
+        A[i][1] = coordinates[i][1]
+        A[i][2] = 1
+        A[i][3] = 0
+        A[i][4] = 0
+        A[i][5] = 0
+        A[i][6] = -1*coordinates[i][0]*coordinates[i][2]
+        A[i][7] = -1*coordinates[i][1]*coordinates[i][2]
+
+        A[i+4][0] = 0
+        A[i+4][1] = 0
+        A[i+4][2] = 0
+        A[i+4][3] = coordinates[i][0]
+        A[i+4][4] = coordinates[i][1]
+        A[i+4][5] = 1
+        A[i+4][6] = -1*coordinates[i][0]*coordinates[i][3]
+        A[i+4][7] = -1*coordinates[i][1]*coordinates[i][3]
+
+        b[i][0] = coordinates[i][2]
+        b[i+4][0] = coordinates[i][3]
+    
+    A_inv = np.linalg.pinv(A)
+    H = np.matmul(A_inv, b)
+    H = np.append(H, 1)
+    H = H.reshape((3, 3))
+
+    return H
+
+def project_image(src_img, dest_img, H):
+    ''' This function will project an image to another image base on homography
+        Input: 
+        src_img = source image
+        dest_img = destination image
+        H = homography matrix
+        Output: 
+        projected image
+
+    '''
+    result_img = np.zeros(dest_img.shape)
+    for x in range(dest_img.shape[0]):
+        for y in range(dest_img.shape[1]):
+            pixel = np.array([y, x, 1])
+            source_pixel = np.matmul(H, pixel)
+            proj_y = source_pixel[0] / source_pixel[2]
+            proj_x = source_pixel[1] / source_pixel[2]
+            if proj_x < 0 or proj_x > src_img.shape[0]-1 or proj_y < 0 or proj_y > src_img.shape[1]-1:
+                result_img[x][y] = dest_img[x][y]
+            else:
+                result_img[x][y] = src_img[int(proj_x)][int(proj_y)]
+    result_img = result_img.astype(int)
+    return result_img
+
+source_img = cv.imread('kittens.jpeg')
+frame_images = {}
+frame_image = {
+    'filename': 'painting1.jpeg',
+    'savename': 'hw2_task1_1_1.png'
+}
+frame_images['A'] = frame_image
+frame_image = {
+    'filename': 'painting2.jpeg',
+    'savename': 'hw2_task1_1_2.png'
+}
+frame_images['B'] = frame_image
+frame_image = {
+    'filename': 'painting3.jpeg',
+    'savename': 'hw2_task1_1_3.png'
+}
+frame_images['C'] = frame_image
+frame_images
+
+# For image A
+coordinates = [
+    [298, 511, 0, 0],
+    [1774, 357, 1920, 0],
+    [1686, 1826, 1920, 1125],
+    [238, 1605, 0, 1125]
+]
+HDA = compute_h(coordinates)
+dest_img = cv.imread(frame_images['A']['filename'])
+resultD2A = project_image(source_img, dest_img, HDA)
+plt.imshow(resultD2A)
+cv.imwrite(frame_images['A']['savename'], resultD2A)
+
+# For image B
+coordinates = [
+    [342, 690, 0, 0],
+    [1888, 750, 1920, 0],
+    [1886, 2002, 1920, 1125],
+    [334, 2334, 0, 1125]
+]
+HDB = compute_h(coordinates)
+dest_img = cv.imread(frame_images['B']['filename'])
+resultD2B = project_image(source_img, dest_img, HDB)
+plt.imshow(resultD2B)
+cv.imwrite(frame_images['B']['savename'], resultD2B)
+
+# For image C
+coordinates = [
+    [106, 444, 0, 0],
+    [1224, 306, 1920, 0],
+    [1098, 1862, 1920, 1125],
+    [120, 1364, 0, 1125]
+]
+HDC = compute_h(coordinates)
+dest_img = cv.imread(frame_images['C']['filename'])
+resultD2C = project_image(source_img, dest_img, HDC)
+plt.imshow(resultD2C)
+cv.imwrite(frame_images['C']['savename'], resultD2C)
+
+\end{lstlisting}
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Code for part 2}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+# Import necessary libraries
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt  
+
+def compute_h (coordinates):
+    ''' This function will compute the homography matrix
+        Input: A list of 4 lists following this format [x, y, x', y']
+        where x and y are pixel from destination image
+        and x' and y' are the pixel from source image
+        Output: A homograply 3x3 matrix'''
+
+        # Create Ax=b where x is the solution
+    A = np.zeros((8, 8))
+    b = np.zeros((8, 1))
+    for i in range(len(coordinates)):
+        A[i][0] = coordinates[i][0]
+        A[i][1] = coordinates[i][1]
+        A[i][2] = 1
+        A[i][3] = 0
+        A[i][4] = 0
+        A[i][5] = 0
+        A[i][6] = -1*coordinates[i][0]*coordinates[i][2]
+        A[i][7] = -1*coordinates[i][1]*coordinates[i][2]
+
+        A[i+4][0] = 0
+        A[i+4][1] = 0
+        A[i+4][2] = 0
+        A[i+4][3] = coordinates[i][0]
+        A[i+4][4] = coordinates[i][1]
+        A[i+4][5] = 1
+        A[i+4][6] = -1*coordinates[i][0]*coordinates[i][3]
+        A[i+4][7] = -1*coordinates[i][1]*coordinates[i][3]
+
+        b[i][0] = coordinates[i][2]
+        b[i+4][0] = coordinates[i][3]
+    
+    A_inv = np.linalg.pinv(A)
+    H = np.matmul(A_inv, b)
+    H = np.append(H, 1)
+    H = H.reshape((3, 3))
+
+    return H
+
+def project_image(src_img, dest_img, H):
+    ''' This function will project an image to another image base on homography
+        Input: 
+        src_img = source image
+        dest_img = destination image
+        H = homography matrix
+        Output: 
+        projected image
+
+    '''
+    result_img = np.zeros(dest_img.shape)
+    for x in range(dest_img.shape[0]):
+        for y in range(dest_img.shape[1]):
+            pixel = np.array([y, x, 1])
+            source_pixel = np.matmul(H, pixel)
+            proj_y = source_pixel[0] / source_pixel[2]
+            proj_x = source_pixel[1] / source_pixel[2]
+            if proj_x < 0 or proj_x > src_img.shape[0]-1 or proj_y < 0 or proj_y > src_img.shape[1]-1:
+                result_img[x][y] = [0, 0 ,0]
+            else:
+                result_img[x][y] = src_img[int(proj_x)][int(proj_y)]
+    result_img = result_img.astype(int)
+    return result_img
+
+source_img = cv.imread('kittens.jpeg')
+frame_images = {}
+frame_image = {
+    'filename': 'painting1.jpeg',
+    'savename': 'hw2_task1_1_1.png'
+}
+frame_images['A'] = frame_image
+frame_image = {
+    'filename': 'painting2.jpeg',
+    'savename': 'hw2_task1_1_2.png'
+}
+frame_images['B'] = frame_image
+frame_image = {
+    'filename': 'painting3.jpeg',
+    'savename': 'hw2_task1_1_3.png'
+}
+frame_images['C'] = frame_image
+frame_images
+
+# For image A to B 
+coordinates = [
+    [342, 690, 298, 511],
+    [1888, 750, 1774, 357],
+    [1886, 2002, 1686, 1826],
+    [334, 2334, 238, 1605]
+]
+HAB = compute_h(coordinates)
+
+# For image B to C
+coordinates = [
+    [106, 444, 342, 690],
+    [1224, 306, 1888, 750],
+    [1098, 1862, 1886, 2002],
+    [120, 1364, 334, 2334]
+]
+HBC = compute_h(coordinates)
+
+HAC = np.matmul(HAB, HBC)
+source_img = cv.imread(frame_images['A']['filename'])
+dest_img = cv.imread(frame_images['C']['filename'])
+
+resultA2C = project_image(source_img, dest_img, HAC)
+plt.imshow(resultA2C)
+cv.imwrite('hw2_task1_2_1.png', resultA2C)
+
+\end{lstlisting}
+
+\end{document}
+

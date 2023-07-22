@@ -1,0 +1,826 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./ece661_pics/hw11_image/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{indentfirst}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{ECE 661: Homework 11}}
+
+Thirawat Bureetes
+
+(Fall 2020)
+\end{center}
+	
+ 
+%-----------------------------------------------------------------------------------
+
+\section*{Task1: Face Recogition}
+
+\subsection*{Principle Component Analysis (PCA)}
+
+The dataset consists of 630 pictures which belong to 30 people (classes). Each person or class has equally 21 pictures. The goal is to apply Principle Component Analysis (PCA) to classify these pictures. First, each image is converted into grey scale. Each image is 128 x 128 pixels, or 16,384 pixels. Normalized each pixel value with the norm of that image. After normalizing all $N=630$ images in the dataset, compute the global mean vector as follow.
+
+\begin{align*}
+\mathbf{m} &= \frac{1}{N} \sum_{i=1}^{N} \mathbf{x}_i
+\end{align*}
+
+Then subtract each normalized vector with global mean and stack all vector together. 
+
+\begin{align*}
+\mathbf{X} &= [\mathbf{x}_1 - \mathbf{m} | \mathbf{x}_2 - \mathbf{m} | ... | \mathbf{x}_N - \mathbf{m}]
+\end{align*}
+
+The matrix $\mathbf{X}$ is 16,384 (number of pixel) x 630 (number of image) dimension. The covariance matrix $\mathbf{C}$ can be obtained by 
+
+\begin{align*}
+\mathbf{C} &= \frac{1}{N} \sum_{i=1}^{N} (\mathbf{x}_i - \mathbf{m}) (\mathbf{x}_i - \mathbf{m})^T \\
+\mathbf{C} &= \frac{1}{N} \mathbf{X}\mathbf{X}^T
+\end{align*}
+
+The goal is to find eigen vector $\mathbf{w}$ that satisfy
+
+\begin{align*}
+\mathbf{C} \mathbf{w} &= \lambda \mathbf{w} \\
+ \mathbf{X}\mathbf{X}^T \mathbf{w} &= \lambda \mathbf{w} \\
+\end{align*}
+
+matrix  $\mathbf{X}\mathbf{X}^T$ will be termendous, instead, smaller size  $\mathbf{X}^T \mathbf{X}$ will be used. Define $\mathbf{u}$ as an eigen vector of $\mathbf{X}^T \mathbf{X}$
+
+\begin{align*}
+ \mathbf{X}^T \mathbf{X} \mathbf{u} &= \lambda \mathbf{u} \\
+\mathbf{X}  \mathbf{X}^T \mathbf{X} \mathbf{u} &= \lambda \mathbf{X} \mathbf{u} \\
+\mathbf{C} \mathbf{X} \mathbf{u} &= \lambda \mathbf{X} \mathbf{u} \\
+ \mathbf{X} \mathbf{u} &= \mathbf{w}
+\end{align*}
+
+There will be 630 eigenvector $\mathbf{w}$. Normalized each eigenvector $\mathbf{w}$ with its value and sort from higher corespondence eigenvalue to lower higher corespondence eigenvalue. The result will be eigenvalue array $\mathbf{W}$ 
+
+\begin{align*}
+\mathbf{W} &= [\mathbf{w}_1  | \mathbf{w}_2 | ... | \mathbf{x}_N]
+\end{align*}
+
+To classify image, subspace of  $\mathbf{W}$  by highest $p$ value 
+
+\begin{align*}
+\mathbf{W}_p &= [\mathbf{w}_1  | \mathbf{w}_2 | ... | \mathbf{x}_p]
+\end{align*}
+
+Testing images are projected into subspace as 
+
+\begin{align*}
+\mathbf{y}_i &= \mathbf{W}_p^T (\mathbf{x}_i - \mathbf{m})
+\end{align*}
+
+The result will be classified using Nearest Neighbor classifier. The classification accuracy ralated to number of $p$ is shown in the result. 
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Linear Discriminant Analysis (LDA)}
+
+The Fischer Discriminant Function is define as 
+
+\begin{align*}
+J(\mathbf{w}) &= \frac{\mathbf{w}^T \mathbf{S}_B \mathbf{w}}{\mathbf{w}^T \mathbf{S}_W \mathbf{w}}
+\end{align*}
+
+$\mathbf{w}$ is an eigen vector that maximize the Fischer Discriminent. $\mathbf{S}_B$ is a between-class scatter which is defined as follow
+
+\begin{align*}
+\mathbf{S}_B &= \frac{1}{|C|} \sum_{i=1}^{|C|} (\mathbf{m}_i - \mathbf{m}) (\mathbf{m}_i - \mathbf{m})^T \\
+\mathbf{S}_B &= \frac{1}{|C|} \mathbf{M} \mathbf{M}^T \\
+\end{align*}
+
+$C$ is a number of classes in that dataset. $\mathbf{m}$ and $\mathbf{m}_i$ are global mean and class $i^{th}$ mean respectively. $\mathbf{M}$ is an array that consist of mean of each class.
+
+\begin{align*}
+\mathbf{M} &= [\mathbf{m}_1 - \mathbf{m} | \mathbf{m}_2 - \mathbf{m} | ... | \mathbf{m}_C - \mathbf{m}]
+\end{align*}
+
+The same procedure used to compute $\mathbf{C} = \frac{1}{N} \mathbf{X}\mathbf{X}^T$ is used. Instead of finding eigenvector $\mathbf{v}$ of $\mathbf{M}\mathbf{M}^T$, compute  eigenvector $\mathbf{u}$ of $\mathbf{M}^T\mathbf{M}$. Then finding eigenvector $\mathbf{v}$ of $\mathbf{M}\mathbf{M}^T$ by 
+
+
+\begin{align*}
+ \mathbf{M} \mathbf{u} &= \mathbf{v}
+\end{align*}
+
+Normalize $\mathbf{v}$ and consolidate to build $\mathbf{V}$ 
+
+\begin{align*}
+\mathbf{V} &= [\mathbf{v}_1  | \mathbf{v}_2 | ... | \mathbf{v}_C ]
+\end{align*}
+
+Then build matrix $\mathbf{D}_B$ which is an diagonal matrix of eigenvalue of $\mathbf{S}_B$. Then compute 
+
+\begin{align*}
+ \mathbf{Z}  &= \mathbf{V}\mathbf{D}_B^{-\frac{1}{2}}
+\end{align*}
+
+Finally supspace $\mathbf{W}_p = \mathbf{Z}\mathbf{U}_p$ is used to test the image by $mathbf{y}_i = \mathbf{W}_p^T (\mathbf{x}_i - \mathbf{m})$  in the same way as in PCA. $\mathbf{U}_p$ is the smallest $p$ eigenvector of $\mathbf{Z}^T \mathbf{S}_W \mathbf{Z}$. Where $\mathbf{S}_W$ is a within-class scatter defined as follow
+
+\begin{align*}
+\mathbf{S}_W &= \frac{1}{|C|} \sum_{i=1}^{|C|} \frac{1}{|C_i|} \sum_{k=1}^{|C_i|} (\mathbf{x}_k - \mathbf{m}_i) (\mathbf{x}_k - \mathbf{m}_i)^T
+\end{align*}
+
+$C$ and $C_i$ are number of classes and number of images in class $i^{th}$ respectively. $\mathbf{x}_k$ is a vector feature of an image and $\mathbf{m}_i$ is mean of feature vector of all image in that particular class. $\mathbf{Z}^T \mathbf{S}_W \mathbf{Z}$ can be also writed as 
+
+\begin{align*}
+\mathbf{Z}^T \mathbf{S}_W \mathbf{Z}  &= \mathbf{Z}^T \mathbf{X} \mathbf{X}^T \mathbf{Z} \\
+&= (\mathbf{Z}^T \mathbf{X}) (\mathbf{Z}^T \mathbf{X})^T \\
+\mathbf{X} &= [\mathbf{x}_{ik} - \mathbf{m}_i]
+\end{align*}
+
+Where $\mathbf{x}_{ik}$ is the normalized vector feature of image $k^{th}$ of class $i^{th}$.
+
+\subsection*{Results}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Task1/chart}
+\caption{Accuracy of PCA and LDA related to number of eigen vector}
+\label{}
+\end{figure}
+
+Both algorithm can acheive 100\% accuracy. However, LDA requieres less number of $p$ which is the number of feature dimension than PCA to reach 100\% accuracy. It also means that we low number of feature dimension, LDA will perform better than PCA.
+%-----------------------------------------------------------------------------------
+
+\section*{Task2: Object Detection with Cascaded AdaBoost Classification}
+
+
+The images are in two catagories: positve and negative. The positve dataset is the actual image of a car while negative dataset is the set of non-car images. All image is in the same size: 40 x 20 pixels. In this task, the features are extracted using Haar filter. The horizontal filter are defined as 1x2, 1x4, 1x8, ..., 1x40. The left-half of filter is value 1 and the right-half is value 0. The vertical image is defined as 2x2, 4x2, ..., 20x2. The top-half is value 1 and the bottom-half is value 0. 
+
+To find the weak classfier, first the initial weight is built. It is compose by 2 parts: the weight for postive images, and the weight for negative images. Each par is a vector of 1 by the number of images in positive or negative and devined each element by 2 times of the number of images in each catagory so each part has summation equal to 0.5. Therefore, the summation of entire wieght vector is equal to 1. 
+
+Then find the feature that minimize the error 
+
+\begin{align*}
+min(S^+ + (T^- - S^-), S^- + (T^+ - S^+)) \\
+\end{align*}
+
+Where
+
+$T^+$ is the summation of weight that belong to positive images
+
+$T^-$ is the summation of weight that belong to negative images
+
+$S^+$ is the summation of weight that corespondence to positive images at current feature threshore
+
+$S^-$ is the summation of weight that corespondence to negative images at current feature threshore
+
+Each iteration, all features are testing and the best one thta minimize an error is the best classifier. Polarity of this iteration classifier is determinded by the side of the equation above. If the minimum value is in $S^+ + (T^- - S^-)$, polarity is 1. Otherwise, -1. The threshore value of this classifier is the feature that corespondence to the minimum error value. Weight vector is updated using this equation.
+
+\begin{align*}
+\mathbf{w}_{t+1} &=  \mathbf{w}_{t}\mathbf{\beta}_t^{1-\mathbf{e}} \\
+\beta_t &= \frac{\epsilon_t}{1-\epsilon_t}
+\end{align*}
+
+Whrer $\mathbf{e}$ is vector of classification result of that classifier. $e_i = 1$  if classification is correct, otherwise, 0. $\epsilon_t$ is the minimum error of that iteration. Performance of classification is determinded by $C(x) = 1$ if $\sum_{t=1}^T \alpha_t h(_tx) \geq$ threshold, otherwise 0. $\alpha_t = log \frac{1}{\beta_t}$ and $h_t(x)$ is a classification result of iteration $t$. Threshold is the minimum value of $\sum_{t=1}^T \alpha_t h(_tx)$ that belong to postive dataset. 
+
+True positive rate is a ratio between number of $C(x) = 1$ that belong to positive dataset to the number total positive dataset. While false positive rate is a ratio between number of $C(x) = 1$ that belong to negative dataset to the number total negative dataset. If true positive rate reach target level at 1 and false positive rate falls below 0.5, the strong classification is completed. If not, true negative images are removed from the training set for the next iteration.
+
+Keep iteration going on until the false postive rate drops below 0.01 or there is no negetive training image remains. The final result will be a cascade of strong classifiers. Evaluate this cascade classifier with the testing dataset. The performance is measure by False positive rate which is the ratio of number of negative images that are classified as postive image to the total number of negative image. And False negative rate which is the ratio of number of positive images that are classified as negative images to the total number of possitive images.
+
+
+
+
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Results}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Task2/n_classifier}
+\caption{Number of weak classifiers for each cascade}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Task2/n_neg_image}
+\caption{Number of negative training image after each cascade}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Task2/train_accu}
+\caption{Training set accuracy}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Task2/test_accu}
+\caption{Test set accuracy}
+\label{}
+\end{figure}
+
+
+
+%-----------------------------------------------------------------------------------
+\newpage
+\section*{Source Code}
+\subsection*{Task1: Face Recogition}
+
+\begin{lstlisting}
+# Import necessary libraries
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt
+from pathlib import Path
+from scipy.optimize import least_squares
+from tqdm import tqdm
+import re
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+
+path = Path.cwd() / 'ece661_pics' / 'hw11_image' / 'Task1'
+np.set_printoptions(precision=5)
+
+class Image():
+    ''' 
+        Class for storing images.
+    '''
+    
+    def __init__(self, path):
+        self.path = path   
+
+    def load(self):
+        filename = f'{self.path.parent}/{self.path.name}'
+        self.image = cv.imread(filename)
+        name = self.path.name
+        self.label = int(re.findall(r'(\d{2})', name)[0])
+
+    def show(self):
+        plt.imshow(cv.cvtColor(self.image, cv.COLOR_BGR2RGB))
+    
+
+# Load training set
+train_set = []
+for x in tqdm((path / 'train').iterdir()):
+    image = Image(x)
+    # Skip Window's system file 
+    if image.path.suffix == '.db':
+        continue
+    image.load()
+    train_set.append(image)
+
+# Load testing set
+test_set = []
+for x in tqdm((path / 'test').iterdir()):
+    image = Image(x)
+    # Skip Window's system file
+    if image.path.suffix == '.db':
+        continue
+    image.load()
+    test_set.append(image)
+
+# Compose feature vector array for PCA
+train_array = []
+train_label = []
+for x in train_set:
+    image = x.image
+    image_gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    vector = image_gray.reshape(-1, 1)
+    # Normalize
+    vector = vector / np.linalg.norm(vector)
+    train_array.append(vector)
+    train_label.append(x.label)
+    
+train_array = np.array(train_array)
+# Keep only 2d 16384 x 630
+train_array = train_array[:, :, 0].T
+train_label = np.array(train_label)
+train_array -= np.mean(train_array, axis=1).reshape(-1, 1)
+
+v, u = np.linalg.eig(np.dot(train_array.T, train_array))
+# Sort the eigen vector
+indices = np.argsort(v * -1)
+v = v[indices]
+u = u[:, indices]
+# Feature array
+w = np.dot(train_array, u)
+w = w / np.linalg.norm(w, axis=0)
+
+# Compose test vector array
+test_array = []
+test_label = []
+for x in test_set:
+    image = x.image
+    image_gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    vector = image_gray.reshape(-1, 1)
+    # Normalize
+    vector = vector / np.linalg.norm(vector)
+    test_array.append(vector)
+    test_label.append(x.label)
+    
+test_array = np.array(test_array)
+# Keep only 2d 16384 x 630
+test_array = test_array[:, :, 0].T
+test_label = np.array(test_label)
+test_array -= np.mean(test_array, axis=1).reshape(-1, 1)
+
+pca_accuracies = []
+for p in range(20):
+    # Use highest p feature
+    wp = w[:, :p+1].T
+    train_feature = np.dot(wp, train_array)
+    test_feature = np.dot(wp, test_array)
+    classifier = KNeighborsClassifier(n_neighbors=1)
+    classifier.fit(train_feature.T, train_label)
+    prediction = classifier.predict(test_feature.T)
+    pca_accuracies.append(accuracy_score(test_label, prediction))
+
+# Compose feature vector array for LDA
+train_array = []
+train_label = []
+for x in train_set:
+    image = x.image
+    image_gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    vector = image_gray.reshape(-1, 1)
+    # Normalize
+    vector = vector / np.linalg.norm(vector)
+    train_array.append(vector)
+    train_label.append(x.label)
+    
+train_array = np.array(train_array)
+# Keep only 2d 16384 x 630
+train_array = train_array[:, :, 0].T
+train_label = np.array(train_label)
+# Compute global mean
+global_mean = np.mean(train_array, axis=1).reshape(-1, 1)
+
+# Compute class mean
+class_means = []
+n_class = train_label.max()
+for k in range(n_class):
+    indices = np.argwhere(train_label == k+1)
+    class_array = train_array[:, indices.ravel()]
+    mean = np.mean(class_array, axis=1)
+    class_means.append(mean)
+
+class_means = np.array(class_means).T
+# Subtract with global mean
+class_means -= global_mean
+
+v, u = np.linalg.eig(np.dot(class_means.T, class_means))
+# Sort the eigen vector
+indices = np.argsort(v * -1)
+v = v[indices]
+u = u[:, indices]
+V = np.dot(class_means, u)
+# Normalized 
+V = V / np.linalg.norm(V, axis=0)
+
+# Compute DB and Z
+DB = np.diag(v)
+Z = np.dot(V, np.linalg.inv(np.sqrt(DB)))
+
+# Compute in-class 
+for i, label in enumerate(train_label):
+    train_array[:, i] -= class_means[:, label-1]
+
+ZTX = np.dot(Z.T, train_array)
+v, u = np.linalg.eig(np.dot(ZTX, ZTX.T))
+# Sort the eigen vector
+indices = np.argsort(v)
+v = v[indices]
+u = u[:, indices]
+
+# Compose training array
+train_array = []
+train_label = []
+for x in train_set:
+    image = x.image
+    image_gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    vector = image_gray.reshape(-1, 1)
+    # Normalize
+    vector = vector / np.linalg.norm(vector)
+    train_array.append(vector)
+    train_label.append(x.label)
+    
+train_array = np.array(train_array)
+# Keep only 2d 16384 x 630
+train_array = train_array[:, :, 0].T
+train_label = np.array(train_label)
+train_array -= np.mean(train_array, axis=1).reshape(-1, 1)
+
+# Compose test vector array
+test_array = []
+test_label = []
+for x in test_set:
+    image = x.image
+    image_gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    vector = image_gray.reshape(-1, 1)
+    # Normalize
+    vector = vector / np.linalg.norm(vector)
+    test_array.append(vector)
+    test_label.append(x.label)
+    
+test_array = np.array(test_array)
+# Keep only 2d 16384 x 630
+test_array = test_array[:, :, 0].T
+test_label = np.array(test_label)
+test_array -= np.mean(test_array, axis=1).reshape(-1, 1)
+
+lda_accuracies = []
+for p in range(20):
+    wp = np.dot(Z, u[:, :p+1]).T
+    train_feature = np.dot(wp, train_array)
+    test_feature = np.dot(wp, test_array)
+    classifier = KNeighborsClassifier(n_neighbors=1)
+    classifier.fit(train_feature.T, train_label)
+    prediction = classifier.predict(test_feature.T)
+    lda_accuracies.append(accuracy_score(test_label, prediction))
+
+fig, ax = plt.subplots()
+fig.suptitle('PCA & LDA Accuracy')
+plt.xticks([4, 8, 12, 16, 20])
+plt.xlabel('p')
+plt.ylabel('Accuracy')
+ax.plot(np.arange(1, 21), lda_accuracies, label='LDA')
+ax.plot(np.arange(1, 21), pca_accuracies, label='PCA')
+plt.legend(loc='best');
+filename = path / 'chart.png'
+plt.savefig(filename)
+
+\end{lstlisting}
+
+
+%----------------------------------------------------------------------------------
+
+
+\newpage
+\subsection*{Task2: Object Detection with Cascaded AdaBoost Classification}
+\begin{lstlisting}
+# Import necessary libraries
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt
+from pathlib import Path
+from tqdm import tqdm
+import re
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+
+path = Path.cwd() / 'ece661_pics' / 'hw11_image' / 'Task2'
+np.set_printoptions(precision=5)
+
+class Image():
+    ''' 
+        Class for storing images.
+    '''
+    
+    def __init__(self, path):
+        self.path = path   
+
+    def load(self):
+        filename = f'{self.path.parent}/{self.path.name}'
+        self.image = cv.imread(filename)
+
+    def show(self):
+        plt.imshow(cv.cvtColor(self.image, cv.COLOR_BGR2RGB))
+    
+    def harr_filter(self):
+        # Compute Haar filter for this image
+        image_gray = cv.cvtColor(self.image, cv.COLOR_BGR2GRAY)
+        intergral_image = np.cumsum(np.cumsum(image_gray, axis=1), axis=0)
+        h, w = image_gray.shape
+        # Horizontal Haar kernals
+        h_kernels = []
+        for i in range(1, int(w/2) + 1):
+            zero = np.zeros((1, i))
+            one = np.ones((1, i))
+            kernel = np.hstack((zero, one))
+            h_kernels.append(kernel)
+        # Vertical Haar kernals
+        v_kernels = []
+        for i in range(1, int(h/2) + 1):
+            zero = np.zeros((i, 2))
+            one = np.ones((i, 2))
+            kernel = np.vstack((one, zero))
+            v_kernels.append(kernel)
+            features = []
+        # Apply horizontal Haar filter
+        for kernel in h_kernels:
+            kh, kw = kernel.shape
+            for i in range(w - kw):
+                for j in range(h - kh):
+                    top_left = intergral_image[j, i]
+                    top_mid = intergral_image[j, i+int(kw/2)]
+                    top_right = intergral_image[j, i+kw]
+                    bot_left = intergral_image[j+kh, i]
+                    bot_mid = intergral_image[j+kh, i+int(kw/2)]
+                    bot_right = intergral_image[j+kh, i+kw]
+                    feature = bot_right - \
+                            2 * bot_mid + \
+                            2 * top_mid - \
+                            top_right + \
+                            bot_left - \
+                            top_left
+                    features.append(feature)
+        # Apply vertical Haar filter
+        for kernel in v_kernels:
+            kh, kw = kernel.shape
+            for i in range(w - kw):
+                for j in range(h - kh):
+                    left_top = intergral_image[j ,i]
+                    left_mid = intergral_image[j+int(kh/2) ,i]
+                    left_bot = intergral_image[j+kh ,i]
+                    right_top = intergral_image[j ,i+kw]
+                    right_mid = intergral_image[j+int(kh/2) ,i+kw]
+                    right_bot = intergral_image[j+kh ,i+kw]
+                    feature = left_top - \
+                            2 * left_mid + \
+                            2 * right_mid - \
+                            right_top + \
+                            left_bot - \
+                            right_bot
+                    features.append(feature)
+
+        features = np.array(features)
+        return features
+
+# Load dataset train positive
+train_positive = []
+for x in tqdm((path / 'train' / 'positive').iterdir()):
+    image = Image(x)
+    # Skip Window's system file 
+    if image.path.suffix == '.db':
+        continue
+    image.load()
+    feature = image.harr_filter()
+    train_positive.append(feature)
+train_positive = np.array(train_positive).T
+
+# Load dataset train negative
+train_negative = []
+for x in tqdm((path / 'train' / 'negative').iterdir()):
+    image = Image(x)
+    # Skip Window's system file 
+    if image.path.suffix == '.db':
+        continue
+    image.load()
+    feature = image.harr_filter()
+    train_negative.append(feature)
+train_negative = np.array(train_negative).T
+
+# Load dataset test positive
+test_positive = []
+for x in tqdm((path / 'test' / 'positive').iterdir()):
+    image = Image(x)
+    # Skip Window's system file 
+    if image.path.suffix == '.db':
+        continue
+    image.load()
+    feature = image.harr_filter()
+    test_positive.append(feature)
+test_positive = np.array(test_positive).T
+
+# Load dataset test negative
+test_negative = []
+for x in tqdm((path / 'test' / 'negative').iterdir()):
+    image = Image(x)
+    # Skip Window's system file 
+    if image.path.suffix == '.db':
+        continue
+    image.load()
+    feature = image.harr_filter()
+    test_negative.append(feature)
+test_negative = np.array(test_negative).T
+
+def compute_cascade(train_set, n_train_positive, n_train_negative):
+    ''' 
+        Find best week classifier and update weight until 
+        reaching target false positive rate.
+    '''
+    false_positive_target = 0.5
+    train_label = np.concatenate((np.ones(n_train_positive), np.zeros(n_train_negative)))
+    # Compose normalized weight
+    weight_positive = np.ones(n_train_positive) / (2 * n_train_positive)
+    weight_negative = np.ones(n_train_negative) / (2 * n_train_negative)
+    weight_norm = np.concatenate((weight_positive, weight_negative))
+    alphas = []
+    classifiers = []
+    hs = []
+    for t in range(50):
+        best_error = np.inf
+        total_positive = np.sum(weight_norm[:n_train_positive])
+        total_negative = np.sum(weight_norm[n_train_positive:])
+        for i in range(n_feature):
+            feature = train_set[i]
+            labels = train_label
+            weight = weight_norm
+            # Sorting by the feature values
+            indices = np.argsort(feature)
+            feature = feature[indices]
+            labels = labels[indices]
+            weight = weight[indices]
+            # Compute error
+            sum_positive = np.cumsum(weight * labels)
+            sum_negative = np.cumsum(weight) - sum_positive
+            error1 = sum_positive + (total_negative - sum_negative)
+            error2 = sum_negative + (total_positive - sum_positive)
+            error = np.minimum(error1, error2)
+            min_index = np.argmin(error)
+            # Keep the result if it is the best
+            if error[min_index] < best_error:
+                best_error = error[min_index]
+                if error1[min_index] <= error2[min_index]:
+                    polarity = 1
+                    result = train_set[i] >= feature[min_index]
+                else:
+                    polarity = -1
+                    result = train_set[i] < feature[min_index]
+                result = result.astype(np.uint8)
+                mismatch = result != train_label
+                mismatch = mismatch.astype(np.uint8)
+                n_mismatch = np.sum(mismatch)
+                classifier = {
+                    'index': i,
+                    'polarity': polarity,
+                    'n_mismatch': n_mismatch,
+                    'epsilon': best_error,
+                    'theta': feature[min_index]
+                }
+        # Update weight
+        epsilon = classifier['epsilon']
+        beta = epsilon / (1 - epsilon)
+        weight_norm = weight_norm * np.power(beta, 1 - mismatch)
+        weight_norm = weight_norm / weight_norm.sum()
+        # Check performance
+        alpha = np.log(1 / beta)
+        alphas.append(alpha)
+        classifiers.append(classifier)
+        hs.append(result)
+        h_np = np.array(hs).T
+        alpha_np = np.array(alphas).T
+        C = np.dot(h_np, alpha_np)
+        threshole = np.min(C[:n_train_positive])
+        C = (C >= threshole).astype(np.uint8)
+        false_positive = np.sum(C[n_train_positive:]) / n_train_negative
+        true_positive = np.sum(C[:n_train_positive]) / n_train_positive
+        if false_positive < false_positive_target:
+            print(f'True Positive = {true_positive:.3f} False Positive = {false_positive:.3f}')
+            break
+
+    # Filter true negative out
+    false_positive_indices = np.argwhere(C[n_train_positive:] == 1).ravel() 
+    false_positive_indices = false_positive_indices + n_train_positive
+    false_positive_features = train_set[:, false_positive_indices]
+    new_train_set = np.hstack((train_set[:, :n_train_positive], false_positive_features))
+    new_n_train_negative = false_positive_indices.shape[0]
+
+    return [new_train_set, new_n_train_negative, 
+            false_positive, true_positive, 
+            len(classifiers), classifiers, alphas]
+
+# Perform classifier on training set
+train_set = np.hstack((train_positive, train_negative))
+n_train_positive = train_positive.shape[1]
+n_train_negative = train_negative.shape[1]
+false_positive_rates = []
+true_positive_rates = []
+n_classifier = []
+classifiers = []
+alphas = []
+n_train_negative_list = []
+false_positive_target = 1e-2
+for state in range(10):
+    n_train_negative_list.append(n_train_negative)
+    outcome = compute_cascade(train_set, n_train_positive, n_train_negative)
+    train_set = outcome[0]
+    n_train_negative = outcome[1]
+    false_positive_rates.append(outcome[2])
+    true_positive_rates.append(outcome[3])
+    n_classifier.append(outcome[4])
+    classifiers.append(outcome[5])
+    alphas.append(outcome[6])
+    if false_positive_rates[-1] < false_positive_target or \
+       n_train_negative < 1:
+       break
+
+fig, ax = plt.subplots()
+fig.suptitle('Number of weak classifiers')
+plt.xlabel('Cascade state')
+plt.ylabel('Number of weak classifiers')
+ax.bar(np.arange(1, state+2), n_classifier)
+filename = path / 'n_classifier.png'
+plt.savefig(filename)
+
+fig, ax = plt.subplots()
+fig.suptitle('Number of negative images')
+plt.xlabel('Cascade state')
+plt.ylabel('Number of negative images')
+ax.plot(np.arange(1, state+2), n_train_negative_list)
+filename = path / 'n_neg_image.png'
+plt.savefig(filename)
+
+fig, ax = plt.subplots()
+fig.suptitle('Training Accuracy')
+plt.xlabel('Cascade state')
+plt.ylabel('Accuracy')
+ax.plot(np.arange(1, state+2), 
+        np.cumprod(true_positive_rates), 
+        label='True Positive Rate')
+ax.plot(np.arange(1, state+2), 
+        np.cumprod(false_positive_rates), 
+        label='False Positive Rate')
+plt.legend(loc='best');
+filename = path / 'train_accu.png'
+plt.savefig(filename)
+
+# Test with test set
+test_set = np.hstack((test_positive, test_negative))
+n_test_positive = test_positive.shape[1]
+n_test_negative = test_negative.shape[1]
+false_positive_rates = []
+false_negative_rates = []
+for i, weak_classifiers in enumerate(classifiers):
+    hs = []
+    for classifier in weak_classifiers:
+        index = classifier['index']
+        threshole = classifier['theta']
+        polarity = classifier['polarity']
+        feature = test_set[index]
+        if polarity == 1:
+            result = feature >= threshole
+        else:
+            result = feature < threshole
+        result = np.array(result, dtype=np.uint8)
+        hs.append(result)
+    
+    hs = np.array(hs).T
+    alpha = np.array(alphas[i]).T
+    C = np.dot(hs, alpha)
+    threshole_alpha = np.sum(alpha) * 0.5
+    C = C >= threshole_alpha
+    C = C.astype(np.uint8)
+    # Filter false negative out for next round
+    true_positive_indices = np.argwhere(C[:n_test_positive] == 1).ravel()
+    true_positive_feature = test_set[:, true_positive_indices]
+    n_false_negative = n_test_positive - true_positive_indices.shape[0]
+    false_negative_rates.append(n_false_negative)
+    # Filter true negative out for the next round
+    false_positive_indices = np.argwhere(C[n_test_positive:] == 1).ravel()
+    false_positive_indices = false_positive_indices + n_test_positive
+    false_positive_feature = test_set[:, false_positive_indices]
+    n_false_positive = false_positive_indices.shape[0]
+    false_positive_rates.append(n_false_positive)
+    # Update testing set
+    test_set = np.hstack((true_positive_feature, false_positive_feature))
+    n_test_positive = true_positive_indices.shape[0]
+
+n_test_positive = test_positive.shape[1]
+n_test_negative = test_negative.shape[1]
+false_negative_rates = np.array(false_negative_rates)
+false_negative_rates = false_negative_rates / n_test_positive
+false_positive_rates = np.array(false_positive_rates)
+false_positive_rates = false_positive_rates / n_test_negative
+
+fig, ax = plt.subplots()
+fig.suptitle('Testing Accuracy')
+plt.xlabel('Cascade state')
+plt.ylabel('Accuracy')
+ax.plot(np.arange(1, state+2), 
+        false_negative_rates, 
+        label='False Negative Rate')
+ax.plot(np.arange(1, state+2), 
+        false_positive_rates, 
+        label='False Positive Rate')
+plt.legend(loc='best');
+filename = path / 'test_accu.png'
+plt.savefig(filename)
+\end{lstlisting}
+
+%-----------------------------------------------------------------------------------
+
+\end{document}
+

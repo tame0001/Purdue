@@ -1,0 +1,10 @@
+*.jpeg
+.ipynb_checkpoints/
+*.png
+.vscode
+*.gz
+*.aux
+*.pdf
+*.JPG
+*.log
+ece661_pics

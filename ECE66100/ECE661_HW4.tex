@@ -1,0 +1,904 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./ece661_pics/hw4_image/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{indentfirst}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{ECE 661: Homework 4}}
+
+Thirawat Bureetes
+
+(Fall 2020)
+\end{center}
+	
+ 
+%-----------------------------------------------------------------------------------
+
+\section*{Theory Question}
+
+$\nabla$
+
+The LoG is defined as $
+LoG(f(x,y)) = \nabla^2 ff(x,y,\sigma) 
+= \frac{\partial}{\partial \sigma} ff(x,y,\sigma)
+$ and $ \nabla^2 ff(x,y,\sigma)  = f(x,y) * h(x,y,\sigma)$
+
+\begin{align*}
+ff(x,y,\sigma) &= \iint^{\infty}_{-\infty} f(x', y')g(x-x',y-y')dx'dy' \\
+g(x,y) &=  \frac{1}{2 \pi \sigma^2} e^{-\frac{x^2+y^2}{2\sigma^2}}\\
+h(x,y,\sigma) &= -\frac{1}{2 \pi \sigma^4}(2- \frac{x^2+y^2}{\sigma^2})e^{-\frac{x^2+y^2}{2\sigma^2}}\\
+\frac{\partial}{\partial \sigma} ff(x,y,\sigma)  &=  \iint^{\infty}_{-\infty} f(x', y') \frac{\partial}{\partial \sigma}g(x-x',y-y')dx'dy' \\
+&=  \iint^{\infty}_{-\infty} f(x', y') \frac{\partial}{\partial \sigma}  (\frac{1}{2 \pi \sigma^2} e^{-\frac{(x-x')^2+(y-y')^2}{2\sigma^2}})  dx'dy' \\
+&=  -\frac{\sigma}{2 \pi \sigma^4} \iint^{\infty}_{-\infty} f(x', y') (2- \frac{(x-x')^2+(y-y')^2}{\sigma^2}) e^{-\frac{(x-x')^2+(y-y')^2}{2\sigma^2}})  dx'dy' \\
+&= \sigma f(x,y) * h(x,y)
+\end{align*}
+
+The DoG compute on 1-dimension where LoG compute on 2-dimensions. Thus DoG is faster than LoG.
+
+%-----------------------------------------------------------------------------------
+
+\section*{Harris Corner Detector}
+
+\subsection*{Theory of Harris Corner Detector}
+
+Harris Corner Detector identifies the corners of images by analysing the derivatives of each pixel in images in grey scale domain. Both derivatives in $x$ and $y$ are considered using Haar filter. The size of Haar filter is the smallest even integer that is greater than $4\sigma$. In case $\sigma = \sqrt{2}$, the matrices below shows Haar filters in $x$ and $y$ direction.
+
+\begin{align*}
+h_x & =  
+\begin{bmatrix} 
+-1 & -1  & -1 & 1 & 1 & 1 \\
+-1 & -1  & -1 & 1 & 1 & 1 \\
+-1 & -1  & -1 & 1 & 1 & 1 \\
+-1 & -1  & -1 & 1 & 1 & 1 \\
+-1 & -1  & -1 & 1 & 1 & 1 \\
+-1 & -1  & -1 & 1 & 1 & 1 \\
+\end{bmatrix}\\
+h_y & =  
+\begin{bmatrix} 
+1 & 1  & 1 & 1 & 1 & 1 \\
+1 & 1  & 1 & 1 & 1 & 1 \\
+-1 & 1  & 1 & 1 & 1 & 1 \\
+-1 & -1  & -1 & -1 & -1 & -1 \\
+-1 & -1  & -1 & -1 & -1 & -1 \\
+-1 & -1  & -1 & -1 & -1 & -1 \\
+\end{bmatrix}
+\end{align*}
+
+The window that will apply the Harris Corner Detector for each pixel is $5\sigma \times 5\sigma$ pixel. Note that $5\sigma$ must be rounded to odd integer to keep interesting pixel center of the window. Define $d_x$ and $d_y$ as the result of convolving the Haar filter $h_x$ and $h_y$ respectively. Then form the result matrix $\mathbf{C}$ as following.
+
+\begin{align*}
+\mathbf{C} & =  
+\begin{bmatrix} 
+\sum{d^2_x} & \sum{d_x d_y}  \\
+\sum{d_x d_y} & \sum{d^2_y}  \\
+\end{bmatrix}
+\end{align*}
+
+In case that pixel is the corner point, the term $\sum{d_x d_y}$ will be non-zero value. Hence, the $\mathbf{C}$ will have rank of 2. Let $\lambda_1$ and $\lambda_2$ are the eigenvalue and $\lambda_1 \geq \lambda_2$. The ratio $r = \frac{\lambda_2}{\lambda_1}$ is a threshold to decide the corner pixel. Instead of computing eigenvalues, the ratio $r$ can be obtained by more efficient method. 
+
+\begin{align*}
+Tr(\mathbf{C}) &= \sum{d^2_x} + \sum{d^2_y} \\ 
+&= \lambda_1 + \lambda_2 \\
+det(\mathbf{C}) &= \sum{d^2_x}  \sum{d^2_y} - (\sum{d_x d_y})^2 \\ 
+&= \lambda_1  \lambda_2 \\
+\frac{det(\mathbf{C})}{(Tr(\mathbf{C}))^2} &= \frac{\lambda_1  \lambda_2}{\lambda_1 + \lambda_2} \\
+k &= \frac{r}{(1+r)^2} \\
+k &= \frac{det(\mathbf{C})}{(Tr(\mathbf{C}))^2}
+\end{align*}
+
+The average $k$ that obtained from all pixels in the image can be used as the threshold level to find the corner points.To verified the corner points from the same object from two different view points by Sum of Squared Differences (SSD) or Normailized Cross Correlation (NCC). 
+
+\begin{align*}
+SSD &= \sum_i{}\sum_j{|f_1(i, j)-f_2(i, j)|^2} \\
+NCC &= \frac{\sum_i{}\sum_j{(f_1(i, j)-m_1)(f_2(i, j)-m_2)}}
+{\sqrt{(\sum_i{}\sum_j{(f_1(i, j)-m_1)^2})(\sum_i{}\sum_j{(f_2(i, j)-m_2)^2})}}
+\end{align*}
+
+Where $f_i$ is the window of the pixel-of-interest from image i and $m_i$ is the mean of the pixel in corresponding window.
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Result of Harris Corner Detector}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{hw4_original1_1}
+\caption{Original picture set 1}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{hw4_original1_2}
+\caption{Original picture set 1}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_1_ssd_sigma_2}
+\caption{Harris Corner detection with $\sigma = 2$ matching with SSD}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_1_ssd_sigma_3}
+\caption{Harris Corner detection with $\sigma = 3$ matching with SSD}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_1_ssd_sigma_4}
+\caption{Harris Corner detection with $\sigma = 4$ matching with SSD}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_1_ssd_sigma_6}
+\caption{Harris Corner detection with $\sigma = 6$ matching with SSD}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_1_ncc_sigma_2}
+\caption{Harris Corner detection with $\sigma = 2$ matching with NCC}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_1_ncc_sigma_3}
+\caption{Harris Corner detection with $\sigma = 3$ matching with NCC}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_1_ncc_sigma_4}
+\caption{Harris Corner detection with $\sigma = 4$ matching with NCC}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_1_ncc_sigma_6}
+\caption{Harris Corner detection with $\sigma = 6$ matching with NCC}
+\label{}
+\end{figure}
+
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{hw4_original2_1}
+\caption{Original picture set 2}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{hw4_original2_2}
+\caption{Original picture set 2}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_2_ssd_sigma_2}
+\caption{Harris Corner detection with $\sigma = 2$ matching with SSD}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_2_ssd_sigma_3}
+\caption{Harris Corner detection with $\sigma = 3$ matching with SSD}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_2_ssd_sigma_4}
+\caption{Harris Corner detection with $\sigma = 4$ matching with SSD}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_2_ssd_sigma_6}
+\caption{Harris Corner detection with $\sigma = 6$ matching with SSD}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_2_ncc_sigma_2}
+\caption{Harris Corner detection with $\sigma = 2$ matching with NCC}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_2_ncc_sigma_3}
+\caption{Harris Corner detection with $\sigma = 3$ matching with NCC}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_2_ncc_sigma_4}
+\caption{Harris Corner detection with $\sigma = 4$ matching with NCC}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_2_ncc_sigma_6}
+\caption{Harris Corner detection with $\sigma = 6$ matching with NCC}
+\label{}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{hw4_original3_1}
+\caption{Original picture set 3}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{hw4_original3_2}
+\caption{Original picture set 3}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_3_ssd_sigma_2}
+\caption{Harris Corner detection with $\sigma = 2$ matching with SSD}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_3_ssd_sigma_3}
+\caption{Harris Corner detection with $\sigma = 3$ matching with SSD}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_3_ssd_sigma_4}
+\caption{Harris Corner detection with $\sigma = 4$ matching with SSD}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_3_ssd_sigma_6}
+\caption{Harris Corner detection with $\sigma = 6$ matching with SSD}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_3_ncc_sigma_2}
+\caption{Harris Corner detection with $\sigma = 2$ matching with NCC}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_3_ncc_sigma_3}
+\caption{Harris Corner detection with $\sigma = 3$ matching with NCC}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_3_ncc_sigma_4}
+\caption{Harris Corner detection with $\sigma = 4$ matching with NCC}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_3_ncc_sigma_6}
+\caption{Harris Corner detection with $\sigma = 6$ matching with NCC}
+\label{}
+\end{figure}
+
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{hw4_original4_1}
+\caption{Original picture set 4}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{hw4_original4_2}
+\caption{Original picture set 4}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_4_ssd_sigma_2}
+\caption{Harris Corner detection with $\sigma = 2$ matching with SSD}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_4_ssd_sigma_3}
+\caption{Harris Corner detection with $\sigma = 3$ matching with SSD}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_4_ssd_sigma_4}
+\caption{Harris Corner detection with $\sigma = 4$ matching with SSD}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_4_ssd_sigma_6}
+\caption{Harris Corner detection with $\sigma = 6$ matching with SSD}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_4_ncc_sigma_2}
+\caption{Harris Corner detection with $\sigma = 2$ matching with NCC}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_4_ncc_sigma_3}
+\caption{Harris Corner detection with $\sigma = 3$ matching with NCC}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_4_ncc_sigma_4}
+\caption{Harris Corner detection with $\sigma = 4$ matching with NCC}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_4_ncc_sigma_6}
+\caption{Harris Corner detection with $\sigma = 6$ matching with NCC}
+\label{}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{hw4_original5_1}
+\caption{Original picture set 5}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{hw4_original5_2}
+\caption{Original picture set 5}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_5_ssd_sigma_2}
+\caption{Harris Corner detection with $\sigma = 2$ matching with SSD}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_5_ssd_sigma_3}
+\caption{Harris Corner detection with $\sigma = 3$ matching with SSD}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_5_ssd_sigma_4}
+\caption{Harris Corner detection with $\sigma = 4$ matching with SSD}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_5_ssd_sigma_6}
+\caption{Harris Corner detection with $\sigma = 6$ matching with SSD}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_5_ncc_sigma_2}
+\caption{Harris Corner detection with $\sigma = 2$ matching with NCC}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_5_ncc_sigma_3}
+\caption{Harris Corner detection with $\sigma = 3$ matching with NCC}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_5_ncc_sigma_4}
+\caption{Harris Corner detection with $\sigma = 4$ matching with NCC}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task1_5_ncc_sigma_6}
+\caption{Harris Corner detection with $\sigma = 6$ matching with NCC}
+\label{}
+\end{figure}
+
+%-----------------------------------------------------------------------------------
+
+\section*{SIFT}
+
+\subsection*{Theory of SIFT}
+
+
+Scale Invariant Feature Transform or SIFT is an algorithm used for extracting key-points or features of the images. The algorithm utilizes Difference of Gaussian (DoG) to detect the feature. However, DoG is quite expensive in term of computational resources. Thus Difference of Gaussion (DoG) is used instead of DoG since DoG is more efficient. The DoG function of an image ($D$) is defined as follow
+
+\begin{align*}
+D(x,y,\sigma) &= ff(x, y, \sigma_1) - ff(x, y, \sigma_2)
+\end{align*}
+
+Where $ff(x, y, \sigma)$ is the convolved image of point $x$ and $y$ at the scale $\sigma$. $\sigma_i$ represents the current octave and $\sigma_{i+1}$ represents the next octave. The feature is obtained by local extrema of $D$. The equation can be approximated with Taylor series as follow
+
+\begin{align*}
+D(\mathbf{x}) &\approx D(\mathbf{x_0}) + J^T(\mathbf{x_0})\mathbf{x} + \frac{1}{2}\mathbf{x}^T H(\mathbf{x_0)}\mathbf{x}
+\end{align*}
+
+Where $\mathbf{x_0}$ is the local maxima from the first round of compuation, $J^T(\mathbf{x_0})$ is the grandient at the point $\mathbf{x_0}$, and $ H(\mathbf{x_0)}$ is the Hessian at the point $\mathbf{x_0}$. The point that has $|D(\mathbf{x})| < 0.03$ is removed. For remaining key points, the megniture and orientation of gradient are used for matching the key points across the pictures. This calculation is based gray scale domain
+
+\begin{align*}
+m(x,y) &= \sqrt{|ff(x+1, y, \sigma) - ff(x, y, \sigma)|^2 + |ff(x, y+1, \sigma) - ff(x, y, \sigma)|^2} \\
+\theta(x,y) &= arctan \frac{|ff(x, y+1, \sigma) - ff(x, y, \sigma)|}{|ff(x+1, y, \sigma) - ff(x, y, \sigma)|}
+\end{align*}
+
+Each key points are evaluated in 16 x 16 pixel window which will subdivined into 16 of 4 x 4 pixel windows. Each window will be applied with 8-bin histrogram. In total, 128 dimentions vector is crated for each key point. This vector is used to find matching key point from another image. The smaller Euclidean distance between two 128 dimentions vector means the more likely that those two points are match.
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Result of SIFT}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task2_1_sift}
+\caption{SIFT algorithm with Eucidiean distance $<$ 100}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task2_2_sift}
+\caption{SIFT algorithm with Eucidiean distance $<$ 150}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task2_3_sift}
+\caption{SIFT algorithm with Eucidiean distance $<$ 80}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task2_4_sift}
+\caption{SIFT algorithm with Eucidiean distance $<$ 100}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_task2_5_sift}
+\caption{SIFT algorithm with Eucidiean distance $<$ 200}
+\label{}
+\end{figure}
+
+%-----------------------------------------------------------------------------------
+
+\section*{Observation}
+
+In Harris corner detection, with higher $\sigma$, the less point of interest detected. However, the remaining points seems to be more correct from visual inspection. However, compare to SIFT algorithm, it is obvious that yield much better feature extraction. And with the descriptive vector, the matching pairs are more correct than Harris Corner detection.
+
+%-----------------------------------------------------------------------------------
+
+\section*{Source Code}
+
+\subsection*{Source Code of Harris Corner Detector}
+
+\begin{lstlisting}
+
+# Import necessary libraries
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt
+from scipy import signal 
+
+class Pixel():
+    '''
+    Class for keeping pixel cooridinate
+    '''
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.point = (self.x, self.y)
+
+    def __repr__(self):
+        return f'({self.x}, {self.y})'
+
+    def adjust_width(self, width):
+        x = self.x + width
+        return (x, self.y)
+
+class Harris():
+    '''
+    Class for implimenting Harris Corner Detection.
+    '''
+
+    K_THRESHOLD = 0.1
+    
+    def __init__(self):
+        pass
+
+    def haar_filter(self, sigma):
+        '''
+        Create Haar filters.
+        Input (simga):
+            sigma: value of sigma
+        Output [haar_x, haar_y]:
+            haar_x: Haar filter in x direction
+            haar_y: Haar filter in y direction
+        '''
+        sigmax4 = int(sigma * 4)
+        if sigmax4 % 2 == 1:
+            sigmax4 = sigmax4 + 1
+        haar_x = np.ones((sigmax4, sigmax4))
+        haar_x[:, :int(sigmax4/2)] = -1
+        haar_y = haar_x.T * -1
+
+        return [haar_x, haar_y]
+
+    def find_harris_corners(self, imgBRG, sigma):
+        '''
+        Apply Harris Corner Detector on gray scale
+        Input (image, simga):
+            imgBRG: original image in BGR format load by CV2
+            sigma: value of sigma
+        Output [corners]:
+            corners: list of corner's coordinates
+        '''
+        image = cv.cvtColor(imgBRG, cv.COLOR_BGR2GRAY)
+        h, w = image.shape
+        [haar_x, haar_y] = self.haar_filter(sigma)
+        dx = signal.convolve2d(image, haar_x, mode='same')
+        dy = signal.convolve2d(image, haar_y, mode='same')
+        dx2 = dx * dx
+        dy2 = dy * dy
+        dxy = dx * dy
+
+        kernel_width = int(np.ceil(sigma * 5))
+        if kernel_width % 2 == 0:
+            kernel_width = kernel_width + 1
+        kernel = np.ones((kernel_width, kernel_width))
+        
+        sum_dx2 = signal.convolve2d(dx2, kernel, mode='same')
+        sum_dy2 = signal.convolve2d(dy2, kernel, mode='same')
+        sum_dxy = signal.convolve2d(dxy, kernel, mode='same')
+
+        trace = sum_dx2 + sum_dy2
+        trace2 = trace * trace
+        det = (sum_dx2 * sum_dy2) - (sum_dxy * sum_dxy)
+        r = det - self.K_THRESHOLD * trace2
+
+        # Search for max r value pixel in 41 x 41 pixel window. Keep only positive value
+        corners = []
+        width = 20 # 41 / 2
+        for i in range(width, w - width):
+            for j in range(width, h - width):
+                window = r[j - width : j + width+1, i - width : i + width+1]
+                max_value = np.amax(window)
+                if max_value > 0 and r[j, i] == max_value:
+                    corners.append(Pixel(i, j))
+        
+        return corners
+
+class Image(Harris):
+    ''' 
+    Class for store images and related parameters.
+    '''
+
+    FILEPATH = 'ece661_pics\\hw4_image\\'
+    FILETYPE = '.png'
+
+    def __init__(self, file1, file2, savename):
+        self.file1 = file1
+        self.file2 = file2
+        self.load_images()
+        self.savename = savename
+
+    def load_images(self):
+        self.image1 = cv.imread(self.FILEPATH + self.file1)
+        self.image2 = cv.imread(self.FILEPATH + self.file2)
+        self.image = cv.hconcat([self.image1, self.image2])
+
+    def show_image(self, image=0):
+        if image == 1:
+            plt.imshow(cv.cvtColor(self.image1, cv.COLOR_BGR2RGB))
+        elif image == 2:
+            plt.imshow(cv.cvtColor(self.image2, cv.COLOR_BGR2RGB))
+        elif image == 0:
+            plt.imshow(cv.cvtColor(self.image, cv.COLOR_BGR2RGB))
+
+    def find_corners(self, sigma):
+        self.current_sigma = sigma
+        corners1 = Harris.find_harris_corners(self, self.image1, sigma)
+        corners2 = Harris.find_harris_corners(self, self.image2, sigma)
+
+        if len(corners1) <= len(corners2):
+            self.cornersA = corners1
+            self.cornersB = corners2
+            self.imageA = self.image1
+            self.imageB = self.image2
+        else:
+            self.cornersA = corners2
+            self.cornersB = corners1
+            self.imageA = self.image2
+            self.imageB = self.image1
+        
+    def extract_window(self, image, center, width):
+        return image[center.y - width : center.y + width+1, center.x - width : center.x + width+1]
+
+    def compute_ssd(self):
+        imageA_gray = cv.cvtColor(self.imageA, cv.COLOR_BGR2GRAY)
+        imageB_gray = cv.cvtColor(self.imageB, cv.COLOR_BGR2GRAY)
+        pairs = []
+
+        # 21 x 21 pixel window. 
+        width = 10 # 21 / 2
+        for corner in self.cornersA:
+            ssd_min = 10000000
+            best_candidate = None
+            windowA = self.extract_window(imageA_gray, corner, width)
+            for candidate in self.cornersB:
+                windowB = self.extract_window(imageB_gray, candidate, width)
+                diff = windowA - windowB
+                ssd = np.sum(diff * diff)
+                if ssd_min > ssd:
+                    ssd_min = ssd
+                    best_candidate = candidate
+            pairs.append((corner, best_candidate))
+
+        image = self.mark_pairs(pairs)
+        # plt.imshow(cv.cvtColor(image, cv.COLOR_BGR2RGB))
+        savename = f'{self.FILEPATH}{self.savename}_ssd_sigma_{self.current_sigma}{self.FILETYPE}'
+        cv.imwrite(savename, image.astype(np.int))
+
+    def compute_ncc(self):
+        imageA_gray = cv.cvtColor(self.imageA, cv.COLOR_BGR2GRAY)
+        imageB_gray = cv.cvtColor(self.imageB, cv.COLOR_BGR2GRAY)
+        pairs = []
+
+        # 21 x 21 pixel window. 
+        width = 10 # 21 / 2
+        for corner in self.cornersA:
+            ncc_max = 0
+            best_candidate = None
+            windowA = self.extract_window(imageA_gray, corner, width)
+            for candidate in self.cornersB:
+                windowB = self.extract_window(imageB_gray, candidate, width)
+                meanA = np.mean(windowA)
+                meanB = np.mean(windowB)
+                windowA_new = windowA - meanA
+                windowB_new = windowB - meanB
+                num = np.sum(windowA_new * windowB_new)
+                den = np.sqrt(np.sum(windowA_new*windowA_new) * np.sum(windowB_new*windowB_new))
+                ncc = num/den
+                if ncc > ncc_max:
+                    ncc_max = ncc
+                    best_candidate = candidate
+            if best_candidate is not None:
+                pairs.append((corner, best_candidate))
+
+        image = self.mark_pairs(pairs)
+        # plt.imshow(cv.cvtColor(image, cv.COLOR_BGR2RGB))
+        savename = f'{self.FILEPATH}{self.savename}_ncc_sigma_{self.current_sigma}{self.FILETYPE}'
+        cv.imwrite(savename, image.astype(np.int))
+
+    def mark_pairs(self, pairs):
+        radius = 2
+        thickness = 1
+        
+        image = cv.hconcat([self.imageA, self.imageB])
+        w = self.imageA.shape[1]
+        for pair in pairs:
+            color = (0, 0, 255)
+            cv.circle(image, pair[0].point, radius, color, thickness)
+            cv.circle(image, pair[1].adjust_width(w), radius, color, thickness)
+            cv.line(image, pair[0].point, pair[1].adjust_width(w), color, thickness)
+
+        
+        return image
+
+images = [
+    Image('pair1\\1.jpg', 'pair1\\2.jpg', 'hw4_task1_1'),
+    Image('pair2\\1.jpg', 'pair2\\2.jpg', 'hw4_task1_2'),
+    Image('pair3\\1.jpg', 'pair3\\2.jpg', 'hw4_task1_3'),
+    Image('pair4\\1.jpg', 'pair4\\2.jpg', 'hw4_task1_4'),
+    Image('pair5\\1.jpg', 'pair5\\2.jpg', 'hw4_task1_5'),
+    Image('pair6\\1.jpg', 'pair6\\2.jpg', 'hw4_task1_6')]
+
+sigmas = [2, 3, 4, 6]
+for image in images:
+    for sigma in sigmas:
+        image.load_images()
+        image.find_corners(sigma)
+        image.compute_ssd()
+        image.load_images()
+        image.find_corners(sigma)
+        image.compute_ncc()
+\end{lstlisting}
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Source Code of SIFT}
+
+\begin{lstlisting}
+
+# Import necessary libraries
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt
+from scipy import signal
+
+class Pixel():
+    '''
+    Class for keeping pixel cooridinate
+    '''
+
+    def __init__(self, kp):
+        self.x = int(kp.pt[0])
+        self.y = int(kp.pt[1])
+        self.point = (self.x, self.y)
+
+    def __repr__(self):
+        return f'({self.x}, {self.y})'
+
+    def adjust_width(self, width):
+        x = self.x + width
+        return (x, self.y)
+
+class SIFT():
+    '''
+    Class for implimenting SIFT.
+    '''
+    
+    def __init__(self):
+        pass
+
+    def extract_feature(self, image):
+        gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+        features = cv.xfeatures2d.SIFT_create()
+        kp, des = features.detectAndCompute(gray_image, None)
+        
+        return [kp, des]
+
+    def find_pairs(self, image1, image2, theshore):
+        kp1, des1 = self.extract_feature(image1)
+        kp2, des2 = self.extract_feature(image2)
+
+        if len(kp1) < len(kp2):
+            kpA = kp1
+            kpB = kp2
+            desA = des1
+            desB = des2
+            imageA = image1
+            imageB = image2
+        else:
+            kpA = kp2
+            kpB = kp1
+            desA = des2
+            desB = des1
+            imageA = image2
+            imageB = image1
+
+        pairs = []
+        for inx_a , des_a in enumerate(desA):
+            min_distance = 1000000000
+            best_candidate = None
+            for inx_b , des_b in enumerate(desB):
+                distance = np.linalg.norm(des_a - des_b)
+                if distance < min_distance:
+                    min_distance = distance
+                    best_candidate = inx_b
+            if min_distance < theshore:
+                pairs.append((Pixel(kpA[inx_a]), Pixel(kpB[best_candidate])))
+        
+        return [pairs, imageA, imageB]
+
+class Image(SIFT):
+    ''' 
+    Class for store images and related parameters.
+    '''
+
+    FILEPATH = 'ece661_pics\\hw4_image\\'
+    FILETYPE = '.png'
+
+    def __init__(self, file1, file2, savename, theshore):
+        self.file1 = file1
+        self.file2 = file2
+        self.load_images()
+        self.savename = savename
+        self.theshore = theshore
+
+    def load_images(self):
+        self.image1 = cv.imread(self.FILEPATH + self.file1)
+        self.image2 = cv.imread(self.FILEPATH + self.file2)
+        self.image = cv.hconcat([self.image1, self.image2])
+
+    def show_image(self, image=0):
+        if image == 1:
+            plt.imshow(cv.cvtColor(self.image1, cv.COLOR_BGR2RGB))
+        elif image == 2:
+            plt.imshow(cv.cvtColor(self.image2, cv.COLOR_BGR2RGB))
+        elif image == 0:
+            plt.imshow(cv.cvtColor(self.image, cv.COLOR_BGR2RGB))
+
+    def process_sift(self):
+        [pairs, imageA, imageB] = SIFT.find_pairs(self, self.image1, self.image2, self.theshore)
+        image = self.mark_pairs(pairs, imageA, imageB)
+        plt.imshow(cv.cvtColor(image, cv.COLOR_BGR2RGB))
+        savename = f'{self.FILEPATH}{self.savename}_sift{self.FILETYPE}'
+        cv.imwrite(savename, image.astype(np.int))
+
+    def mark_pairs(self, pairs, imageA, imageB):
+        radius = 2
+        thickness = 1
+        image = cv.hconcat([imageA, imageB])
+        w = imageA.shape[1]
+        for pair in pairs:
+            color = (0, 0, 255)
+            cv.circle(image, pair[0].point, radius, color, thickness)
+            cv.circle(image, pair[1].adjust_width(w), radius, color, thickness)
+            cv.line(image, pair[0].point, pair[1].adjust_width(w), color, thickness)
+
+        return image
+
+images = [
+    Image('pair1\\1.jpg', 'pair1\\2.jpg', 'hw4_task2_1', 100),
+    Image('pair2\\1.jpg', 'pair2\\2.jpg', 'hw4_task2_2', 150),
+    Image('pair3\\1.jpg', 'pair3\\2.jpg', 'hw4_task2_3', 80),
+    Image('pair4\\1.jpg', 'pair4\\2.jpg', 'hw4_task2_4', 100),
+    Image('pair5\\1.jpg', 'pair5\\2.jpg', 'hw4_task2_5', 200),
+    Image('pair6\\1.jpg', 'pair6\\2.jpg', 'hw4_task2_6', 30)]
+
+for image in images:
+    image.process_sift()
+
+\end{lstlisting}
+
+%-----------------------------------------------------------------------------------
+
+\end{document}
+

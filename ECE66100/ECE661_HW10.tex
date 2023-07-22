@@ -1,0 +1,717 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./ece661_pics/hw10_image/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{indentfirst}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{ECE 661: Homework 10}}
+
+Thirawat Bureetes
+
+(Fall 2020)
+\end{center}
+	
+ 
+%-----------------------------------------------------------------------------------
+
+\section*{Task1: Projective Stereo Reconstruction}
+
+
+\subsection*{Fundamental Matrix}
+
+There are two images capturing the same sence: image A and image B. $\mathbf{x}$ and $\mathbf{x}'$ represent the same point in the image A and image B repectively. These two points from two images can be linked together as following.
+
+\begin{align*}
+\mathbf{x'}^T\mathbf{F}\mathbf{x} &= 0
+\end{align*}
+
+$\mathbf{F}$ is called fundamental matrix. The fundamental matrix is 3 x 3 matrix, therefore, it has 9 elements. However, the Degree of Freedom of $\mathbf{F}$ is 7. So, with 8 manually picked corecespondences between $\mathbf{x}$ and $\mathbf{x}'$, the matrix A can be obtained by solving $\mathbf{A}\mathbf{F} = 0$. Where 
+
+\begin{align*}
+\mathbf{A}&= 
+\begin{bmatrix} 
+x'_ix_i & x'_iy_i & x'_i & y'_ix_i & y'_iy_i & y'_i & x_i & y_i & 1
+\end{bmatrix}
+\end{align*}
+
+The $\mathbf{F}$ is the eigenvector that corespondence to the minimum eigenvalue of Singular Value Decomposition (SVD) of matrix $\mathbf{A}$. Since $\mathbf{F}$ has rank equal to 2, $\mathbf{F}$ is further decomposed using SVD. The result will be 3 eigenvalues and 3 eigenvectors. Force the mimumum eigenvalue to 0 and recomposite to form $\mathbf{F}$ with rank equal to 2.
+ 
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{LM Refinement}
+
+To using LM non-linear to optimize $\mathbf{F}$, first, the cost (objective) function has to be declared. Define image A's epipole as $\mathbf{e}$ and image B's epipole as $\mathbf{e'}$. These epipoles are also left and right null vector of $\mathbf{F}$.  
+
+\begin{align*}
+\mathbf{F}\mathbf{e} &= 0 \\
+\mathbf{e'}^T\mathbf{F} &= 0 \\
+\end{align*}
+
+As  $\mathbf{F}$ has rank equal to 2. Epipoles are the eigenvectors (right and left) that correspondence to the smallest eigenvalue. Next, find camera paramenter  $\mathbf{P}$ and  $\mathbf{P'}$. 
+
+\begin{align*}
+\mathbf{P} &= [\mathbf{I}|0]  \\
+\mathbf{P'} &= [[\mathbf{e'}]_x\mathbf{F}|\mathbf{e'}] 
+\end{align*}
+
+Where 
+
+\begin{align*}
+[\mathbf{e'}]_x
+\begin{bmatrix} 
+0 & -e_z & e_y  \\ 
+e_z & 0 & -e_x \\ 
+-e_y & e_x & 0
+\end{bmatrix}
+\end{align*}
+
+With each manually picked correspondence paris, the world coordinate ($\mathbf{X}$) is the eigenvector correspondence to the smallest eigenvalue from SVD of $\mathbf{A}$ defined as following
+
+\begin{align*}
+\mathbf{A} = 
+\begin{bmatrix} 
+x_i \mathbf{p}^T_3 - \mathbf{p}^T_1   \\ 
+y_i \mathbf{p}^T_3 - \mathbf{p}^T_2   \\ 
+x'_i \mathbf{p'}^T_3 - \mathbf{p'}^T_1   \\ 
+y'_i \mathbf{p'}^T_3 - \mathbf{p'}^T_2   \\ 
+\end{bmatrix}
+\end{align*}
+
+Where 
+
+\begin{align*}
+\mathbf{P} &= 
+\begin{bmatrix} 
+\mathbf{p}^T_1 \\
+\mathbf{p}^T_2 \\
+\mathbf{p}^T_3
+\end{bmatrix} \\
+\mathbf{P'} &= 
+\begin{bmatrix} 
+\mathbf{p'}^T_1 \\
+\mathbf{p'}^T_2 \\
+\mathbf{p'}^T_3
+\end{bmatrix}
+\end{align*}
+
+The final cost function of an optimization is geomatrix error(distant) as defined below.
+
+\begin{align*}
+d^2_{geo} &= \sum ||(\mathbf{x}_i - \mathbf{X}_i  \mathbf{P}_i ) + (\mathbf{x'}_i - \mathbf{X}_i  \mathbf{P'}_i ) ||^2_2
+\end{align*}
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Image Rectification}
+
+To rectifine image, $\mathbf{H}$ and $\mathbf{H'}$ are used for image A and image B respectively. First compute $\mathbf{H'} = \mathbf{T}_2\mathbf{G}\mathbf{R}\mathbf{T}_1$. $\mathbf{T}_1$ is used to translate image into the origin point. $\mathbf{R}$ is used to rotated epipole $\mathbf{e}$ to $\begin{bmatrix}f & 0 & 1\end{bmatrix}^T$. Then  $\mathbf{G}$ translate epipole further to $\begin{bmatrix}f & 0 & 0\end{bmatrix}^T$. Lastly, $\mathbf{T}_2$ translate image to original center.
+
+For $\mathbf{H}$ , starting with $\mathbf{M} = [\mathbf{e'}]_x\mathbf{F}$. $\mathbf{H}_0 = \mathbf{H'}\mathbf{M}$. Then define $\mathbf{H}_a$ as 
+
+\begin{align*}
+\mathbf{H}_a = 
+\begin{bmatrix} 
+a & b & c  \\ 
+0 & 1 & 0 \\ 
+0 & 0 & 1
+\end{bmatrix}
+\end{align*}
+
+Use linear least-square to minimize 
+
+\begin{align*}
+\sum a \hat{x}_i + b \hat{y}_i + c -  \hat{x'}_i
+\end{align*}
+
+Where 
+
+\begin{align*}
+\mathbf{\hat{x}}_i &= \mathbf{H}_0 \mathbf{x}_i \\
+\mathbf{\hat{x}'}_i &= \mathbf{H'} \mathbf{x'}_i
+\end{align*}
+
+Finally, $\mathbf{H} =\mathbf{H}_a \mathbf{H}_0 $
+
+
+%-----------------------------------------------------------------------------------
+
+\section*{Results}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{DSC_1603}
+\caption{Picture A}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{DSC_1604}
+\caption{Picture B}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{pic3}
+\caption{Picture A with interesting points}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{pic4}
+\caption{Picture B with interesting points}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=22cm,keepaspectratio]{pic1}
+\caption{Original pictures with corespondance pixels}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{pic5}
+\caption{Rectified picture A with interesting points}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{pic6}
+\caption{Rectified picture B with interesting points}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=22cm,keepaspectratio]{pic2}
+\caption{Rectified pictures with corespondance pixels}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{pic7}
+\caption{Result of Canny edge detection of image A}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{pic8}
+\caption{Random select 40 points from Canny edge as interesting points}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{pic9}
+\caption{Random select 40 points from Canny edge as interesting points on rectified image}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=22cm,keepaspectratio]{pic10}
+\caption{Random select 40 points from Canny edge corespondance pixels}
+\label{}
+\end{figure}
+
+
+%-----------------------------------------------------------------------------------
+\newpage
+\section*{Source Code}
+
+\begin{lstlisting}
+# Import necessary libraries
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt
+from pathlib import Path
+from scipy.optimize import least_squares
+
+path = Path.cwd() / 'ece661_pics' / 'hw10_image'
+np.set_printoptions(precision=5)
+
+class Point():
+    '''
+        Class for storing point or pixel.
+    '''
+    def __init__(self, x, y):
+        self.x = x  
+        self.y = y
+        self.point = (int(self.x), int(self.y))
+
+    def adjust_width(self, width):
+        x = self.x + width
+        return (x, self.y)
+    
+    def adjust_hieght(self, hieght):
+        y = self.y + hieght
+        return (self.x, y)
+
+    def multiply_with(self, H):
+        x = np.array([self.x, self.y, 1])
+        new_x = np.dot(H, x)
+        x = new_x[0] / new_x[2]
+        y = new_x[1] / new_x[2]
+        return (Point(x, y))
+    
+    def vector(self):
+        return np.array([self.x, self.y, 1])
+
+    def __repr__(self):
+        return f'({self.x:6.1f},{self.y:6.1f})'
+
+class Pair():
+    '''
+        Class for stroing corespondance pair.
+    '''
+    def __init__(self, a, b):
+        self.a = a
+        self.b = b
+    
+    def __repr__(self):
+        return f'{self.a}{self.b}'
+
+class Image():
+    ''' 
+        Class for storing images.
+    '''
+    
+    def __init__(self, path):
+        self.path = path   
+        self.load() 
+
+    def load(self):
+        filename = f'{self.path.parent}\\{self.path.name}'
+        self.image = cv.imread(filename)
+        self.image_gray = cv.cvtColor(self.image, cv.COLOR_BGR2GRAY)
+
+    def show(self):
+        plt.imshow(cv.cvtColor(self.image, cv.COLOR_BGR2RGB))
+   
+img_a = Image(path / 'DSC_1603.jpg')
+img_b = Image(path / 'DSC_1604.jpg')
+
+def normalize(points):
+    '''
+        Normalize points. 
+    '''
+    xs = []
+    ys = []
+    for point in points:
+        xs.append(point.x)
+        ys.append(point.y)
+    
+    xs = np.array(xs)
+    ys = np.array(ys)
+    mean_x = xs.mean()
+    mean_y = ys.mean()
+    xs = (xs - mean_x)**2
+    ys = (ys - mean_y)**2
+    scale = np.sqrt(2) / (np.sqrt((xs + ys)).mean())
+    tx = -scale * mean_x
+    ty = -scale * mean_y
+    T = np.array([
+        [scale, 0, tx],
+        [0, scale, ty],
+        [0, 0, 1]
+    ])
+    new_points = []
+    for point in points:
+        new_points.append(point.multiply_with(T))
+
+    return T, new_points
+
+# Manually pick correspondence points
+points = [
+    # x1 y1 x2 y2
+    [785, 115, 826, 63],
+    [1648, 56, 1804, 14],
+    [1621, 780, 1761, 736],
+    [840, 718, 886, 718],
+    [544, 775, 593, 795],
+    [601, 1275, 655, 1351],
+    [1234, 812, 1402, 790],
+    [2093, 773, 2151, 701],
+    [2045, 1310, 2104, 1210],
+    [1248, 1376, 1411, 1365],
+    [1964, 714, 1984, 656],
+    [2106, 52, 2028, 25]
+]
+points_a = []
+points_b = []
+pairs = []
+for point in points:
+    point_a = Point(point[0], point[1])
+    points_a.append(point_a)
+    point_b = Point(point[2], point[3])
+    points_b.append(point_b)
+    pairs.append(Pair(point_a,point_b))    
+# Normalize points
+T1, points_a_norm = normalize(points_a)
+T2, points_b_norm = normalize(points_b)
+pairs_norm = [] 
+for i in range(len(points)):
+    pairs_norm.append(Pair(points_a_norm[i], points_b_norm[i]))
+
+# Construct A matrix for solving AF = 0
+A = []
+for pair in pairs_norm:
+    A.append([
+        pair.b.x * pair.a.x,
+        pair.b.x * pair.a.y,
+        pair.b.x,
+        pair.b.y * pair.a.x,
+        pair.b.y * pair.a.y,
+        pair.b.y,
+        pair.a.x,
+        pair.a.y,
+        1
+    ])
+A = np.array(A, dtype=np.float)
+u, s, vt = np.linalg.svd(A)
+# Select the last colume
+F = vt.T[:, -1]
+F = F.reshape((3, 3))
+u, s, vt = np.linalg.svd(F)
+# Force last eigen value to 0
+s[-1] = 0
+F = np.dot(u, np.dot(np.diag(s), vt))
+# Denormalize
+F = np.dot(T2.T, np.dot(F, T1))
+F = F / F[-1, -1]
+
+def compute_camara_params(F):
+    '''
+     Compute epipoles and camera parameters.
+    '''
+    # Compute epipoles
+    u, s, vt = np.linalg.svd(F)
+    e1 = vt.T[:, -1]
+    e2 = u[:, -1]
+    e1 = e1 / e1[2]
+    e2 = e2 / e2[2]
+    #Compute camara parameters
+    P1 = np.eye(3)
+    P1 = np.append(P1, np.zeros((3, 1)), axis=1)
+    ex = np.array([
+        [0, -e2[2], e2[1]],
+        [e2[2], 0, -e2[0]],
+        [-e2[1], e2[0], 0]
+    ])
+    P2 = np.append(np.dot(ex, F), e2.reshape((3, 1)), axis=1)
+    return e1, e2, P1, P2
+
+def cost_function(F, pairs):
+    '''
+        Cost function for LM optimization.
+    '''
+    F = F.reshape((3, 3))
+    e1, e2, P1, P2 = compute_camara_params(F)
+    cost_array = []
+    for pair in pairs:
+        A = np.array([
+            pair.a.x*P1[2,:] - P1[0,:],
+            pair.a.y*P1[2,:] - P1[1,:],
+            pair.b.x*P2[2,:] - P2[0,:],
+            pair.b.y*P2[2,:] - P2[1,:]
+        ])
+        u, s, vt = np.linalg.svd(A)
+        X_world = vt.T[:, -1]
+        X_world = X_world / np.linalg.norm(X_world)
+        P1X = np.dot(P1, X_world)
+        P1X = P1X / P1X[-1]
+        P2X = np.dot(P2, X_world)
+        P2X = P2X / P2X[-1]
+        cost = np.linalg.norm(pair.a.vector()-P1X) + np.linalg.norm(pair.b.vector()-P2X)
+        cost_array.append(cost)
+
+    return np.array(cost_array)
+
+# LM optimization
+res = least_squares(cost_function, F.ravel(), method='lm',
+                    args=(pairs, ),
+                    max_nfev=5000)
+F = res.x
+F = F / F[-1]
+F = F.reshape((3,3))
+u, s, vt = np.linalg.svd(F)
+# Force last eigen value to 0
+s[-1] = 0
+F = np.dot(u, np.dot(np.diag(s), vt))
+
+def compute_homography(F, pairs, img1, img2):
+
+    e1, e2, P1, P2 = compute_camara_params(F)
+    h, w = img1.image_gray.shape
+    # Compute G
+    angle = np.arctan((h/2-e2[1]) / (e2[0]-w/2))
+    f = np.cos(angle)*(e2[0]-w/2) - np.sin(angle)*(e2[1]-h/2)
+    G = np.eye(3)
+    G[2, 0] = -1/f
+    # Compute R
+    R = np.zeros((3, 3))
+    R[0, 0] = np.cos(angle)
+    R[0, 1] = -np.sin(angle)
+    R[1, 0] = np.sin(angle)
+    R[1, 1] = np.cos(angle)
+    R[2, 2] = 1
+    # Compute T
+    T = np.eye(3)
+    T[0, 2] = -w/2
+    T[1, 2] = -h/2
+    # Compute H2
+    H2 = np.dot(G, np.dot(R, T))
+    center = Point(w/2, h/2)
+    center = center.multiply_with(H2)
+    T2 = np.eye(3)
+    T2[0, 2] = w/2 - center.x
+    T2[1, 2] = h/2 - center.y
+    H2 = np.dot(T2, H2)
+    H2 = H2 / H2 [2, 2]
+    # Compute H0
+    ex = np.array([
+        [0, -e2[2], e2[1]],
+        [e2[2], 0, -e2[0]],
+        [-e2[1], e2[0], 0]
+    ])
+    E = np.array([e2, e2, e2]).T
+    M = np.dot(ex, F) + E
+    H0 = np.dot(H2, M)
+    # Compute H1
+    A = []
+    b = []
+    for pair in pairs:
+        new_a = pair.a.multiply_with(H0)
+        A.append(new_a.vector())
+        new_b = pair.b.multiply_with(H2)
+        b.append(new_b.vector())
+    A = np.array(A)
+    b = np.array(b)[:, 0]
+    x = np.dot(np.linalg.pinv(A), b)
+    HA = np.eye(3)
+    HA[0, :] = x
+    H1 = np.dot(HA, H0)
+    center = Point(w/2, h/2)
+    center = center.multiply_with(H1)
+    T1 = np.eye(3)
+    T1[0, 2] = w/2 - center.x
+    T1[1, 2] = h/2 - center.y
+    H1 = np.dot(T2, H1)
+    H1 = H1 / H1 [2, 2]
+
+    F_rec = np.dot(np.linalg.pinv(H2.T), np.dot(F, np.linalg.pinv(H1)))
+    return F_rec, H1, H2
+
+F_rec, H1, H2 = compute_homography(F, pairs, img1, img2)
+
+# Draw line for two images
+radius = 10
+thickness = 10
+h, w = img1.image_gray.shape
+canvas = cv.hconcat([img_a.image, img_b.image])
+for pair in pairs:
+    color = (0, 0, 255)
+    cv.circle(canvas, pair.a.point, radius, color, thickness)
+    cv.circle(canvas, pair.b.adjust_width(w), radius, color, thickness)
+    cv.line(canvas, pair.a.point, pair.b.adjust_width(w), color, thickness)
+plt.imshow(cv.cvtColor(canvas, cv.COLOR_BGR2RGB))
+savename = f"{path / 'pic1.png'}"
+cv.imwrite(savename, canvas.astype(np.int))
+
+def rectify_image(img, H, points):
+    '''
+        Compute retified image and points.
+    '''
+    h, w = img.image_gray.shape
+    top_left = Point(0, 0)
+    top_right = Point(0, w)
+    bot_left = Point(h, 0)
+    bot_right = Point(h, w)
+
+    top_left = top_left.multiply_with(H)
+    top_right = top_right.multiply_with(H)
+    bot_left = bot_left.multiply_with(H)
+    bot_right = bot_right.multiply_with(H)
+
+    min_x = np.min([top_left.x, top_right.x, bot_left.x, bot_right.x])
+    max_x = np.max([top_left.x, top_right.x, bot_left.x, bot_right.x])
+    min_y = np.min([top_left.y, top_right.y, bot_left.y, bot_right.y])
+    max_y = np.max([top_left.y, top_right.y, bot_left.y, bot_right.y])
+
+    len_x = max_x - min_x
+    len_y = max_y - min_y
+    
+    H = np.linalg.inv(H)
+    canvas = np.zeros((int(len_x), int(len_y), 3), dtype=np.uint8)
+
+    for i in range(canvas.shape[1]):
+        for j in range(canvas.shape[0]):
+            pixel = Point(i+min_x, j+min_y)
+            pixel = pixel.multiply_with(H)
+            if 0 <= pixel.x < w and 0 <= pixel.y < h:
+                canvas[j, i, :] = img.image[int(pixel.y), int(pixel.x), :]
+
+    H_inv = np.linalg.inv(H)
+    points_rectified = []
+    for point in points:
+        point_rectified = point.multiply_with(H_inv)
+        x = int(point_rectified.x - min_x)
+        y = int(point_rectified.y - min_y)
+        points_rectified.append(Point(x, y))
+    
+    return canvas, points_rectified
+
+img_a_rectifed, points_a_rectified =  rectify_image(img_a, H1, points_a)
+img_b_rectifed, points_b_rectified =  rectify_image(img_b, H2, points_b)
+
+pairs_rectified = []
+for i in range(len(pairs)):
+    pairs_rectified.append(Pair(points_a_rectified[i], points_b_rectified[i]))
+
+# Draw line for two images after rectified
+radius = 10
+thickness = 10
+color = (0, 0, 255)
+h_a, w_a, _ = img_a_rectifed.shape
+h_b, w_b, _ = img_b_rectifed.shape
+max_h = max(h_a, h_b)
+canvas = np.zeros((max_h, w_a+w_b, 3), dtype=np.uint8)
+canvas[:h_a, :w_a, :] = img_a_rectifed
+canvas[:h_b, w_a:, :] = img_b_rectifed
+for pair in pairs_rectified:
+    cv.circle(canvas, pair.a.point, radius, color, thickness)
+    cv.circle(canvas, pair.b.adjust_width(w), radius, color, thickness)
+    cv.line(canvas, pair.a.point, pair.b.adjust_width(w), color, thickness)
+plt.imshow(cv.cvtColor(canvas, cv.COLOR_BGR2RGB))
+savename = f"{path / 'pic2.png'}"
+cv.imwrite(savename, canvas.astype(np.int))
+
+def mark_points(img, points, savename):
+    radius = 10
+    thickness = 10
+    color = (0, 0, 255)
+    canvas = img.copy()
+    for point in points:
+        cv.circle(canvas, point.point, radius, color, thickness)
+    filename = f'{path / savename}'
+    cv.imwrite(filename, canvas.astype(np.int))
+mark_points(img_a.image, points_a, 'pic3.png')
+mark_points(img_b.image, points_b, 'pic4.png')
+mark_points(img_a_rectifed, points_a_rectified, 'pic5.png')
+mark_points(img_b_rectifed, points_b_rectified, 'pic6.png')
+
+edges_a = cv.Canny(img_a.image, 100, 200)
+plt.imshow(edges_a, cmap = 'gray')
+filename = f'{path / "pic7.png"}'
+cv.imwrite(filename, edges_a.astype(np.uint8))
+h, w = edges_a.shape
+edge_points_a = []
+for i in range(w):
+    for j in range(h):
+        if edges_a[j, i] == 255:
+            edge_points_a.append(Point(i, j))
+
+sample_edges = random.sample(edge_points_a, 40)
+mark_points(img_a.image, sample_edges, 'pic8.png')
+img_a_rectifed, sample_edges_rectified =  rectify_image(img_a, H1, sample_edges)
+mark_points(img_a_rectifed, sample_edges_rectified, 'pic9.png')
+
+def extract_window(image, point, width):
+    return image[point.y - width : point.y + width+1, point.x - width : point.x + width+1]
+
+def compute_ncc(img_a, img_b, points_a):
+    image_a_gray = cv.cvtColor(img_a, cv.COLOR_BGR2GRAY)
+    image_b_gray = cv.cvtColor(img_b, cv.COLOR_BGR2GRAY)
+    pairs = []
+
+    # 21 x 21 pixel window. 
+    width = 10 # 21 / 2
+    for point in points_a:
+        ncc_max = 0
+        best_candidate = None
+        window_a = extract_window(image_a_gray, point, width)
+        candidates = []
+        h, w = image_b_gray.shape
+
+        for i in range(width, w-width):
+            for j in range(point.y-20, point.y+30):
+                candidates.append(Point(i, j))
+
+        for candidate in candidates:
+            window_b = extract_window(image_b_gray, candidate, width)
+            mean_a = np.mean(window_a)
+            mean_b = np.mean(window_b)
+            window_a_new = window_a - mean_a
+            window_b_new = window_b - mean_b
+            num = np.sum(window_a_new * window_b_new)
+            den = np.sqrt(np.sum(window_a_new**2) * np.sum(window_b_new**2))
+            ncc = num / den
+            if ncc > ncc_max:
+                ncc_max = ncc
+                best_candidate = candidate
+        if best_candidate is not None:
+            pairs.append(Pair(point, best_candidate))
+
+    return pairs
+
+canny_pairs_rectified = compute_ncc(img_a_rectifed, img_b_rectifed, sample_edges_rectified)
+
+# Draw line for two images after rectified
+radius = 10
+thickness = 10
+color = (0, 0, 255)
+h_a, w_a, _ = img_a_rectifed.shape
+h_b, w_b, _ = img_b_rectifed.shape
+max_h = max(h_a, h_b)
+canvas = np.zeros((max_h, w_a+w_b, 3), dtype=np.uint8)
+canvas[:h_a, :w_a, :] = img_a_rectifed
+canvas[:h_b, w_a:, :] = img_b_rectifed
+for pair in canny_pairs_rectified:
+    cv.circle(canvas, pair.a.point, radius, color, thickness)
+    cv.circle(canvas, pair.b.adjust_width(w_a), radius, color, thickness)
+    cv.line(canvas, pair.a.point, pair.b.adjust_width(w_a), color, thickness)
+plt.imshow(cv.cvtColor(canvas, cv.COLOR_BGR2RGB))
+savename = f"{path / 'pic10.png'}"
+cv.imwrite(savename, canvas.astype(np.int))
+
+\end{lstlisting}
+
+%-----------------------------------------------------------------------------------
+
+\end{document}
+

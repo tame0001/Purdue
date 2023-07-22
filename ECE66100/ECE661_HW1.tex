@@ -1,0 +1,334 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./ece595_pics/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{ECE 661: Homework 1}}
+
+Thirawat Bureetes
+
+(Fall 2020)
+\end{center}
+	
+%\subsection*{Question 1}
+
+\begin{enumerate}
+ 
+%-----------------------------------------------------------------------------------
+
+\item 
+\noindent\textbf{Answer}
+
+The point $(x, y)^T$ in physical space $\mathbb{R}^2$ and its homogeneous coordinate $(u,v,w)^T$ in representational space $\mathbb{R}^3$ have relationship as below.
+
+\begin{align*}
+x &= \frac{u}{w} \\
+y &= \frac{v}{w}
+\end{align*}
+
+To represent the origin of physical space $\mathbb{R}^2$ $(0,0)^T$ in representational space $\mathbb{R}^3$.
+
+\begin{align*}
+x &= \frac{u}{w} = 0\\
+y &= \frac{v}{w} = 0
+\end{align*}
+
+The equations above are true when $u = 0$, $v = 0$ and $w \neq 0$. So, the origin of physical space $\mathbb{R}^2$ in representational space $\mathbb{R}^3$ is $(0, 0, w)^T$ where $w = \{w|w \in \mathbb{R}, w \neq 0\}$.
+
+%-----------------------------------------------------------------------------------
+
+\item 
+\noindent\textbf{Answer}
+
+$[u,v,w]^T$ in representational space $\mathbb{R}^3$ can represent infinity in physical space $\mathbb{R}^2$ when $w \to 0$. Therefore, $(u_1,v_1,0)^T$ and $(u_2,v_2,0)^T$ are both represent the infinity in physical space even $u_1 \neq u_2$ and $v_1 \neq v_2$. So  the infinity in physical space $\mathbb{R}^2$ are not the same.
+
+%-----------------------------------------------------------------------------------
+
+\item 
+\noindent\textbf{Answer}
+
+The degenerate conic is defined as $\mathbf{C} = \mathbf{l}\mathbf{m}^T + \mathbf{m}\mathbf{l}^T$. Each term of the RHS is an outer product, therefore the rank of the result is always 1. From rank property $rank(\mathbf{A}+\mathbf{B}) \leq rank(\mathbf{A})+rank(\mathbf{B})$
+
+\begin{align*}
+rank(\mathbf{l}\mathbf{m}^T+\mathbf{m}\mathbf{l}^T) &\leq rank(\mathbf{l}\mathbf{m}^T)+rank(\mathbf{m}\mathbf{l}^T) \\
+rank(\mathbf{C}) &\leq 1 + 1 \\
+&\leq 2
+\end{align*}
+
+%-----------------------------------------------------------------------------------
+\newpage
+\item 
+\noindent\textbf{Answer}
+
+\begin{align*}
+\mathbf{l}_1 &= 
+	\begin{pmatrix}
+		0 \\ 0 \\ 1
+	\end{pmatrix} 
+	\times
+	\begin{pmatrix}
+		3 \\ 5 \\ 1
+	\end{pmatrix}\\
+&= 
+	\begin{pmatrix}
+		-5 \\ 3 \\ 0
+	\end{pmatrix}\\
+\mathbf{l}_2 &= 
+	\begin{pmatrix}
+		-3 \\ 4 \\ 1
+	\end{pmatrix} 
+	\times
+	\begin{pmatrix}
+		-7 \\ 5 \\ 1
+	\end{pmatrix}\\
+&= 
+	\begin{pmatrix}
+		-1 \\ -4 \\ 13
+	\end{pmatrix}\\
+\mathbf{l}_1 \times  \mathbf{l}_2&= 
+	\begin{pmatrix}
+		-5 \\ 3 \\ 0
+	\end{pmatrix} 
+	\times
+	\begin{pmatrix}
+		-1 \\ -4 \\ 13
+	\end{pmatrix}\\
+&= 
+	\begin{pmatrix}
+		39 \\ 65 \\ 23
+	\end{pmatrix}\\
+\end{align*}
+
+The intersection between $\mathbf{l}_1$ and $\mathbf{l}_2$ is $(\frac{39}{23},\frac{65}{23})^T$ in physical space.
+
+\begin{align*}
+\mathbf{l}_{2,new} &= 
+	\begin{pmatrix}
+		-7 \\ -5 \\ 1
+	\end{pmatrix} 
+	\times
+	\begin{pmatrix}
+		7 \\ 5 \\ 1
+	\end{pmatrix}\\
+&= 
+	\begin{pmatrix}
+		-10 \\ -14 \\ 0
+	\end{pmatrix}\\
+\mathbf{l}_1 \times  \mathbf{l}_{2,new}&= 
+	\begin{pmatrix}
+		-5 \\ 3 \\ 0
+	\end{pmatrix} 
+	\times
+	\begin{pmatrix}
+		-10 \\ -14 \\ 0
+	\end{pmatrix}\\
+&= 
+	\begin{pmatrix}
+		0 \\ 0 \\ 100
+	\end{pmatrix}\\
+\end{align*}
+
+The new intersection point is at the origin. Consider that both $\mathbf{l}_1$ and$\mathbf{l}_{2,new}$ pass the origin. So the intersection could be determinded without calculating the result of cross product of lines. There are 2 steps requiered. 1) find $\mathbf{l}_1$. 2) find $\mathbf{l}_{2,new}$. 
+
+%-----------------------------------------------------------------------------------
+\newpage
+\item 
+\noindent\textbf{Answer}
+
+\begin{align*}
+\mathbf{l}_1 &= 
+	\begin{pmatrix}
+		0 \\ 0 \\ 1
+	\end{pmatrix} 
+	\times
+	\begin{pmatrix}
+		5 \\ -3 \\ 1
+	\end{pmatrix}\\
+&= 
+	\begin{pmatrix}
+		3 \\ 5 \\ 0
+	\end{pmatrix}\\
+\mathbf{l}_2 &= 
+	\begin{pmatrix}
+		-5 \\ 0 \\ 1
+	\end{pmatrix} 
+	\times
+	\begin{pmatrix}
+		0 \\ -3 \\ 1
+	\end{pmatrix}\\
+&= 
+	\begin{pmatrix}
+		3 \\ 5 \\ 15
+	\end{pmatrix}\\
+\mathbf{l}_1 \times  \mathbf{l}_2&= 
+	\begin{pmatrix}
+		3 \\ 5 \\ 0
+	\end{pmatrix} 
+	\times
+	\begin{pmatrix}
+		3 \\ 5 \\ 15
+	\end{pmatrix}\\
+&= 
+	\begin{pmatrix}
+		75 \\ -45 \\ 0
+	\end{pmatrix}\\
+\end{align*}
+
+The intersection between $\mathbf{l}_1$ and $\mathbf{l}_2$ is at the infinity since $(u,v,0)^T$ represent the infinity. In the otherhand, it means that $\mathbf{l}_1$ and $\mathbf{l}_2$ are parallel lines. Considering the implicit from of line $ax+by+c = 0$, the slope of line is determined by $\frac{-a}{b}$ and the y-intercept is $\frac{-c}{b}$.  $\mathbf{l}_1$ and $\mathbf{l}_2$ has same $a$ and $b$ but different $c$. This means that  $\mathbf{l}_1$ and $\mathbf{l}_2$ have the same slope but different y-interception points, therefore,  $\mathbf{l}_1$ and $\mathbf{l}_2$ are parallel.
+
+%-----------------------------------------------------------------------------------
+\item 
+\noindent\textbf{Answer}
+
+From the information given, the ellipse's formula can be writen as
+
+\begin{align*}
+\frac{(x-x_0)^2}{a^2} +\frac{(y-y_0)^2}{b^2} &= 1\\
+\frac{(x-3)^2}{1^2} +\frac{(y-2)^2}{(\frac{1}{2})^2} &= 1\\
+\frac{x^2 - 6x + 9}{1} +\frac{y^2 -4y + 4}{\frac{1}{4}} &= 1\\
+x^2 - 6x + 9 + 4y^2 - 16y + 16 - 1 &= 0\\
+x^2 + 4y^2 - 6x - 16y + 24 &= 0\\
+\end{align*}
+
+This is compitible with implicit from of conic $ax^2 + bxy + cy^2 + dx + ey +f = 0$. Rewrite the ellipse into $\mathbf{C}$.
+
+\begin{align*}
+\mathbf{C} &= 
+\begin{bmatrix}
+a & \frac{b}{2} & \frac{d}{2}\\
+\frac{b}{2} & c & \frac{e}{2} \\
+\frac{d}{2} & \frac{e}{2} & f
+\end{bmatrix} \\
+&= 
+\begin{bmatrix}
+1 & 0 & -3\\
+0 & 4 & -8 \\
+-3 & -8 & 24
+\end{bmatrix}
+\end{align*}
+
+
+let $\mathbf{p}$ is an origin point or $(0,0,1)^T$. 
+
+\begin{align*}
+\mathbf{l}_{polar} &= \mathbf{C}\mathbf{p} \\
+&= 
+\begin{bmatrix}
+1 & 0 & -3\\
+0 & 4 & -8 \\
+-3 & -8 & 24
+\end{bmatrix}
+\begin{pmatrix}
+0\\
+0\\
+1
+\end{pmatrix}\\
+&= 
+\begin{pmatrix}
+-3\\
+-8\\
+24
+\end{pmatrix}\\
+\end{align*}
+
+The x-axis can be writen in explicit from as $y = 0$ or in implicit from as $(0)x + (1)y + (0) = 0$. So the x-axis can be writen as $\mathbf{l}_x = (0, 1, 0)^T$. For y-axis, it is $x = 0$ or $(1)x + (0)y + (0) = 0$. So $\mathbf{l}_y = (1, 0, 0)^T$.
+
+\begin{align*}
+\begin{pmatrix}
+-3\\
+-8\\
+24
+\end{pmatrix}
+\times
+\begin{pmatrix}
+0\\
+1\\
+0
+\end{pmatrix}
+&= 
+\begin{pmatrix}
+-24\\
+0\\
+-3
+\end{pmatrix}\\
+\begin{pmatrix}
+-3\\
+-8\\
+24
+\end{pmatrix}
+\times
+\begin{pmatrix}
+1\\
+0\\
+0
+\end{pmatrix}
+&= 
+\begin{pmatrix}
+0\\
+24\\
+8
+\end{pmatrix}\\
+\end{align*}
+
+The intersection between polar line and x-axis is $(8,0)$. The intersection between polar line and y-axis is $(0,3)$.
+
+%-----------------------------------------------------------------------------------
+\item 
+\noindent\textbf{Answer}
+
+The line $x=\frac{1}{2}$ can be writen as $(1)x + (0)y - \frac{1}{2} = 0$. And the line $y=-\frac{1}{3}$ can be writen as $(0)x + (1)y + \frac{1}{3} = 0$. 
+
+\begin{align*}
+\begin{pmatrix}
+1\\
+0\\
+- \frac{1}{2}
+\end{pmatrix}
+\times
+\begin{pmatrix}
+0\\
+1\\
+\frac{1}{3}
+\end{pmatrix}
+&= 
+\begin{pmatrix}
+\frac{1}{2}\\
+-\frac{1}{3}\\
+1
+\end{pmatrix}
+\end{align*}
+
+The intersection between $x=\frac{1}{2}$ and $y=-\frac{1}{3}$ is $(\frac{1}{2}, -\frac{1}{3})$.
+
+\end{enumerate}
+
+
+\end{document}
+

@@ -1,0 +1,999 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./ece661_pics/hw9_image/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{indentfirst}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{ECE 661: Homework 9}}
+
+Thirawat Bureetes
+
+(Fall 2020)
+\end{center}
+	
+ 
+%-----------------------------------------------------------------------------------
+
+\section*{Theory Question}
+
+The point $x$ is the point in an absolute conic if $x^T \mathbf{w} x = 0$. The derivation shows that $\mathbf{w} = \mathbf{K}^{-T} \mathbf{K}^{-1}$. As $\mathbf{K}^{-T} \mathbf{K}^{-1}$ is positive definite, there will be no real number vector $x$ that makes $\mathbf{K}^{-T} \mathbf{K}^{-1} x = 0$. To make $x^T \mathbf{w} x = 0$ hold, point $x$ can only be in imaginary number. As the result, $\mathbf{w}$ can't be seen in the camera image.
+
+%-----------------------------------------------------------------------------------
+
+\section*{Implimentation}
+
+
+\subsection*{Corner Detection}
+
+Each image consists of 20 black squre: 5 rows with 4 square each row. Therefore, there are 80 total corners. The original image is in RGB domain. However, all processing will be done in gray scale. First, blur gray scale image using  \lstinline{cv.GaussianBlur} with $(5,5)$ kernal size. Then using   \lstinline{cv.Canny} to detect edge pixel.
+
+With the result from \lstinline{cv.Canny}, using \lstinline{cv.HoughLines} to construct lines. However, there are several duplicated lines. Since the pattern of squares is fixed and known, the final lines should consist of 10 horizontal lines and 8 vertical lines. The value of $\theta$ is used to determind if that particular line is horizontal or vertical. If $0.25 \pi \leq \theta \leq 0.75 \pi$, that line will be classified as horizontal line. To remove dulicated lines in each group, the similar value of $\rho$ is drop until there are 10 and 8 lines remaining in horizontal group and vertical group respectively.
+
+With final 10 horizontal lines and 8 vertical lines, there are 80 intersection points which represent 80 cornors in each image. World coordinate $x_w$ is  linked to pixel coordinate on the image $x$ by $x= \mathbf{H}x_w$ Homography matrix $\mathbf{H}$ is obtained by Singular Value Decomposition of 80 points in each image. The final $\mathbf{H}$ is the eigen vector that corelated to the lowest eigen value.
+
+ 
+%-----------------------------------------------------------------------------------
+
+\subsection*{Camera Calibration}
+
+World coordinate $x_w$ is also linked to pixel coordinate on the image $x$ by $x= \mathbf{K[R}|t]x_w$ where $\mathbf{K}$ is an intrinsic parameter and $\mathbf{[R}|t]$ is an extrinsic parameter. Homograhy matrix $\mathbf{H}$ can be writen in to 3 coloum vectors $\begin{bmatrix} h_1 & h_2 & h_3\end{bmatrix}$
+
+\begin{align*}
+h_1^T \mathbf{w} h_1 &= h_2^T \mathbf{w} h_2 \\
+h_1^T \mathbf{w} h_2 &= 0 \\
+\mathbf{w} &= \begin{bmatrix} 
+w_{11} & w_{12} & w_{13} \\
+w_{21} & w_{22} & w_{23} \\
+w_{31} & w_{32} & w_{33} \\
+\end{bmatrix}
+\end{align*}
+
+$\mathbf{w}$ is a symmetic matrix. Rewrite the equations above 
+\begin{align*}
+(V_{11}-V_{12}^T)b &= 0 \\
+V_{12}^Tb &= 0 \\
+V_{ij} &= \begin{bmatrix} 
+h_{i1} h_{j1}\\
+h_{i1} h_{j2} - h_{i2} h_{j1} \\
+h_{i2} h_{j2}\\
+h_{i3} h_{j1} - h_{i1} h_{j3} \\
+h_{i3} h_{j2} - h_{i2} h_{j3} \\
+h_{i3} h_{j3}\\
+\end{bmatrix} \\
+b &= 
+\begin{bmatrix} 
+w_{11} \\
+w_{12} \\
+w_{13} \\
+w_{22} \\
+w_{23} \\
+w_{33} \\
+\end{bmatrix} \\
+\end{align*}
+
+Let $N$ is a number of image in the dataset. Construct $\mathbf{V}$ matrix by stacking $(V_{11}-V_{12}^T)$ and $V_{12}^T$. The final $\mathbf{V}$ dimension will be (2xN, 6). Using Singular Value Decomposition to obtain the vector $b$. Therefore, each element of $\mathbf{w}$ are known. Intransic parameter $\mathbf{K}$ is linked to $\mathbf{w}$ as 
+
+\begin{align*}
+\mathbf{w}  &= \mathbf{K}^{-T} \mathbf{K}^{-1}
+\end{align*}
+
+Break down $\mathbf{K}$  into 
+\begin{align*}
+\mathbf{K}  &= \begin{bmatrix} 
+\alpha_x & s & x_0 \\
+0 & \alpha_y & y_0 \\
+0 & 0 & 1 \\
+\end{bmatrix}
+\end{align*}
+
+Each element is defined as followed
+\begin{align*}
+x_0  &= \frac{w_{12}w_{13} - w_{11}w_{23}}{w_{11}w_{22}-w_{12}^2} \\
+\lambda  &= w_{33} - \frac{w_{13}^2+x_0(w_{12}w_{13} - w_{11}w_{23})}{w_{11}} \\
+\alpha_x &= \sqrt{\frac{\lambda}{w_{11}}} \\
+\alpha_y &= \sqrt{\frac{\lambda w_{11}}{w_{11}w_{22}-w_{12}^2}} \\
+s &= -\frac{w_{12}\alpha_x^2 \alpha_y}{\lambda} \\
+y_0 &= \frac{s x_0}{\alpha_y} - \frac{w_{13}\alpha_x^2}{\lambda}
+\end{align*}
+
+At this step $\mathbf{K}$ is obtained and applied to all images in the same dataset. To calculate extrinsic parameters $\mathbf{R}$ and $t$, the fomulars are mentioned as followiing. 
+\begin{align*}
+\mathbf{R}  &= \begin{bmatrix} r_1 & r_2 & r_3\end{bmatrix} \\
+\epsilon &= \frac{1}{||\mathbf{K}^{-1}h_1||} \\ 
+t &= \epsilon \mathbf{K}^{-1} h_3 \\
+r_1 &= \epsilon \mathbf{K}^{-1} h_1 \\
+r_2 &= \epsilon \mathbf{K}^{-1} h_2 \\
+r_3 &= r_1 \times r_2
+\end{align*}
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{LM Refinement}
+
+After obtain parameters from linear method, the parameters can be refined using LM optimization. First, create the cost function as the Eucidean distance of every corner of every image in the dataset. 
+
+\begin{align*}
+residual  &= \sum_i \sum_j ||x_{ij} - \mathbf{K}[\mathbf{R}_i|t_i] x_{wj}||^2
+\end{align*}
+
+$x_{ij}$ is a projected corner $j$ of image $i$ from world coordinate $x_{wj}$. $\mathbf{K}$ has 5 elements and $t_i$ has 3 elements. $\mathbf{R}_i$ is 3 x 3 matrix, however, there are only 3 DoF. Using \lstinline{cv.Rodrigues} to convert 3 x 3 matrix to 3-element vector and vice versa. Let $N$ is number of the image in the dataset, the parameter vector for LM optimization is 5 + N(3+3) elements.
+%-----------------------------------------------------------------------------------
+
+\section*{Results}
+
+\subsection*{Given Dataset Picture 11 (Fix image)}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset1/Pic_11_edge}
+\caption{Canny edge detection}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset1/Pic_11_lines}
+\caption{Lines detection. Keep only 8 vertical lines and 10 horizontal lines}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset1/Pic_11_corners}
+\caption{Corners with labels}
+\label{}
+\end{figure}
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Given Dataset Picture 1}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset1/Pic_1_edge}
+\caption{Canny edge detection}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset1/Pic_1_lines}
+\caption{Lines detection. Keep only 8 vertical lines and 10 horizontal lines}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset1/Pic_1_corners}
+\caption{Corners with labels}
+\label{}
+\end{figure}
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Given Dataset Picture 18}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset1/Pic_18_edge}
+\caption{Canny edge detection}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset1/Pic_18_lines}
+\caption{Lines detection. Keep only 8 vertical lines and 10 horizontal lines}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset1/Pic_18_corners}
+\caption{Corners with labels}
+\label{}
+\end{figure}
+
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Given Dataset Instrinsic Parameter}
+
+\underline{Without LM optimazation}
+\begin{align*}
+\mathbf{K} &= \begin{bmatrix} 
+729.033 & -9.459 & 202.872 \\
+0 & 726.857 & 280.702 \\
+0 & 0 & 1 \\
+\end{bmatrix}
+\end{align*}
+
+Mean Eucidean distance of all cornors of all images in the dataset = 11.100
+
+Variance Eucidean distance of all cornors of all images in the dataset = 223.358
+
+\vspace{1cm}
+\underline{After LM optimazation}
+\begin{align*}
+\mathbf{K} &= \begin{bmatrix} 
+718.819 & -10.616 & 292.479 \\
+0 & 715.987 & 217.393 \\
+0 & 0 & 1 \\
+\end{bmatrix}
+\end{align*}
+
+Mean Eucidean distance of all cornors of all images in the dataset = 4.375
+
+Variance Eucidean distance of all cornors of all images in the dataset = 37.154
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Given Dataset Reprojected Image}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset1/after_LM/Pic_1}
+\caption{Image 1. Red - fix image corners. Blue - reprojected corners before LM. Green - reprojected corners after LM}
+\label{}
+\end{figure}
+
+\begin{align*}
+[\mathbf{R}|t] &= \begin{bmatrix} 
+-0.723 & 0.206 & 0.659 & -42.65 \\
+-0.196 & -0.976 & 0.089 & 161.3 \\
+0.662 & -0.064 & 0.747 & -567.6\\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+[\mathbf{R}|t]_{LM} &= \begin{bmatrix} 
+-0.766 & 0.175 & 0.619 & 25.63 \\
+-0.178 & -0.982 & 0.057 & 107.6 \\
+0.618 & -0.066 & 0.784 & -536.2\\
+\end{bmatrix}
+\end{align*}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset1/after_LM/Pic_14}
+\caption{Image 14. Red - fix image corners. Blue - reprojected corners before LM. Green - reprojected corners after LM}
+\label{}
+\end{figure}
+
+\begin{align*}
+[\mathbf{R}|t] &= \begin{bmatrix} 
+-0.964 & 0.113 & -0.242 & 0.171 \\
+-0.108 & -0.993 & 0.034 & 141.9 \\
+-0.244 & -0.007 & 0.970 & -403.5\\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+[\mathbf{R}|t]_{LM} &= \begin{bmatrix} 
+-0.962 & 0.127 & -0.244 & 51.4 \\
+-0.119 & -0.992 & -0.045 & 109.6 \\
+-0.248 & -0.015 & 0.969 & -405.9\\
+\end{bmatrix}
+\end{align*}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset1/after_LM/Pic_26}
+\caption{Image 26. Red - fix image corners. Blue - reprojected corners before LM. Green - reprojected corners after LM}
+\label{}
+\end{figure}
+
+\begin{align*}
+[\mathbf{R}|t] &= \begin{bmatrix} 
+-0.998 & 0.056 & 0.030 & 15.37 \\
+-0.039 & -0.913 & 0.407 & 145.9 \\
+0.050 & 0.405 & 0.913 & -469.5\\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+[\mathbf{R}|t]_{LM} &= \begin{bmatrix} 
+-0.999 & 0.023 &  0.026 & 73.14 \\
+-0.010 & -0.913 & 0.408 & 103.8 \\
+0.031 & 0.408 & 0.916 & -455.8\\
+\end{bmatrix}
+\end{align*}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset1/after_LM/Pic_37}
+\caption{Image 37. Red - fix image corners. Blue - reprojected corners before LM. Green - reprojected corners after LM}
+\label{}
+\end{figure}
+
+\begin{align*}
+[\mathbf{R}|t] &= \begin{bmatrix} 
+-0.999 & -0.014 & -0.050 & -28.14 \\
+0.019 & -0.999 & 0.020 & 121.0 \\
+-0.050 & -0.020 & 0.999 & -555.3\\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+[\mathbf{R}|t]_{LM} &= \begin{bmatrix} 
+-0.999 & -0.010 & -0.014 & 40.19 \\
+0.011 & -0.999 & 0.021 & 72.90 \\
+-0.014 & -0.021 & 0.999 & -515.0\\
+\end{bmatrix}
+\end{align*}
+
+%-----------------------------------------------------------------------------------
+
+
+\subsection*{New Dataset Picture 1 (Fix image)}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset2/DSC_1560_edge}
+\caption{Canny edge detection}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset2/DSC_1560_lines}
+\caption{Lines detection. Keep only 8 vertical lines and 10 horizontal lines}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset2/DSC_1560_corners}
+\caption{Corners with labels}
+\label{}
+\end{figure}
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{New Dataset Picture 9}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset2/DSC_1569_edge}
+\caption{Canny edge detection}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset2/DSC_1569_lines}
+\caption{Lines detection. Keep only 8 vertical lines and 10 horizontal lines}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset2/DSC_1569_corners}
+\caption{Corners with labels}
+\label{}
+\end{figure}
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{New Dataset Picture 21}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset2/DSC_1582_edge}
+\caption{Canny edge detection}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset2/DSC_1582_lines}
+\caption{Lines detection. Keep only 8 vertical lines and 10 horizontal lines}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{Dataset2/DSC_1582_corners}
+\caption{Corners with labels}
+\label{}
+\end{figure}
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{New Dataset Instrinsic Parameter}
+
+\underline{Without LM optimazation}
+\begin{align*}
+\mathbf{K} &= \begin{bmatrix} 
+462.691 & -9.861 & 265.43 \\
+0 & 468.378 & 201.913 \\
+0 & 0 & 1 \\
+\end{bmatrix}
+\end{align*}
+
+Mean Eucidean distance of all cornors of all images in the dataset = 6.942
+
+Variance Eucidean distance of all cornors of all images in the dataset = 17.033
+
+\vspace{1cm}
+\underline{After LM optimazation}
+\begin{align*}
+\mathbf{K} &= \begin{bmatrix} 
+476.48 & -6.829 & 192.642 \\
+0 & 483.38 & 254.072 \\
+0 & 0 & 1 \\
+\end{bmatrix}
+\end{align*}
+
+Mean Eucidean distance of all cornors of all images in the dataset = 3.053
+
+Variance Eucidean distance of all cornors of all images in the dataset = 3.356
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{New Dataset Reprojected Image}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{Dataset2/after_LM/DSC_1566}
+\caption{Image 6. Red - fix image corners. Blue - reprojected corners before LM. Green - reprojected corners after LM}
+\label{}
+\end{figure}
+
+\begin{align*}
+[\mathbf{R}|t] &= \begin{bmatrix} 
+-0.960 & -0.013 & 0.279 & 139.8 \\
+-0.064 & -0.965 & -0.264 & 25.47 \\
+0.272 & -0.271 & 0.923 & -312.7\\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+[\mathbf{R}|t]_{LM} &= \begin{bmatrix} 
+-0.957 & -0.015 & 0.291 & 95.14 \\
+-0.071 & -0.956 & -0.283 & 63.44 \\
+0.283 & -0.291 & 0.914 & -332.2\\
+\end{bmatrix}
+\end{align*}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{Dataset2/after_LM/DSC_1568}
+\caption{Image 8. Red - fix image corners. Blue - reprojected corners before LM. Green - reprojected corners after LM}
+\label{}
+\end{figure}
+
+\begin{align*}
+[\mathbf{R}|t] &= \begin{bmatrix} 
+-0.987 & -0.032 & 0.194 & 134.9 \\
+-0.162 & -0.943 & -0.334 & 23.65 \\
+0.142 & -0.332 & 0.932 & -284.9\\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+[\mathbf{R}|t]_{LM} &= \begin{bmatrix} 
+-0.913 & -0.043 & 0.125 & 92.66 \\
+-0.005 & -0.931 & -0.365 & 56.58 \\
+0.132 & -0.363 & 0.923 & -294.7\\
+\end{bmatrix}
+\end{align*}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{Dataset2/after_LM/DSC_1582}
+\caption{Image 21. Red - fix image corners. Blue - reprojected corners before LM. Green - reprojected corners after LM}
+\label{}
+\end{figure}
+
+\begin{align*}
+[\mathbf{R}|t] &= \begin{bmatrix} 
+-0.898 & -0.125 & -0.422 & 87.38 \\
+-0.047 & -0.981 & -0.191 & 23.86 \\
+-0.437 & -0.151 & 0.887 & -273.7\\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+[\mathbf{R}|t]_{LM} &= \begin{bmatrix} 
+-0.911 & 0.091 & -0.401 & 42.16 \\
+-0.013 & -0.980 & -0.200 & 52.59 \\
+-0.411 & -0.177 & 0.894 & -267.9\\
+\end{bmatrix}
+\end{align*}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{Dataset2/after_LM/DSC_1587}
+\caption{Image 24. Red - fix image corners. Blue - reprojected corners before LM. Green - reprojected corners after LM}
+\label{}
+\end{figure}
+
+\begin{align*}
+[\mathbf{R}|t] &= \begin{bmatrix} 
+-0.980 & -0.067 & 0.188 & 136.0 \\
+0.023 & -0.974 & -0.226 & 36.25 \\
+0.198 & -0.217 & 0.956 & -292.3\\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+[\mathbf{R}|t]_{LM} &= \begin{bmatrix} 
+-0.980 & -0.067 & 0.187 & 93.48 \\
+0.021 & -0.971 & -0.238 & 71.76 \\
+0.198 & -0.223 & 0.953 & -307.9\\
+\end{bmatrix}
+\end{align*}
+
+%-----------------------------------------------------------------------------------
+\newpage
+\section*{Source Code}
+
+\begin{lstlisting}
+
+# Import necessary libraries
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt
+from pathlib import Path
+from scipy.optimize import least_squares
+
+FILEPATH = 'ece661_pics\\hw9_image\\'
+np.set_printoptions(precision=3)
+
+world_cornors = np.array([
+    [0, 0], [24, 0], [49, 0], [78, 0], [97, 0], [122, 0], [146, 0], [170, 0],
+    [0, 24], [24, 24], [49, 24], [78, 24], [97, 24], [122, 24], [146, 24], [170, 24],
+    [0, 49], [24, 49], [49, 49], [78, 49], [97, 49], [122, 49], [146, 49], [170, 49],
+    [0, 78], [24, 78], [49, 78], [78, 78], [97, 78], [122, 78], [146, 78], [170, 78],
+    [0, 97], [24, 97], [49, 97], [78, 97], [97, 97], [122, 97], [146, 97], [170, 97],
+    [0, 122], [24, 122], [49, 122], [78, 122], [97, 122], [122, 122], [146, 122], [170, 122],
+    [0, 146], [24, 146], [49, 146], [78, 146], [97, 146], [122, 146], [146, 146], [170, 146],
+    [0, 170], [24, 170], [49, 170], [78, 170], [97, 170], [122, 170], [146, 170], [170, 170],
+    [0, 194], [24, 194], [49, 194], [78, 194], [97, 194], [122, 194], [146, 194], [170, 194],
+    [0, 219], [24, 219], [49, 219], [78, 219], [97, 219], [122, 219], [146, 219], [170, 219]
+])
+
+class Lines():
+    '''
+        Class for line from rho and theta.
+    '''
+    def __init__(self, rho, theta):
+        self.rho = rho
+        self.theta = theta
+    
+    def get_HC(self):
+        '''
+          Return homogenous coordinate of line.
+        '''
+        pt0 = np.array([self.rho*np.cos(self.theta), 
+                        self.rho*np.sin(self.theta), 1])
+        pt1 = pt0 + np.array([100*np.sin(self.theta), 
+                              -100*np.cos(self.theta), 0])
+        line_HC = np.cross(pt0, pt1)
+        self.HC = line_HC / line_HC[2]
+
+        return self.HC
+
+class Image():
+    ''' 
+        Class for storing images.
+    '''
+    
+    def __init__(self, path):
+        self.path = path   
+        self.load() 
+        self.find_edge()
+        self.find_line()
+        self.get_corner()
+
+    def load(self):
+        filename = f'{self.path.parent}\\{self.path.name}'
+        self.image = cv.imread(filename)
+        self.image_gray = cv.cvtColor(self.image, cv.COLOR_BGR2GRAY)
+
+    def show(self):
+        plt.imshow(cv.cvtColor(self.image, cv.COLOR_BGR2RGB))
+    
+    def find_edge(self, min_val=150, max_val=255):
+        ''' 
+            Find edges using Canny algotirhm.
+        '''
+        blur_img = cv.GaussianBlur(self.image_gray, (5,5), 0)
+        self.edge = cv.Canny(blur_img, min_val, max_val)
+        filename = f'{self.path.parent}\\{self.path.stem}_edge.png'
+        cv.imwrite(filename, self.edge)
+
+        return self.edge
+
+    def find_line(self, threshore=50):
+        '''
+            Find lines using Hough transformation.
+         '''
+        img = self.image.copy()
+        # Find all possible lines
+        lines = cv.HoughLines(self.edge, 1 , np.pi/180, threshore)
+
+        # Separate horizontal lines and vertical lines
+        thetas_H = []
+        rhos_H = []
+        thetas_V = []
+        rhos_V = []
+        for line in lines:
+            rho, theta = line[0]
+            if 0.25 < theta / np.pi < 0.75 :
+                rhos_H.append(rho)
+                thetas_H.append(theta)
+            else:
+                rhos_V.append(rho)
+                thetas_V.append(theta)
+
+        rhos_H = np.array(rhos_H)
+        rhos_V = np.array(rhos_V)
+        thetas_H = np.array(thetas_H)
+        thetas_V = np.array(thetas_V)
+
+        def filter_line(rhos, thetas, num_line):
+            '''
+                Filter lines. Keep only certain number.
+            '''
+            # Sort parameters
+            idx = np.argsort(np.abs(rhos))
+            rhos = rhos[idx]
+            thetas = thetas[idx]
+            # Keep running until certain number of lines left
+            while rhos.size > num_line:
+                diff = np.abs(np.diff(np.abs(rhos)))
+                idx_diff_min = np.argwhere(diff == diff.min())[0][0]
+                # Drop small difference parameter
+                rhos = np.delete(rhos, idx_diff_min)
+                thetas = np.delete(thetas, idx_diff_min)
+            lines = []
+            # Draw line
+            for i in range(rhos.size):
+                rho = rhos[i]
+                theta = thetas[i]
+                a = np.cos(theta)
+                b = np.sin(theta)
+                x0 = a * rho
+                y0 = b * rho
+                x1 = int(x0 + 1000*(-b))
+                y1 = int(y0 + 1000*(a))
+                x2 = int(x0 - 1000*(-b))
+                y2 = int(y0 - 1000*(a))
+                cv.line(img, (x1, y1), (x2, y2), (0, 0, 255), 1)
+                lines.append(Lines(rho, theta))
+
+            return lines
+
+        self.lines_H = filter_line(rhos_H, thetas_H, 10)
+        self.lines_V = filter_line(rhos_V, thetas_V, 8)
+
+        filename = f'{self.path.parent}\\{self.path.stem}_lines.png'
+        cv.imwrite(filename, img)
+
+    def get_corner(self):
+        '''
+            Compute corner from lines.
+        '''
+        img = self.image.copy()
+        i = 0
+        corners = []
+        for line_H in self.lines_H:
+            for line_V in self.lines_V:
+                i += 1
+                corner = np.cross(line_H.get_HC(), line_V.get_HC())
+                corner = corner / corner[2]
+                coordinate = corner[:2].astype(np.int)
+                x = coordinate[0]
+                y = coordinate[1]
+                cv.circle(img, (x, y), 2, (0, 0, 255), 2)
+                cv.putText(img, str(i), (x, y), 
+                           cv.FONT_HERSHEY_SIMPLEX, 
+                           0.5, (255, 255, 0), 1)
+                corners.append([x, y])
+            
+        self.corners = np.array(corners)    
+        filename = f'{self.path.parent}\\{self.path.stem}_corners.png'
+        cv.imwrite(filename, img)
+
+        # Compute Homography matrix
+        A = np.zeros((2*len(corners), 9), np.float32)
+        for i in range(len(corners)):
+            x1 = world_cornors[i][0]
+            y1 = world_cornors[i][1]
+            x2 = corners[i][0]
+            y2 = corners[i][1]
+            A[2*i, :] = np.array([0, 0, 0, -x1, -y1, -1, x1*y2, y1*y2, y2])
+            A[2*i+1, :] = np.array([x1, y1, 1, 0, 0, 0, -x1*x2, -y1*x2, -x2])
+        u, s, v = np.linalg.svd(A)
+        idx = np.argmin(s)
+        eig_vector = v[idx, :]
+        self.H = eig_vector.reshape((3 , 3))
+
+    def compute_extrinsic(self, K):
+        '''
+            Compute extrincic parameters.
+            K (intrinsic parameter) is requiered.
+        '''
+        h1 = self.H[:, 0]
+        h2 = self.H[:, 1]
+        h3 = self.H[:, 2]
+        K_inv = np.linalg.inv(K)
+        e = 1 / np.linalg.norm(np.dot(K_inv, h1))
+        t = e * np.dot(K_inv, h3)
+        r1 = e * np.dot(K_inv, h1)
+        r2 = e * np.dot(K_inv, h2)
+        r3 = np.cross(r1, r2)
+        Q = np.array([r1, r2, r3]).T
+        u, s, vt = np.linalg.svd(Q)
+        R = np.dot(u, vt)
+        # Rt = np.append(R, t.reshape(-1,1), axis=1)
+        
+        return R, t
+
+def load_dataset(number=1):
+    dataset = []
+    directory = f'{FILEPATH}Dataset{number}'
+    imgs = Path(directory).iterdir()
+    for img in imgs:
+        if img.suffix == '.jpg':
+            dataset.append(Image(img))
+    
+    return dataset
+
+dataset = load_dataset(1)
+
+def compute_V(H, i, j):
+    ''' 
+        Compute Vij from H
+    '''
+    hi = H[:, i-1]
+    hj = H[:, j-1]
+    Vij = np.zeros((6, 1))
+    Vij[0] = hi[0] * hj[0]
+    Vij[1] = hi[0] * hj[1] + hi[1] * hj[0]
+    Vij[2] = hi[1] * hj[1]
+    Vij[3] = hi[2] * hj[0] + hi[0] * hj[2]
+    Vij[4] = hi[2] * hj[1] + hi[1] * hj[2]
+    Vij[5] = hi[2] * hj[2]
+
+    return Vij
+
+# Compute instinsic parameter
+V = np.zeros((2*len(dataset), 6))
+# Create V matrix 80 x 6
+for i, img in enumerate(dataset):
+    V[2*i, :] = compute_V(img.H, 1, 2).T
+    V[2*i+1, :] = (compute_V(img.H, 1, 1) 
+                   - compute_V(img.H, 2, 2)).T
+
+# SVD decomposition
+u, s, vt = np.linalg.svd(V)
+b = vt[-1, :]
+# Rename W
+w11 = b[0]
+w12 = b[1]
+w22 = b[2]
+w13 = b[3]
+w23 = b[4]
+w33 = b[5]
+# Compute parameters
+x0 = (w12*w13 - w11*w23) / (w11*w22 - w12**2)
+l = w33 - (w13**2 + x0*(w12*w13 - w11*w23)) / w11
+alpha_x = np.sqrt(l / w11)
+alpha_y = np.sqrt((l*w11) / (w11*w22 - w12**2))
+s = -(w12* (alpha_x**2) *  alpha_y) / l
+y0 = s*x0/alpha_y - w13 * (alpha_x**2) / l
+
+# Assembly K 
+K = np.zeros((3, 3))
+K[0, 0] = alpha_x
+K[0, 1] = s
+K[0, 2] = x0
+K[1, 1] = alpha_y
+K[1, 2] = y0
+K[2, 2] = 1
+print('K (intrinsic) paramenter before LM opimization \n', K)
+
+def build_params(K, dataset):
+    '''
+        Compack parameters into 1D vector.
+        K Wx1 t1 Wx2 t2 Wx3 T3 ...
+    '''
+    params = np.array(K[0, :])
+    params = np.append(params, K[1, 1:3])
+    for img in dataset:
+        R, t = img.compute_extrinsic(K)
+        params = np.append(params, cv.Rodrigues(R)[0])
+        params = np.append(params, t)
+    return np.array(params)
+
+params = build_params(K, dataset)
+
+def extract_params(params):
+    '''
+        Invert of build params function.
+    '''
+    K = np.zeros((3, 3))
+    K[0][0] = params[0]
+    K[0][1] = params[1]
+    K[0][2] = params[2]
+    K[1][1] = params[3]
+    K[1][2] = params[4]
+    K[2][2] = 1
+    params = np.delete(params, np.arange(0,5))
+    ws = []
+    ts = []
+    while params.size > 0:
+        ws.append(params[:3])
+        params = np.delete(params, np.arange(0,3))
+        ts.append(params[:3])
+        params = np.delete(params, np.arange(0,3))
+
+    return K, np.array(ws), np.array(ts)
+
+def cost_function(params, dataset, world_cornors):
+    '''
+        Residal function for LM optimization.
+    ''''
+    error_vector = []
+    K, ws, ts = extract_params(params)
+    world_coordinate = np.hstack((world_cornors, 
+                                  np.zeros((80, 1)), 
+                                  np.ones((80, 1)))) 
+    for i, img in enumerate(dataset):
+        # Compute error for each image
+        w = ws[i]
+        t = ts[i]
+        R = cv.Rodrigues(w)[0]
+        Rt = np.append(R, t.reshape(-1,1), axis=1) 
+        proj_coordinates = np.dot(np.dot(K, Rt), world_coordinate.T).T
+        for j, corner in enumerate(img.corners):
+            # Compute error on each point
+            proj_coordinate = proj_coordinates[j]
+            proj_coordinate /= proj_coordinate[2]
+            proj_coordinate = proj_coordinate[:2]
+        
+            # Error on each point
+            error_vector.append(np.linalg.norm(proj_coordinate - corner))
+
+    return np.array(error_vector)
+
+sol = least_squares(cost_function, params, method='lm', 
+                    args=(dataset, world_cornors),
+                    max_nfev=5000)
+
+K_lm, ws_lm, ts_lm = extract_params(sol.x)
+print('K (intrinsic) paramenter after LM opimization \n', K_lm)
+
+error_before = cost_function(params, dataset, world_cornors)
+error_after = cost_function(sol.x, dataset, world_cornors)
+print('Error \t Before LM \t After LM')
+print(f'Mean \t {error_before.mean():8.3f} \t {error_after.mean():7.3f}')
+print(f'Var \t {error_before.var():8.3f} \t {error_after.var():7.3f}')
+
+def KRt2H(K, R, t):
+    '''
+        Compute Homography matrix from
+        K (intinsic) and Rt (extrinsic).
+    '''
+    Rt = np.append(R, t.reshape(-1,1), axis=1)
+    Rt = np.delete(Rt, 2, axis=1)
+    H = np.dot(K, Rt)
+
+    return H
+
+fix_image = 2 # Pic_11
+# Compute Homography of fix image
+R, t = dataset[fix_image].compute_extrinsic(K)
+H_fix = KRt2H(K, R, t)
+for img in dataset:
+    i = 0
+    base_img = dataset[fix_image].image.copy()
+    base_corner = dataset[fix_image].corners
+    # Draw fix image corners in red
+    for corner in base_corner:
+        x, y = corner
+        i += 1
+        cv.circle(base_img, (x, y), 2, (0, 0, 255), 2)
+        cv.putText(base_img, str(i), (x, y), 
+                    cv.FONT_HERSHEY_SIMPLEX, 
+                    0.5, (255, 255, 0), 1)
+    # Compute projected homogramphy matrix
+    R, t = img.compute_extrinsic(K)
+    H = KRt2H(K, R, t)
+    # Corners to be projected
+    corners = img.corners
+    corners = np.hstack((corners, np.ones((80, 1))))
+    proj_world = np.dot(np.linalg.inv(H), corners.T)
+    proj_corner = np.dot(H_fix, proj_world).T
+    for corner in proj_corner:
+        x = int(corner[0] / corner[2])
+        y = int(corner[1] / corner[2])
+        # Draw projected corner in blue
+        cv.circle(base_img, (x, y), 2, (255, 0, 0), 2)
+
+    path = img.path
+    filename = f'{path.parent}\\before_LM\\{path.stem}.png'
+    cv.imwrite(filename, base_img)
+
+# Compute homography matrix of fix image after LM
+w = ws_lm[fix_image]
+R = cv.Rodrigues(w)[0]
+t = ts_lm[fix_image]
+H_fix_lm = KRt2H(K_lm, R, t)
+for num, img in enumerate(dataset):
+    i = 0
+    base_img = dataset[fix_image].image.copy()
+    base_corner = dataset[fix_image].corners
+    # Draw base corner in red
+    for corner in base_corner:
+        x, y = corner
+        i += 1
+        cv.circle(base_img, (x, y), 2, (0, 0, 255), 2)
+        cv.putText(base_img, str(i), (x, y), 
+                    cv.FONT_HERSHEY_SIMPLEX, 
+                    0.5, (255, 255, 0), 1)
+    # Compute projected homogramphy matrix before LM
+    R, t = img.compute_extrinsic(K)
+    H = KRt2H(K, R, t)
+    # Corners to be projected
+    corners = img.corners
+    corners = np.hstack((corners, np.ones((80, 1))))
+    proj_world = np.dot(np.linalg.inv(H), corners.T)
+    proj_corner = np.dot(H_fix, proj_world).T
+    for corner in proj_corner:
+        x = int(corner[0] / corner[2])
+        y = int(corner[1] / corner[2])
+        # Draw projected corner before LM in blue
+        cv.circle(base_img, (x, y), 2, (255, 0, 0), 2)
+    # Compute projected homogramphy matrix after LM
+    w = ws_lm[num]
+    R_lm = cv.Rodrigues(w)[0]
+    t_lm = ts_lm[num]
+    H_lm = KRt2H(K_lm, R_lm, t_lm)
+    proj_world_lm = np.dot(np.linalg.inv(H_lm), corners.T)
+    proj_corner_lm = np.dot(H_fix_lm, proj_world_lm).T
+    for corner in proj_corner_lm:
+        x = int(corner[0] / corner[2])
+        y = int(corner[1] / corner[2])
+        # Draw projected corner after LM in green
+        cv.circle(base_img, (x, y), 2, (0, 255, 0), 2)
+
+    path = img.path
+    filename = f'{path.parent}\\after_LM\\{path.stem}.png'
+    cv.imwrite(filename, base_img)
+\end{lstlisting}
+
+%-----------------------------------------------------------------------------------
+
+\end{document}
+

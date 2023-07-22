@@ -1,0 +1,423 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./ece661_pics/hw7_image/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{indentfirst}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{ECE 661: Homework 7}}
+
+Thirawat Bureetes
+
+(Fall 2020)
+\end{center}
+	
+ 
+%-----------------------------------------------------------------------------------
+
+\section*{Theory Question}
+
+\begin{enumerate}
+
+\item 
+
+\begin{enumerate}
+\item Greyscale Co-Occurrence Marix (GLCM)
+
+The idea of GLMC is to find the number of pairs of pixel with $D$ distance apart from each other. Assume $D = (1, 1)$ which is 1 pixel to the right and 1 pixel down. The algorithm will scan every pixel $(x_i, y_i)$ and compare with pixel $(x_{i+1}, y_{i+1})$. Let's say there are $P$ level of pixel value. In this case, $P =3$ or there are 3 possible value ${0, 1, 2}$ The outcome will be $P x P$ GLCM matrix that shows how many pair of pixels that $D$ pixel away with certain pixel intensity. For examplae, element $(0, 1)$ represents the number of pairs where pixel $(x_i, y_i)$ is 0 and $(x_{i+1}, y_{i+1})$ is 1. Since the  pixel $(x_i, y_i)$ is 0 and $(x_{i+1}, y_{i+1})$ is 1 or  pixel $(x_i, y_i)$ is 1 and $(x_{i+1}, y_{i+1})$ is 0 have similar meaning so the GLCM element $(m, n)$ and $(n,m)$ are sum up and the matrix become symmetric. The texture features are derived from GLCM matrix such as Entropy, Contrast or Homogeneity.
+
+\item Local Binary Pattern (LBP)
+
+LBP analyze $P$ pixel surrounded paricular pixel with $R$ distance away. It compares each neighbour pixel with the center pixel. If the center pixel has higher value, 1 is assigned to that neighbour pixel. Otherwise, 0. As the result, there are binary vector with $P$ elements. To make this vector rotation-invaient, the element inside is rotatate to find the sequence that make the value of entire vector minimum. Next step is encoding the vector into $P+2$ possible value which is from $0$ to $P+1$. Apply this procedure into every pixel of the image. Eventually, the final feature vector of the image is the histrogram of encoded value range from 0 to $P+1$. 
+
+\item Gabor Filter Famlity
+
+Gabor filter apply convolution filter to analyze the certain frequency in both x-axis and y-axis. It uses Fourier transform to generate sinusodial and exponential component which has real and imaginary part. The operation is regurated with several factors: $\lambda$ or wavelenght of the sinusodial component, $\theta$ or the angle to the axis, $\sigma$ the standard deviation of the Gausian envelop.
+
+\end{enumerate}
+
+\item 
+
+\begin{enumerate}
+\item No
+
+\item Yes
+
+\item Yes
+
+\end{enumerate}
+
+\end{enumerate}
+
+%-----------------------------------------------------------------------------------
+
+\section*{Implimentation}
+
+
+\subsection*{LBP Feature Extraction}
+
+Local Binary Patterns (LBP) is an algorithm to extract feature which is rotation-invariant. The features from LBP don't vary to the size of the images. It first starts with analyzing every pixel of grey scale image. On each pixel $(x,y)$, $P$ neighbour pixel with radius $R$ are considered to as following equation.
+
+
+\begin{align*}
+x_i &= x + Rcos(\frac{2\pi i}{P}) \\
+y_i &= y + Rsin(\frac{2\pi i}{P}) \\
+\end{align*}
+
+In this case, $R = 1$ and $P = 8$. Therefore, there will be 8 neighbour pixel around the center pixel. In some cases, $x_i$ and $y_i$ are not integer. This means that the real place of $(x_i, y_i)$is in middle of 4 correr pixels: A, B, C, and D. Defind A is a top-left pixel, B is a top-right pixel, C is a bottom-left pixel, and D is a bottom-right pixel. The value of  $(x_i, y_i)$ is computed by linear interpolation as shown below.
+
+\begin{align*}
+I(x_i, y_i) &= (1-du)(1-dv)A + (1-du)(dv)B + (du)(1-dv)C + (du)(dv)D \\
+\end{align*}
+\begin{align*}
+du &= cos(\frac{2\pi i}{P}) \\
+dv &= sin(\frac{2\pi i}{P})
+\end{align*}
+
+The final value of each neighbour pixel are compared with the center pixel. If the value is greater, it gets 1. Otherwise 0. After this step, there are 8 bit of binary vector (0 or 1). To make this vector rotation-invariant, the element in the vector is rotated. Each rotation, the value of the vector is compute. The result of this operation is to find the rotation of sequece of binary that make the value of the vector minimum. 
+
+The next step is to encode the 8 bit binary vector. Number of run is definded as the scenario that value change from 0 to 1 or vice versa. The number of run is less than or equal to 2, the encoded number is equal to number 1's in the vector. If the number of run more than 2, the encoder number is P+1, in this case 9.
+
+The process goes through every pixel in the image. As a result, each pixel will yield the value from 0 to P+1, in this case 9. There are 10 possible value. The final feature vector of the image is the 10 bins histrogram of the image.
+ 
+%-----------------------------------------------------------------------------------
+
+\subsection*{NN-Classifier}
+
+There are 100 images in training dataset and 20 images in testing dataset that belong to 5 image classes. For each testing image, its feature vector will be compared with the feature vector of each training image. The method of comparision is Eudlidean distace or $L_2$ norm. The 5 least distance are selected. The predicted outcome is the commom image class from 5 least distance. If there are tie from 2 image classes, the class that has less sum of distance is the final result.
+
+%-----------------------------------------------------------------------------------
+
+\section*{Results}
+
+\begin{figure}[H]
+\begin{subfigure}{1\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{training/beach/1}
+  \caption{Image}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{1\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{histrogram_beach}
+  \caption{Histrogram feature}
+  \label{}
+\end{subfigure}
+
+\caption{Sample image and its histrogram feature from beach class}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{1\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{training/building/12}
+  \caption{Image}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{1\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{histrogram_building}
+  \caption{Histrogram feature}
+  \label{}
+\end{subfigure}
+
+\caption{Sample image and its histrogram feature from building class}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{1\textwidth}
+  \centering
+  \includegraphics[width=0.8\linewidth]{training/car/03}
+  \caption{Image}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{1\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{histrogram_car}
+  \caption{Histrogram feature}
+  \label{}
+\end{subfigure}
+
+\caption{Sample image and its histrogram feature from car class}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{1\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{training/mountain/08}
+  \caption{Image}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{1\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{histrogram_mountain}
+  \caption{Histrogram feature}
+  \label{}
+\end{subfigure}
+
+\caption{Sample image and its histrogram feature from mountain class}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{1\textwidth}
+  \centering
+  \includegraphics[width=0.7\linewidth]{training/tree/05}
+  \caption{Image}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{1\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{histrogram_tree}
+  \caption{Histrogram feature}
+  \label{}
+\end{subfigure}
+
+\caption{Sample image and its histrogram feature from tree class}
+\label{}
+\end{figure}
+
+
+%-----------------------------------------------------------------------------------
+
+\section*{Observation}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{table}
+\caption{Sample image and its histrogram feature from tree class}
+\label{}
+\end{figure}
+
+The overall accuracy is 56\%
+
+%-----------------------------------------------------------------------------------
+
+\section*{Source Code}
+
+\begin{lstlisting}
+# Import necessary libraries
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt
+from os import listdir
+import re
+import math
+
+FILEPATH = 'ece661_pics\\hw7_image\\'
+
+class Pattern():
+    ''' 
+        Class for handling pattern.
+    '''
+    P = 8
+    ARRAY2VALUE = np.array([2**(7-i) for i in range(P)])
+
+    def __init__(self, pattern):
+        self.pattern = pattern 
+        self.find_min_val()
+    
+    def __repr__(self):
+        return  (f'Pattern = {self.pattern}\n'
+                f'Min pattern = {self.min_pattarn}\n'
+                f'Min Value = {self.min_value}\n')
+    
+    def find_min_val(self):
+        ''' 
+            Find the min value pattern.
+        '''
+        min_value = 2**self.P
+        pattern = self.pattern.tolist()
+        for i in range(self.P):
+            pattern.append(pattern.pop(0))
+            value = np.dot(self.ARRAY2VALUE, np.array(pattern))
+            if value < min_value:
+                self.min_value = value
+                self.min_pattarn = pattern.copy()
+                min_value = value
+
+    def encode(self):
+        '''
+            Encode the pattern.
+        '''
+        if self.min_value == 0:
+            return 0
+        elif self.min_value == 2**self.P - 1:
+            return self.P
+        
+        runs = 0
+        ones = 0
+        prev = self.min_pattarn[0]
+        if prev == 1:
+            ones += 1
+            runs *= 1
+        for i in range(1, self.P):
+            current = self.min_pattarn[i]
+            if prev != current:
+                runs +=1 
+            if runs > 2:
+                return self.P + 1
+            if current == 1:
+                ones += 1
+            prev = current
+        return ones
+
+class Image():
+    ''' 
+        Class for storing images.
+    '''
+    
+    def __init__(self, name):
+        self.name = name    
+        self.image = None  
+        self.hist = None
+
+    def load(self):
+        self.image = cv.imread(self.name)
+        self.image_gray = cv.cvtColor(self.image, cv.COLOR_BGR2GRAY)
+
+    def show(self):
+        if self.image is None:
+            self.load()
+        plt.imshow(cv.cvtColor(self.image, cv.COLOR_BGR2RGB))
+    
+    def extract_pattern(self, p=8, r=1):
+        '''
+            Extract histrogram pattern.
+        '''
+        if self.image is None:
+            self.load()
+        
+        if self.hist is not None:
+            return self.hist
+        
+        img = self.image_gray
+        h, w = img.shape
+        du = math.cos(2*math.pi/p)
+        dv = math.sin(2*math.pi/p)
+        # Compute linear interpolation
+        # 1. Turn 3 x 3 to 9 x 1
+        # 2. Dot product with 8 x 9 matrix below
+        interpolation = np.array([
+            [0, 0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, (1-du)*(1-dv), (1-du)*(dv), 0, (du)*(1-dv), (dv)*(dv)],
+            [0, 0, 0, 0, 0, 1, 0, 0, 0],
+            [0, (du)*(1-dv), (dv)*(dv), 0, (1-du)*(1-dv), (1-du)*(dv), 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 0, 0, 0],
+            [(dv)*(dv), (du)*(1-dv), 0, (1-du)*(dv), (1-du)*(1-dv), 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, (1-du)*(dv), (1-du)*(1-dv), 0, (dv)*(dv), (du)*(1-dv), 0],
+        ])
+
+        patterns = []
+        for i in range(1, w-1):
+            for j in range(1, h-1):
+                # Extract 3 x 3 kernal
+                kernal = img[j-1:j+2, i-1:i+2]
+                # Apply linear interpolation
+                pattern = np.dot(interpolation, kernal.ravel().T)
+                # Compare to center pixel
+                pattern = pattern > kernal[1][1]
+                pattern = Pattern(pattern.astype(np.uint8))
+                # Use encode function of Pattern class define above
+                patterns.append(pattern.encode())
+
+        self.hist, self.bin_edges = np.histogram(patterns, bins=[i for i in range(p+3)], density=True)
+        return self.hist
+
+    def plot_histogram(self, savename=None):
+        if self.hist is None:
+            self.extract_pattern() 
+        
+        plt.bar(self.bin_edges[0:-1], self.hist)
+        if savename is not None:
+            savename = f'{FILEPATH}{savename}.png'
+            plt.savefig(savename)
+
+def load_image(img_classes):
+    '''
+        Load images from database.
+    '''
+
+    trainning_set = {}
+    testing_set = {}
+    
+    for img_class in img_classes:
+        trainning_set[img_class] = []
+        testing_set[img_class] = []
+        # Load training sets
+        directory = f'{FILEPATH}training\\{img_class}'
+        imgs = listdir(directory)
+        for img in imgs:
+            full_path = f'{directory}\\{img}'
+            trainning_set[img_class].append(Image(full_path))
+
+        # Load testing set
+        directory = f'{FILEPATH}testing'
+        imgs = listdir(directory)
+        imgs_in_class = [re.findall(f'{img_class}.*', img) for img in imgs]
+        for img in imgs_in_class:
+            if img:
+                full_path = f'{directory}\\{img[0]}'
+                testing_set[img_class].append(Image(full_path))
+        
+
+    return trainning_set, testing_set
+
+img_classes = ['beach', 'building', 'car', 'mountain', 'tree']
+[imgs_train, imgs_test] = load_image(img_classes)
+
+for class_idx_test, img_class_test in enumerate(img_classes):
+    for img_test in imgs_test[img_class_test]:
+        print(img_test.name) # Image under test
+        distances = [] # Distance to each train image
+        indiecs = [] # Class index of each train image
+        for class_idx_train, img_class_train in enumerate(img_classes):
+            for img_train in imgs_train[img_class_train]:
+                distance = np.linalg.norm(img_train.extract_pattern() - img_test.extract_pattern())
+                distances.append(distance)
+                indiecs.append(class_idx_train)
+        distances = np.array(distances)
+        indiecs = np.array(indiecs)
+        min_distances = np.sort(distances) # Sorting distance array
+        min_distances_idx = np.where(distances < min_distances[5]) # Find 5 least distance
+        # Get Class index of most common class of 5 least distance
+        predicted = np.bincount(indiecs[min_distances_idx]).argmax()  
+        print(f'Ground Truth class {img_classes[class_idx_test]}. Predicted class {img_classes[predicted]}\n')
+
+
+\end{lstlisting}
+
+%-----------------------------------------------------------------------------------
+
+\end{document}
+

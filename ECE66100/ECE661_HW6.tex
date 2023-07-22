@@ -1,0 +1,828 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./ece661_pics/hw6_image/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{indentfirst}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{ECE 661: Homework 6}}
+
+Thirawat Bureetes
+
+(Fall 2020)
+\end{center}
+	
+ 
+%-----------------------------------------------------------------------------------
+
+\section*{Theory Question}
+
+Wathershed algorithm works as finding the local minima (valley). starting from these points, it starts to fill (flooding) the area follow the direction of gradient. When the flooding from two different valleys collide, the barrier is form. These barriers are used to segmenting the image. As a result, the algorithm can segment object from background based on local condition. However, it requires computational resources to compute. In the other hands, Otsu algorithm works to find a single value (threshore) that can maximize the inter-class variance. This algorithm consumes less computational result. Hoever, the segmented result is obtained by global threshore which might not be perfect fit.
+
+
+%-----------------------------------------------------------------------------------
+
+\section*{Implimentation}
+
+\subsection*{Otsu algorithm}
+
+Otsu algorithm is used to find the best threshore value to separate two classes for pixel in the image: foreground and background. The threshore is obtained by maximize the inter-class variance. 
+\begin{align*}
+\sigma^2_b(t) &= \omega_0(t)\omega_1(t)[\mu_0(t)-\mu_1(t)]^2
+\end{align*}
+
+Where $\omega_0(t)$ and $\omega_1(t)$ are probabilities of class 0 and 1 at the threshore $t$. $\mu_0(t)$ and $\mu_1(t)$ are the expected value from class 0 and 1 at the threshore $t$
+
+\begin{align*}
+\omega_0(t) &= \sum_{i=0}^{t-1} p(i) \\
+\omega_1(t) &= \sum_{i=t}^{L-1} p(i) \\
+\mu_0 &= \frac{\sum_{i=0}^{t-1} ip(i)}{\omega_0(t)} \\
+\mu_1 &= \frac{\sum_{i=t}^{L-1} ip(i)}{\omega_1(t)} \\
+\end{align*}
+
+Where $L$ is the histrogram bins of all pixels in the image. $p(i)$ is the probability of pixel intensity. In practical, we can obtain $\omega_1(t)$ and $\mu_1(t)$ using $\omega_0(t)$ and $\mu_0(t)$ by following equations.
+
+\begin{align*}
+\omega_0(t)  + \omega_1(t) &= 1 \\
+\omega_1(t) &= 1 - \omega_0(t) \\
+\omega_0(t)  \mu_0  + \omega_1(t) \mu_1&= \mu \\
+\mu_1 &= \frac{\mu - \omega_0(t)  \mu_0}{\omega_1(t)} \\
+\end{align*}
+
+%-----------------------------------------------------------------------------------
+
+
+\subsection*{Otsu algorithm using RGB channels}
+
+Each image consists of R, G, and B channels of color. Each channel are subject to find the threshore using Otsu algorithm. The pixel that intensity value is more than threshore level is classified and a foreground. Otherwise, as a background. As a resuth, there are 3 masks to be conbined using AND operator to produce the final mask. The final mask goes through Morphological transformmation to remove noise. 
+
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Otsu algorithm using texture features}
+
+Segmentaion using texture features are based on grey scale image. The feature of each pixel are compute by the variance of N x N pixel window around the pixel center where N = 3, 5, and 7. The value of varaince is normalized to between 0 to 255 which is the same as pixel intensity of 8-bit color image. Therefore, there are 3 layers of feature. Otsu algorithm is applied to each layer. The foreground pixel is the pixel that variance value is less than the threshore. Otherwise, it will be classified as background.  As a resuth, there are 3 masks to be conbined using AND operator to produce the final mask. The final mask goes through Morphological transformmation to remove noise. 
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Contour extraction}
+
+Contour line helps to clearly visualize the boundary between foreground and background pixels. Let's define 1 and 0 and foreground pixel and background pixel in final mask obtained from image Ostu algorithm. The contour line is considered by 8 neighbour pixels. Consider only the pixels that theirs value is 1 (it is foreground pixel), if there is at least 0 pixel among 8 neighbour pixels, that pixel is classified as a contour point. 
+
+%-----------------------------------------------------------------------------------
+
+\section*{Observation}
+
+It is clearly noticible that segmentation using  RGB channels performs much faster than segmentation using texture features. This is because segmentation using texture features needs to compute varaince of N x N window of all pixel in the image.
+
+The result from segmentation using texture features yields clear cut of border pixel between background and foreground. However, the area inside the foreground is not detected. In the other hands, segmentation using  RGB channels can identify the area of foreground object. However, if the color of pixels are quite similiar, this method can't seperate background and foreground.
+
+%-----------------------------------------------------------------------------------
+
+
+\section*{Results}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_color_iter1_mask_red}
+  \caption{Channel Red}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_color_iter1_mask_green}
+  \caption{Channel Green}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_color_iter1_mask_blue}
+  \caption{Channel Blue}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_color_iter1_mask_premorph}
+  \caption{All RGB combined}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_color_iter1_mask}
+  \caption{Mask after closing with 15x15 kernal}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_color_iter1_contour}
+  \caption{Contour}
+  \label{}
+\end{subfigure}
+
+\caption{Pigeon image segmentation using RGB channels iteration 1}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_color_iter2_mask_red}
+  \caption{Channel Red}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_color_iter2_mask_green}
+  \caption{Channel Green}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_color_iter2_mask_blue}
+  \caption{Channel Blue}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_color_iter2_mask_premorph}
+  \caption{All RGB combined}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_color_iter2_mask}
+  \caption{Mask after closing with 21x21 kernal}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_color_iter2_contour}
+  \caption{Contour}
+  \label{}
+\end{subfigure}
+
+\caption{Pigeon image segmentation using RGB channels iteration 2}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw6_1_color_iter2}
+\caption{Segmented image}
+\label{}
+\end{figure}
+
+
+
+
+
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_color_iter1_mask_red}
+  \caption{Channel Red}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_color_iter1_mask_green}
+  \caption{Channel Green}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_color_iter1_mask_blue}
+  \caption{Channel Blue}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_color_iter1_mask_premorph}
+  \caption{All RGB combined}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_color_iter1_mask}
+  \caption{Mask after closing with 1x1 kernal}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_color_iter1_contour}
+  \caption{Contour}
+  \label{}
+\end{subfigure}
+
+\caption{Pigeon image segmentation using RGB channels iteration 1}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_color_iter2_mask_red}
+  \caption{Channel Red}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_color_iter2_mask_green}
+  \caption{Channel Green}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_color_iter2_mask_blue}
+  \caption{Channel Blue}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_color_iter2_mask_premorph}
+  \caption{All RGB combined}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_color_iter2_mask}
+  \caption{Mask after closing with 45x45 kernal}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_color_iter2_contour}
+  \caption{Contour}
+  \label{}
+\end{subfigure}
+
+\caption{Fox image segmentation using RGB channels iteration 2}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw6_2_color_iter2}
+\caption{Segmented image}
+\label{}
+\end{figure}
+
+
+
+
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_color_iter1_mask_red}
+  \caption{Channel Red}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_color_iter1_mask_green}
+  \caption{Channel Green}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_color_iter1_mask_blue}
+  \caption{Channel Blue}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_color_iter1_mask_premorph}
+  \caption{All combined}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_color_iter1_mask}
+  \caption{Mask after closing with 67x67 kernal}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_color_iter1_contour}
+  \caption{Contour}
+  \label{}
+\end{subfigure}
+
+\caption{Cat image segmentation using RGB channels iteration 1}
+\label{}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw6_3_color_iter1}
+\caption{Segmented image}
+\label{}
+\end{figure}
+
+
+
+
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_feature_iter1_mask_3}
+  \caption{3 x 3 feature extraction}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_feature_iter1_mask_5}
+  \caption{5 x 5 feature extraction}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_feature_iter1_mask_7}
+  \caption{7 x 7 feature extraction}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_feature_iter1_mask_premorph}
+  \caption{All RGB combined}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_feature_iter1_mask}
+  \caption{Mask after closing with 5x5 kernal}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_feature_iter1_contour}
+  \caption{Contour}
+  \label{}
+\end{subfigure}
+
+\caption{Pigeon image segmentation using feature extraction iteration 1}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_feature_iter2_mask_3}
+  \caption{3 x 3 feature extraction}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_feature_iter2_mask_5}
+  \caption{5 x 5 feature extraction}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_feature_iter2_mask_7}
+  \caption{7 x 7 feature extraction}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_feature_iter2_mask_premorph}
+  \caption{All combined}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_feature_iter2_mask}
+  \caption{Mask after closing with 9x9 kernal}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_1_feature_iter2_contour}
+  \caption{Contour}
+  \label{}
+\end{subfigure}
+
+\caption{Pigeon image segmentation using feature extraction iteration 2}
+\label{}
+\end{figure}
+
+
+
+
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_feature_iter1_mask_3}
+  \caption{3 x 3 feature extraction}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_feature_iter1_mask_5}
+  \caption{5 x 5 feature extraction}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_feature_iter1_mask_7}
+  \caption{7 x 7 feature extraction}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_feature_iter1_mask_premorph}
+  \caption{All RGB combined}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_feature_iter1_mask}
+  \caption{Mask after closing with 5x5 kernal}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_2_feature_iter1_contour}
+  \caption{Contour}
+  \label{}
+\end{subfigure}
+
+\caption{Fox image segmentation using feature extraction iteration 1}
+\label{}
+\end{figure}
+
+
+
+
+
+
+
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_feature_iter1_mask_3}
+  \caption{3 x 3 feature extraction}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_feature_iter1_mask_5}
+  \caption{5 x 5 feature extraction}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_feature_iter1_mask_7}
+  \caption{7 x 7 feature extraction}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_feature_iter1_mask_premorph}
+  \caption{All RGB combined}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_feature_iter1_mask}
+  \caption{Mask after closing with 5x5 kernal}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_feature_iter1_contour}
+  \caption{Contour}
+  \label{}
+\end{subfigure}
+
+\caption{Cat image segmentation using feature extraction iteration 1}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_feature_iter2_mask_3}
+  \caption{3 x 3 feature extraction}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_feature_iter2_mask_5}
+  \caption{5 x 5 feature extraction}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_feature_iter2_mask_7}
+  \caption{5 x 5 feature extraction}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_feature_iter2_mask_premorph}
+  \caption{All combined}
+  \label{}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_feature_iter2_mask}
+  \caption{Mask after closing with 9x9 kernal}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw6_3_feature_iter2_contour}
+  \caption{Contour}
+  \label{}
+\end{subfigure}
+
+\caption{Cat image segmentation using feature extraction iteration 2}
+\label{}
+\end{figure}
+
+
+%-----------------------------------------------------------------------------------
+
+\section*{Source Code}
+
+\begin{lstlisting}
+
+# Import necessary libraries
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt
+
+class Image():
+    ''' 
+    Class for store images.
+    '''
+
+    FILEPATH = 'ece661_pics\\hw6_image\\'
+
+    def __init__(self, name, savename):
+        self.name = name
+        self.savename = savename
+        self.load_images()
+        
+
+    def load_images(self):
+        self.image = cv.imread(self.FILEPATH + self.name)
+        self.image_gray = cv.cvtColor(self.image, cv.COLOR_BGR2GRAY)
+        self.image_red = self.image[:,:, 2]
+        self.image_green = self.image[:,:, 1]
+        self.image_blue = self.image[:,:, 0]
+        
+    
+    def load_variance(self):
+        self.load_images()
+        self.image_3 = self.compute_variance(3)
+        self.image_5 = self.compute_variance(5)
+        self.image_7 = self.compute_variance(7)
+
+    def compute_variance(self, window):
+        ''' 
+            Compute variance of image by window size.
+        '''
+        h, w = self.image_gray.shape
+        width = int((window - 1) / 2)
+        variance = np.zeros((h, w))
+        for j in range(h):
+            for i in range(w):
+                kernal = self.image_gray[j-width : j+width+1, i-width : i+width+1]
+                if kernal.size == 0:
+                    variance[j][i] = 0
+                else:
+                    variance[j][i] = np.var(kernal)
+        # Normalize to 0-255
+        variance = (variance * 255 / variance.max())
+
+        return variance.astype(np.uint8)
+
+    def show_image(self, color=None):
+        if color is None:
+            plt.imshow(cv.cvtColor(self.image, cv.COLOR_BGR2RGB))
+        elif color == 'gray':
+            plt.imshow(self.image_gray, cmap='gray')
+        elif color == 'red':
+            plt.imshow(self.image_red, cmap='gray')
+        elif color == 'blue':
+            plt.imshow(self.image_blue, cmap='gray')
+        elif color == 'green':
+            plt.imshow(self.image_green, cmap='gray')      
+
+img1 = Image('pigeon.jpeg', 'hw6_1')   
+img2 = Image('Red-Fox.jpg', 'hw6_2') 
+img3 = Image('cat.jpg', 'hw6_3')
+
+class Otsu():
+    '''
+        Class for implementing Otsu algorithm.
+    '''
+
+    FILEPATH = 'ece661_pics\\hw6_image\\'
+
+    def __init__(self):
+        pass
+
+    def find_threshore(self, layer):
+        '''
+            Find the threshore of particular image layer.
+        '''
+        # Ignore pixel intensity = 0 for Otsu iteration
+        [hist, bin_edges] = np.histogram(layer, bins=np.arange(1, 257), density=True)
+        prob_wieght = hist * bin_edges[:-1]
+        mean = np.sum(prob_wieght) # mean of the whole layer
+        k = 0
+        var_max = 0
+        w0 = 0
+        prob_wieght_sum = 0
+        # Compute parameters
+        for i in range(hist.size):
+            w0 += hist[i]
+            w1 = 1 - w0
+            prob_wieght_sum += prob_wieght[i]
+            u0 = prob_wieght_sum / w0
+            if w1 != 0:
+                u1 = (mean - prob_wieght_sum) / w1
+                var = w0 * w1 * (u0 - u1)**2
+                if var > var_max:
+                    var_max = var
+                    k = i
+
+        return k+1
+
+    def get_mask(self, layer, threshore, image_name, layer_name, higher=True):
+        '''
+            Get array of 0 and 1 as the mask of the layer.
+        '''
+        if higher:
+            mask = (layer > threshore).astype(np.uint8)
+        else:
+            mask = (layer < threshore).astype(np.uint8)
+        savename = f'{self.FILEPATH}{image_name}_mask_{layer_name}.png'
+        cv.imwrite(savename, mask*255)
+
+        return mask
+
+    def find_contour(self, mask, image_name):
+        '''
+            Get the contour mask
+        '''
+        contour = np.zeros(mask.shape).astype(np.uint8)
+        ones = np.argwhere(mask == 1)
+        for one in ones:
+            x = one[1]
+            y = one[0]
+            window = mask[y-1:y+2, x-1:x+2]
+            if np.sum(window) < 9 and window.size == 9:
+                contour[y][x] = 1
+        
+        savename = f'{self.FILEPATH}{image_name}_contour.png'
+        cv.imwrite(savename, contour*255)
+
+        return contour
+
+    def color_segmentaion(self, image, iterations, morphs):
+        '''
+            Implement segmetation with each RGB layer.
+        '''
+        for iteration in range(iterations):
+            morph_size = morphs[iteration]
+            filename = f'{image.savename}_color_iter{iteration+1}'
+            # Find the threshore
+            k_red = self.find_threshore(image.image_red)
+            k_green = self.find_threshore(image.image_green)
+            k_blue = self.find_threshore(image.image_blue)
+            # Get masks for each layer and combine them together
+            mask_red = self.get_mask(image.image_red, k_red, filename, 'red')
+            mask_green = self.get_mask(image.image_green, k_green, filename, 'green')
+            mask_blue = self.get_mask(image.image_blue, k_blue, filename, 'blue')
+            mask = mask_red * mask_green * mask_blue
+            savename = f'{self.FILEPATH}{filename}_mask_premorph.png'
+            cv.imwrite(savename, mask*255)
+            # Closing holes
+            kernel = np.ones((morph_size, morph_size),np.uint8)
+            mask = cv.morphologyEx(mask, cv.MORPH_CLOSE, kernel)
+            savename = f'{self.FILEPATH}{filename}_mask.png'
+            cv.imwrite(savename, mask*255)
+
+            contour = self.find_contour(mask, filename)
+            for i in range(3):
+                image.image[:, :, i] *= mask
+            savename = f'{self.FILEPATH}{filename}.png'
+            cv.imwrite(savename, image.image)
+    
+    def feature_segmentation(self, image, iterations, morphs):
+        '''
+            Implement segmetation by feature.
+        '''
+        img = image.image_gray
+        for iteration in range(iterations):
+            morph_size = morphs[iteration]
+            filename = f'{image.savename}_feature_iter{iteration+1}'
+            # Find the threshore
+            k_3 = self.find_threshore(image.image_3)
+            k_5 = self.find_threshore(image.image_5)
+            k_7 = self.find_threshore(image.image_7)
+            # Get masks for each layer and combine them together
+            mask_3 = self.get_mask(image.image_3, k_3, filename, '3', False)
+            mask_5 = self.get_mask(image.image_5, k_5, filename, '5', False)
+            mask_7 = self.get_mask(image.image_7, k_7, filename, '7', False)
+            mask = mask_3 * mask_5 * mask_7
+            savename = f'{self.FILEPATH}{filename}_mask_premorph.png'
+            cv.imwrite(savename, mask*255)
+            # Closing holes
+            kernel = np.ones((morph_size, morph_size),np.uint8)
+            finalmark = cv.morphologyEx(mask, cv.MORPH_CLOSE, kernel)
+            savename = f'{self.FILEPATH}{filename}_mask.png'
+            cv.imwrite(savename, mask*255)
+
+            contour = self.find_contour(mask, filename)
+            for i in range(3):
+                image.image[:, :, i] *= mask
+            image.image_3 *= mask
+            image.image_5 *= mask
+            image.image_7 *= mask
+            savename = f'{self.FILEPATH}{filename}.png'
+            cv.imwrite(savename, image.image)
+
+otsu = Otsu()
+
+img1.load_images()
+otsu.color_segmentaion(img1, 2, [15, 21])
+
+img2.load_images()
+otsu.color_segmentaion(img2, 2, [1, 35])
+
+img3.load_images()
+otsu.color_segmentaion(img3, 1, [67])
+
+img1.load_variance()
+otsu.feature_segmentation(img1, 2, [5, 9])
+
+img2.load_variance()
+otsu.feature_segmentation(img2, 1, [5])
+
+img3.load_variance()
+otsu.feature_segmentation(img3, 2, [5, 5])
+
+\end{lstlisting}
+
+%-----------------------------------------------------------------------------------
+
+\end{document}
+

@@ -1,0 +1,777 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./ece661_pics/hw5_image/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{indentfirst}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{ECE 661: Homework 5}}
+
+Thirawat Bureetes
+
+(Fall 2020)
+\end{center}
+	
+ 
+%-----------------------------------------------------------------------------------
+
+\section*{Theory Question}
+
+\begin{enumerate}
+
+\item 
+\textbf{Answer}
+
+Define ${X'}_i$ and $X_i$ are matching coordinate obtained from feature extraction. Randomly select $n$ pair to compute homography matrix $H$. $\tilde{X'}_i = HX_i$ is an estimated coordinate of ${X'}_i$. Define the threshore level $\delta$ pixel. If the displacement between real coordinate ${X'}_i$ and estimated coordinate $\tilde{X'}_i$ is less than the threshore $||{X'}_i - \tilde{X'}_i||^2 \leq \delta^2$, we accpet that point as an inlier. Otherwise, that point is an outlier.
+
+\item 
+\textbf{Answer}
+
+\begin{align*}
+(\mathbf{J}^T \mathbf{J} + \mu \mathbf{I})\delta_p &= \mathbf{J} \epsilon(p_k) \\
+\delta_p &= (\mathbf{J}^T \mathbf{J} + \mu \mathbf{I})^{-1} \mathbf{J} \epsilon(p_k) \\
+\end{align*}
+
+The term $ \mu \mathbf{I}$ is dumping coefficient. When the $ \mu \mathbf{I}$ is high (much higher than diagonal of $\mathbf{J}^T \mathbf{J}$), the equation will look like $\delta_p = ( \mu \mathbf{I})^{-1} \mathbf{J} \epsilon(p_k) = \gamma_k \mathbf{J} \epsilon(p_k)$ which is Gradient-Descent method. In the other hand, when $ \mu \mathbf{I}$ is close to 0, the equation will become  $\delta_p = ( \mathbf{J}^T \mathbf{J})^{-1} \mathbf{J} \epsilon(p_k)$ which is Gradient-Newton method. Therefore, $ \mu \mathbf{I}$ can be used to select the method of computing at that iteration. 
+
+To utilize faster calculation from Gradient-Newton method, we choose $0 <\mu_0 <1$. Each iteration, $\mu_{k+1}$ will be updated according cost function. In general $\mu_{k+1} \geq \mu_k$. This means that the algorithm will perform closer to Gradient-Descent method which will provide the stable result at the end.
+
+\end{enumerate}
+
+
+%-----------------------------------------------------------------------------------
+
+\section*{Implimentation}
+
+\subsection*{Finding correspondences using SIFT}
+
+To find correspondences between a pair of images, SIFT algorithm is used to extract features or key-points of each image. As the requiements of this assingment, either SSD or NCC must be used. Between a pair of images, Normailized Cross Correlation or NCC is used to find the best matching pair. The NCC formula is stated as follow. 
+
+\begin{align*}
+NCC &= \frac{\sum_i{}\sum_j{(f_1(i, j)-m_1)(f_2(i, j)-m_2)}}
+{\sqrt{(\sum_i{}\sum_j{(f_1(i, j)-m_1)^2})(\sum_i{}\sum_j{(f_2(i, j)-m_2)^2})}}
+\end{align*}
+
+Assuming that image A has $M$ features from SIFT. The program will find the best match for each $m_i$ where $i \in [1, M]$ to the features of image B. Then the program will keep only certain number of best matching or highest NCC value. The number of NCC pairs is configable in the program. 
+
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{RANSAC}
+
+Random Sanple Consensus or RANSAC is an algorithm to filter out the outlier from the dataset. Define $N$ as number of trials. This number is obtained by following formula.
+
+\begin{align*}
+N &= \frac{ln(1-p)}{ln[1-(1-\epsilon]^n]}
+\end{align*}
+
+Where $p$ is the propability that there wil lbe at least 1 from N trials that will be free from outliers. $\epsilon$ is the probability that a random correspondence is outiler. and $n$ number of random sample in each iteration. Random$n$ correspondences are used to calculate homography matrix $\mathbf{H}$. Define $X$ and $X'$ are correspondence paris from image $i$ and image $i+1$. We can find the estimated $X'$ from the homography matrix by $\tilde{X} = \mathbf{H}X'$
+
+The different of  $X'$ and $\tilde{X} = \mathbf{H}X'$ are used to evaluated the acuracy of obtained $H$ in each iteration. Define the different of  $X'$ and $\tilde{X} = \mathbf{H}X'$ as $e^2 = (\Delta x)^2 + (\Delta y)^2$. In case $d^2 \leq \delta^2$ where $\delta$ is thershore level, we accept that correspondence as inlier.After N rounds of trial, the $\mathbf{H}$ that yields the most inliers is the final outcome of RANSAC algorithm. 
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Linear Least-Squares Minimization}
+
+\begin{align*}
+X' &= \mathbf{H}X \\
+\begin{pmatrix} x'\\ y'\\ 1\end{pmatrix} &= 
+\mathbf{H} 
+\begin{pmatrix} x\\ y\\ 1\end{pmatrix}
+\end{align*}
+
+Let's define homography matrix $\mathbf{H}$ as
+
+\begin{align*}
+\mathbf{H} &= 
+\begin{bmatrix}
+h_{11} & h_{12} & h_{13}\\
+h_{21} & h_{22} & h_{23} \\
+h_{31} & h_{32} & 1
+\end{bmatrix} \\
+\begin{pmatrix} x'\\ y'\\ 1\end{pmatrix} &= 
+\mathbf{H} 
+\begin{pmatrix} x\\ y\\ 1\end{pmatrix} \\
+\begin{pmatrix} x'\\ y'\\ 1\end{pmatrix} &= 
+\begin{bmatrix}
+h_{11} & h_{12} & h_{13}\\
+h_{21} & h_{22} & h_{23} \\
+h_{31} & h_{32} & 1
+\end{bmatrix}
+\begin{pmatrix} x\\ y\\ 1\end{pmatrix} \\
+x' &= h_{11}x + h_{12}y + h_{13}\\
+y' &= h_{21}x + h_{22}y + h_{23}\\
+1 &= h_{31}x + h_{32}y + 1\\
+\end{align*}
+
+Any homogeneous coordinates $\begin{pmatrix} x_h\\ y_h\\ z_h\end{pmatrix}$ is coresponding to physical coordinate $(x_p,y_p)$ following these relationships:
+\begin{align*}
+x_p &= \frac{x_h}{z_h}\\
+y_p &= \frac{y_h}{z_h}\\
+\end{align*}
+
+From this reletionship, we get:
+\begin{align*}
+\frac{x'}{1} &= \frac{ h_{11}x + h_{12}y + h_{13}}{h_{31}x + h_{32}y + 1}\\
+x'(h_{31}x + h_{32}y + 1) &= h_{11}x + h_{12}y + h_{13} \\
+x' &= h_{11}x + h_{12}y + h_{13} - h_{31}xx' -  h_{32}yx' \\
+\frac{y'}{1} &= \frac{ h_{21}x + h_{22}y + h_{23}}{h_{31}x + h_{32}y + 1}\\
+y'(h_{31}x + h_{32}y + 1) &= h_{21}x + h_{22}y + h_{23} \\
+y' &= h_{21}x + h_{22}y + h_{23} - h_{31}xy' -  h_{32}yy' \\
+\end{align*}
+
+As a result, there are 8 unknown variables. With n pairs of correspondence, the $\mathbf{A}$ will be 2n x 8 dimension. And vector $b$ will be 2n elements. 
+\begin{align*}
+\begin{bmatrix}
+x_1^{'}\\ y_1^{'}\\ x_2^{'} \\ y_2^{'} \\ . \\  . \\ . \\ x_n^{'} \\ y_n^{'}
+\end{bmatrix} &=
+\begin{bmatrix}
+x_{1} & y_{1} & 1  & 0 & 0 & 0 & -x_{1}x_1^{'} & -y_{1}x_1^{'}\\ 
+0 & 0 & 0 & x_{1} & y_{1} & 1 & -x_{1}y_1^{'} & -y_{1}y_1^{'}\\
+x_{2} & y_{2} & 1  & 0 & 0 & 0 & -x_{2}x_2^{'} & -y_{2}x_2^{'}\\ 
+0 & 0 & 0 & x_{2} & y_{2} & 1 & -x_{2}y_2^{'} & -y_{2}y_2^{'}\\ 
+. &  . & . & . & . & . & . & .\\
+. &  . & . & . & . & . & . & .\\
+. &  . & . & . & . & . & . & .\\
+x_{n} & y_{n} & 1  & 0 & 0 & 0 & -x_{n}x_n^{'} & -y_{n}x_n^{'}\\ 
+0 & 0 & 0 & x_{n} & y_{n} & 1 & -x_{n}y_n^{'} & -y_{n}y_n^{'}\\ 
+\end{bmatrix}
+\begin{bmatrix}
+h_{11} \\ h_{12}\\ h_{13} \\ h_{21} \\ h_{22} \\ h_{23} \\ h_{31} \\ h_{32}
+\end{bmatrix} \\
+b &= \mathbf{A}H
+\end{align*}
+
+To solve this system of equation, $\hat{H} = (\mathbf{A}^T \mathbf{A})^{-1} \mathbf{A}^T b$. The estimated $\hat{H}$ from Linear Least-Squares Minimization will be 8 dimensions. As we know that $h_{33} = 1$. So we can estimate homography matrix $\hat{H}$ from n pairs of correspondence.
+
+%-----------------------------------------------------------------------------------
+
+\section*{Levenberg-Marquardt Algorithm}
+
+So far, we compute homography matrix by assuming that $H_{33} = 0$. The solution for linear method might not be very accurate. Therefore, we will apply non-linear method to refine the homography matrix. Levenberg-Marquardt Algorithm or LM is a non-linear optimization that combine the pros of Gradient-Descent and Gradient-Newton together. The formula of LM is shown as follow.
+
+\begin{align*}
+(\mathbf{J}^T \mathbf{J} + \mu \mathbf{I})\delta_H &= \mathbf{J} F(H_k)
+\end{align*}
+
+$H_k$ is the hompgraphy matrix after k iterations. $F(H_k)$ is the objective function which is the displacement between measure $X'$ and estimated $\tilde{X'} = HX$. The objective is to minimize $F(H_k) = ||X' - \tilde{X'}||^2 =||X' -  HX||^2$. Define $X = \begin{bmatrix} x_1 & y_1 & x_2 & y_2 & x_3 & y_3  & . &  . & x_n & y_n \end{bmatrix}^T$, $X' = \begin{bmatrix} x'_1 & y'_1 & x'_2 & y'_2 & x'_3 & y'_3  & . &  . & x'_n & y'_n \end{bmatrix}^T$, and $HX = \begin{bmatrix} f^1_1 & f^2_1 & f^1_2 & f^2_2 & f^1_3 & f^2_3  & . &  . & f^1_n & f^2_n \end{bmatrix}^T$ where 
+
+\begin{align*}
+f^1_i &= \frac{h_{11}x_i + h_{12}y_i + h_{13}}{h_{31}x_i + h_{32}y_i + h_{33}} \\
+f^2_i &= \frac{h_{21}x_i + h_{22}y_i + h_{23}}{h_{31}x_i + h_{32}y_i + h_{33}} \\
+\end{align*}
+
+Since there is no $H$ term in $X'$, $\mathbf{J}_F = - \mathbf{J}_{HX}$
+
+\begin{align*}
+\mathbf{J} &= - \mathbf{J}_{HX} \\
+&= - \begin{bmatrix} 
+\frac{\partial f^1_1}{\partial h_{11}} & \frac{\partial f^1_1}{\partial h_{12}} & \frac{\partial f^1_1}{\partial h_{13}}  & \frac{\partial f^1_1}{\partial h_{21}} & . & . & \frac{\partial f^1_1}{\partial h_{33}} \\\\
+\frac{\partial f^2_1}{\partial h_{11}} & \frac{\partial f^2_1}{\partial h_{12}} & \frac{\partial f^2_1}{\partial h_{13}}  & \frac{\partial f^2_1}{\partial h_{21}} & . & . & \frac{\partial f^2_1}{\partial h_{33}} \\
+. & . & .  & . & . & . & . \\
+. & . & .  & . & . & . & . \\
+. & . & .  & . & . & . & . \\
+\frac{\partial f^1_i}{\partial h_{11}} & \frac{\partial f^1_i}{\partial h_{12}} & \frac{\partial f^1_i}{\partial h_{13}}  & \frac{\partial f^1_i}{\partial h_{21}} & . & . & \frac{\partial f^1_i}{\partial h_{33}} \\\\
+\frac{\partial f^2_i}{\partial h_{11}} & \frac{\partial f^2_i}{\partial h_{12}} & \frac{\partial f^2_i}{\partial h_{13}}  & \frac{\partial f^2_i}{\partial h_{21}} & . & . & \frac{\partial f^2_i}{\partial h_{33}} \\
+\end{bmatrix} \\
+\end{align*}
+
+After forming the objective function and Jacobian, these parameters are fed into LM algorithm from Scipy library. The final result will be optimized $H$. 
+%-----------------------------------------------------------------------------------
+
+\section*{Parameters}
+
+NCC Window Size = 21 x 21 pixels
+
+Number of matching for each pair of images = 250
+
+$p$ = 0.99
+
+$\epsilon$ = 0.4
+
+$n$ = 6
+
+$\delta$ = 3
+
+%-----------------------------------------------------------------------------------
+
+\section*{Results}
+
+\begin{figure}[H]
+\centering
+\includegraphics[angle=-90, width=0.7\linewidth]{image1}
+\caption{Original picture 1}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[angle=-90, width=0.7\linewidth]{image2}
+\caption{Original picture 2}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[angle=-90, width=0.7\linewidth]{image3}
+\caption{Original picture 3}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[angle=-90, width=0.7\linewidth]{image4}
+\caption{Original picture 4}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[angle=-90, width=0.7\linewidth]{image5}
+\caption{Original picture 5}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[ width=1\linewidth]{pair12_NCC}
+\caption{NCC Matching between image 1 and image 2}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{pair12_inlier}
+\caption{Inlier pair between image 1 and image 2}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[ width=1\linewidth]{pair23_NCC}
+\caption{NCC Matching between image 2 and image 3}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{pair23_inlier}
+\caption{Inlier pair between image 2 and image 3}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[ width=1\linewidth]{pair34_NCC}
+\caption{NCC Matching between image 3 and image 4}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{pair34_inlier}
+\caption{Inlier pair between image 3 and image 4}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[ width=1\linewidth]{pair45_NCC}
+\caption{NCC Matching between image 4 and image 5}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{pair45_inlier}
+\caption{Inlier pair between image 4 and image 5}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[ width=1\linewidth]{no_LM}
+\caption{Panoramic picture before homography refining}
+\label{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{refined}
+\caption{Panoramic picture after homography refining}
+\label{}
+\end{figure}
+
+
+
+%-----------------------------------------------------------------------------------
+
+\section*{Source Code}
+
+\begin{lstlisting}
+# Import necessary libraries
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt
+from scipy import signal, optimize
+import math
+import random
+
+class Pixel():
+    '''
+    Class for keeping pixel cooridinate
+    '''
+
+    def __init__(self, kp):
+        self.x = int(kp.pt[0])
+        self.y = int(kp.pt[1])
+        self.point = (self.x, self.y)
+
+    def __repr__(self):
+        return f'({self.x}, {self.y})'
+
+    def adjust_width(self, width):
+        x = self.x + width
+        return (x, self.y)
+
+class Image():
+    ''' 
+    Class for store images and related parameters.
+    '''
+
+    FILEPATH = 'ece661_pics\\hw5_image\\'
+    NCC_WINDOW_SIZE = 10 # 21 x 21 pixel
+
+    def __init__(self, name):
+        self.name = name
+        self.load_images()
+        self.keypoints = None
+        
+
+    def load_images(self):
+        self.image = cv.imread(self.FILEPATH + self.name + '.jpg')
+
+    def show_image(self):
+        plt.imshow(cv.cvtColor(self.image, cv.COLOR_BGR2RGB))
+
+    def extract_feature(self):
+        '''
+            Extract the features from image using SIFT and the window around the features.
+        '''
+        if self.keypoints is not None:
+            return self.keypoints, self.windows
+        
+        gray_image = cv.cvtColor(self.image, cv.COLOR_BGR2GRAY)
+        # Extract features with SIFT
+        features = cv.xfeatures2d.SIFT_create()
+        kps, des = features.detectAndCompute(gray_image, None)
+
+        width = self.NCC_WINDOW_SIZE
+        # List of keypoint
+        self.keypoints = []
+        # Filter out keypoints that are close to the edge
+        for kp in kps:
+            if  width <= kp.pt[0] < gray_image.shape[1] - width and \
+                width <= kp.pt[1] < gray_image.shape[0] - width:
+                self.keypoints.append(Pixel(kp))
+        
+        # Make an array size_of_window x number_of_keypoints. Started with 0 vector column
+        windows = np.zeros(((width*2 + 1) ** 2, 1)).astype(int)
+        for keypoint in self.keypoints:
+            # Extract NCC window around the keypoing
+            window = gray_image[keypoint.y - width : keypoint.y + width+1, keypoint.x - width : keypoint.x + width+1]
+            mean = np.mean(window)
+            # Adjust with its mean before append to final array
+            window = window - mean
+            windows = np.append(windows, window.reshape(window.size, 1), axis=1)
+        
+        # Remove 0 vector column
+        self.windows = np.delete(windows, 0, axis=1)
+
+        return self.keypoints, self.windows
+
+    def mark_keypoints(self):
+        '''
+            Mark the feature on the image
+        '''
+        if self.keypoints is None:
+            self.extract_feature()
+            
+        radius = 2
+        thickness = 1
+        color = (0, 0, 255)
+        image = self.image.copy()
+        for keypoint in self.keypoints:
+            cv.circle(image, keypoint.point, radius, color, thickness)
+        plt.imshow(cv.cvtColor(image, cv.COLOR_BGR2RGB))
+        savename = f'{self.FILEPATH}{self.name}_keypoints.png'
+        cv.imwrite(savename, image.astype(np.int))
+
+
+img1 = Image('image1')
+img2 = Image('image2')
+img3 = Image('image3')
+img4 = Image('image4')
+img5 = Image('image5')
+
+class ImagePair():
+    '''
+        Class for finding correspondences of pair of images
+    '''
+    NUMBER_PAIR = 250
+    FILEPATH = 'ece661_pics\\hw5_image\\'
+
+    def __init__(self, name, imgA, imgB):
+        self.name = name
+        self.imgA = imgA
+        self.imgB = imgB
+        self.image = cv.hconcat([self.imgA.image, self.imgB.image])
+        self.pairs = None
+    
+    def show_image(self):
+        plt.imshow(cv.cvtColor(self.image, cv.COLOR_BGR2RGB))
+
+    def ncc_matching(self):
+        '''
+            find the pair of feature base on NCC. 
+            Limit number of pair to the class constant.
+        '''
+        if self.pairs is not None:
+            return self.pairs
+        
+        self.imgA.extract_feature()
+        self.imgB.extract_feature()
+        self.pairs = []
+        
+        # Array of NCC. Size is number_of_keypointA x Size is number_of_keypointB
+        numerator  = np.dot(self.imgA.windows.T, self.imgB.windows)
+        windowA_sq = self.imgA.windows * self.imgA.windows
+        windowB_sq = self.imgB.windows * self.imgB.windows
+        windowA_sumsq = np.sum(windowA_sq, axis=0).reshape((windowA_sq.shape[1], 1))
+        windowB_sumsq = np.sum(windowB_sq, axis=0).reshape((windowB_sq.shape[1], 1))
+        denominator = np.sqrt(np.dot(windowA_sumsq, windowB_sumsq.T))
+        ncc = numerator/denominator
+
+        # Keep highest value of NCC pairs upto the number define in class constant. 
+        ncc_highest = np.amax(ncc, axis=1)
+        ncc_highest_idx = np.argmax(ncc, axis=1)
+        sorted_inx = np.argsort(ncc_highest)
+        sorted_inx = sorted_inx[-self.NUMBER_PAIR:]
+        for inx in sorted_inx:
+            kpA = self.imgA.keypoints[inx]
+            kpB = self.imgB.keypoints[ncc_highest_idx[inx]]
+            pair = (kpA, kpB)
+            self.pairs.append(pair)
+        
+        return self.pairs
+
+    def mark_pairs(self):
+        '''
+            Mark correspondences
+        '''
+
+        if self.pairs is None:
+            self.ncc_matching()
+
+        radius = 2
+        thickness = 1
+        color = (0, 0, 255)
+        image = self.image.copy()
+        w = self.imgA.image.shape[1]
+        for pair in self.pairs:
+            pointA = pair[0].point
+            pointB = pair[1].adjust_width(w)
+            cv.circle(image, pointA, radius, color, thickness)
+            cv.circle(image, pointB, radius, color, thickness)
+            cv.line(image, pointA, pointB, color, thickness)
+
+        plt.imshow(cv.cvtColor(image, cv.COLOR_BGR2RGB))
+        savename = f'{self.FILEPATH}{self.name}_NCC.png'
+        cv.imwrite(savename, image.astype(np.int))
+
+
+pair12 = ImagePair('pair12', img1, img2)
+pair23 = ImagePair('pair23', img2, img3)
+pair34 = ImagePair('pair34', img3, img4)
+pair45 = ImagePair('pair45', img4, img5)
+
+pair12.mark_pairs()
+pair23.mark_pairs()
+pair34.mark_pairs()
+pair45.mark_pairs()
+
+class Ransac():
+    '''
+        Class for performing RANSAC algorithm
+    '''
+
+    def __init__(self, n, p, e, d):
+        self.n = n
+        self.p = p
+        self.e = e
+        self.d = d
+        self.num_trial = int(np.log(1 - p) / np.log(1 - (1-e)**n))
+
+    def compute_homography(self, pairs):
+        '''
+            Compute homography from input correspondences
+        '''
+        # Forming system of linear equation AH = b
+        A = np.zeros((1, 8)) # Create first row with 0
+        b = np.array([])
+
+        for pair in pairs:
+            X = pair[0] # X
+            X_dash = pair[1] # X'
+
+            a = np.array([X.x, X.y, 1, 0, 0, 0, -X.x * X_dash.x, -X.y * X_dash.x]).reshape((1, 8))
+            A = np.append(A, a, axis=0)
+            a = np.array([0, 0, 0, X.x, X.y, 1, -X.x * X_dash.y, -X.y * X_dash.y]).reshape((1, 8))
+            A = np.append(A, a, axis=0)
+            b = np.append(b, [X_dash.x, X_dash.y])
+
+        A = np.delete(A, 0, axis=0) # Remove the first row
+        b = b.reshape((-1, 1))
+
+        ATA_inv = np.linalg.inv(np.dot(A.T, A))
+        H = np.dot(ATA_inv, np.dot(A.T, b))
+        H = np.append(H, [1]).reshape((3, 3))
+
+        return H
+
+    def get_homography(self, image_pair):
+        '''
+            Get the best homography by RANSAC algorithm
+        '''
+
+        # Put all correspondance into 3 x num_of_pairs of X and X'
+        X = np.zeros((3, 1)) # X
+        X_dash = np.zeros((3, 1)) # X'
+        for pair in image_pair.pairs:
+            X = np.append(X, [[pair[0].x], [pair[0].y], [1]], axis=1)
+            X_dash = np.append(X_dash, [[pair[1].x], [pair[1].y], [1]], axis=1)
+        X = np.delete(X, 0, axis=1)
+        X_dash = np.delete(X_dash, 0, axis=1)
+  
+        num_pair = len(image_pair.pairs)
+        M = int(num_pair * (1 - self.e))
+
+        H_best = None
+        inlier = None
+        max_inlier = 0
+        
+        for i in range(self.num_trial):
+            # Sample correspondences then compute homography from the samples
+            sample = random.sample(image_pair.pairs, self.n)
+            H = self.compute_homography(sample)
+            # Evaluate homography
+            HX = np.matmul(H, X)
+            HX = HX / HX[2, :]
+            # Vector of displacement from X' and HX
+            error = np.sum((HX - X_dash)**2, axis=0)
+            # Find the index of inlier
+            idx = np.argwhere(error < self.d**2).ravel()
+            if len(idx) > max_inlier:
+                inlier = [image_pair.pairs[i] for i in idx]
+                H_best = H
+                max_inlier = len(idx)
+        
+        return H_best, inlier
+
+    def mark_inliers(self, image_pair, inliers=None):
+        if inliers is None:
+            [H, inliers] = self.get_homography(image_pair)
+        
+        radius = 2
+        thickness = 1
+        color = (0, 255, 0)
+        image = image_pair.image.copy()
+        w = image_pair.imgA.image.shape[1]
+        for inlier in inliers:
+            pointA = inlier[0].point
+            pointB = inlier[1].adjust_width(w)
+            cv.circle(image, pointA, radius, color, thickness)
+            cv.circle(image, pointB, radius, color, thickness)
+            cv.line(image, pointA, pointB, color, thickness)
+
+        plt.imshow(cv.cvtColor(image, cv.COLOR_BGR2RGB))
+        savename = f'{image_pair.FILEPATH}{image_pair.name}_inlier.png'
+        cv.imwrite(savename, image.astype(np.int))
+
+
+ransac = Ransac(6, 0.99, 0.5, 3)
+
+[H12, inliers12] = ransac.get_homography(pair12)
+print(inliers12)
+ransac.mark_inliers(pair12, inliers12)
+
+[H23, inliers23] = ransac.get_homography(pair23)
+print(inliers23)
+ransac.mark_inliers(pair23, inliers23)
+
+[H34, inliers34] = ransac.get_homography(pair34)
+print(inliers34)
+ransac.mark_inliers(pair34, inliers34)
+
+[H45, inliers45] = ransac.get_homography(pair45)
+print(inliers45)
+ransac.mark_inliers(pair45, inliers45)
+
+def panorama(H12, H23, H34, H45, img1, img2, img3, img4, img5, name):
+    ''' 
+        Generate panorama picture from 5 images
+    '''
+    filepath = 'ece661_pics\\hw5_image\\'
+
+    img_all = [img1, img2, img3, img4, img5]
+
+    # Compute necesarry homography
+    H13 = np.matmul(H23, H12)
+    H43 = np.linalg.inv(H34)
+    H53 = np.matmul(H43, np.linalg.inv(H45))
+    H3 = np.eye(3)
+
+    # Calculate offset reference to image 3 (middle image)
+    tx = img1.image.shape[1] + img2.image.shape[1]
+    ty = 0
+    H_translate = np.array([[1, 0, tx], [0, 1, ty], [0, 0, 1]])
+    H_all  = [H13, H23, H3, H43, H53]
+    for i, H in enumerate(H_all):
+        H_all[i] = np.matmul(H_translate, H)
+    
+    # Create the canvas for final output
+    height = 0
+    width = 0
+    for img in img_all:
+        height = max(height, img.image.shape[0])
+        width = width + img.image.shape[1]
+
+    canvas = np.zeros((height, width, 3), np.uint8)
+
+    # Create all pexels in final canvas. Stack into n x 3 array
+    XX, YY = np.meshgrid(np.arange(0, width, 1), np.arange(0, height, 1))
+    canvas_points = np.vstack((XX.ravel(), YY.ravel())).T
+    canvas_points = np.append(canvas_points, np.ones((canvas_points.shape[0], 1)), axis=1).astype(np.int)
+
+    for i, H in enumerate(H_all):
+        img = img_all[i].image
+        h, w, d = img.shape
+        H_inv = np.linalg.inv(H)
+
+        # Apply homography
+        transfrom_points = np.dot(H_inv, canvas_points.T)
+        transfrom_points = transfrom_points / transfrom_points[2, :]
+        transfrom_points = transfrom_points.T
+
+        # Filter out-of-bound
+        valid_low_x = 0 <= transfrom_points[:, 0]
+        valid_low_y = 0 <= transfrom_points[:, 1]
+        valid_high_x = transfrom_points[:, 0] < w-1
+        valid_high_y = transfrom_points[:, 1] < h-1
+        valid_points = valid_low_x * valid_low_y * valid_high_x * valid_high_y
+        valid_points_idx = np.argwhere(valid_points == True).ravel()
+
+        # Mapping image
+        for index in valid_points_idx:
+            transfrom_point = np.round(transfrom_points[index]).astype(np.int)
+            canvas_point = canvas_points[index]
+            canvas[canvas_point[1]][canvas_point[0]][:] = img[transfrom_point[1]][transfrom_point[0]][:]
+
+    plt.imshow(cv.cvtColor(canvas, cv.COLOR_BGR2RGB))
+    savename = f'{filepath}{name}.png'
+    cv.imwrite(savename, canvas)
+
+panorama(H12, H23, H34, H45, img1, img2, img3, img4, img5, 'no_LM')
+
+def refine_homography(H, pairs):
+    '''
+        Method for refining homography matrix with LM algorithm.
+    '''
+
+    def objective_func(H, pairs):
+        ''' 
+            ||X' - f(H)|| (num_of_inlier x 1 vector)
+        '''
+        X_dash = np.array([])
+        F = np.array([])
+        for pair in pairs:
+            X = pair[0]
+            denominator = X.x*H[6] + X.y*H[7] + H[8]
+            F = np.append(F, (X.x*H[0] + X.y*H[1] + H[2]) / denominator) # F1
+            F = np.append(F, (X.x*H[3] + X.y*H[4] + H[5]) / denominator) # F2
+            X_dash = np.append(X_dash, [pair[1].x, pair[1].y])
+            
+        return X_dash - F
+
+    def jacobian(H, pairs):
+        '''
+            Jacobian num_of_inlier x 9 matrix
+        '''
+        F = np.zeros((1, 9))
+        for pair in pairs:
+            X = pair[0]
+            denominator = X.x*H[6] + X.y*H[7] + H[8]
+            # Jacobian of F1
+            delta_f = np.array([X.x / denominator,
+                                X.y / denominator,
+                                1 / denominator,
+                                0,
+                                0,
+                                0,
+                                (-X.x * (X.x*H[0] + X.y*H[1] + H[2])) / (denominator**2),
+                                (-X.y * (X.x*H[0] + X.y*H[1] + H[2])) / (denominator**2),
+                                (-1 * (X.x*H[0] + X.y*H[1] + H[2])) / (denominator**2)]).reshape((1, 9))
+            F = np.append(F, delta_f, axis=0)
+            # Jacobian of F2
+            delta_f = np.array([0,
+                                0,
+                                1,
+                                X.x / denominator,
+                                X.y / denominator,
+                                1 / denominator,
+                                (-X.x * (X.x*H[3] + X.y*H[4] + H[5])) / (denominator**2),
+                                (-X.y * (X.x*H[3] + X.y*H[4] + H[5])) / (denominator**2),
+                                (-1 * (X.x*H[3] + X.y*H[4] + H[5])) / (denominator**2)]).reshape((1, 9))
+            F = np.append(F, delta_f, axis=0)
+        F = np.delete(F, 0, axis=0)
+
+        # Jacobian of cost function equal to - Jacobian of F
+        return -F
+
+    H = H.ravel()
+    sol = optimize.root(fun=objective_func, x0=H, args=pairs, jac=jacobian, method='lm')
+    H_refined = sol.x
+    H_refined = H_refined / H_refined[8]
+    
+    return H_refined.reshape((3, 3))
+
+H12_refined = refine_homography(H12, inliers12)
+H23_refined = refine_homography(H23, inliers23)
+H34_refined = refine_homography(H34, inliers34)
+H45_refined = refine_homography(H45, inliers45)
+
+panorama(H12_refined, H23_refined, H34_refined, H45_refined, img1, img2, img3, img4, img5, 'refined')
+
+\end{lstlisting}
+
+%-----------------------------------------------------------------------------------
+
+\end{document}
+

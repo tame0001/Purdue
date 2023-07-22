@@ -1,0 +1,1120 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./ece661_pics/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{ECE 661: Homework 3}}
+
+Thirawat Bureetes
+
+(Fall 2020)
+\end{center}
+	
+ 
+-----------------------------------------------------------------------------------
+
+\subsection*{Point-to-point correspondences}
+
+Define $\mathbf{p}$ as the point of the world coorinate as a domain of the equation and $\mathbf{p'}$ as a point in the image coordinate as a range of the equation with has destortions. $\mathbf{H}$ is an homography matrix that describe the relationship between two coordianate as 
+
+
+\begin{align*}
+p' &= \mathbf{H} p \\
+\begin{pmatrix} x'\\ y'\\ 1\end{pmatrix} &= 
+\mathbf{H} 
+\begin{pmatrix} x\\ y\\ 1\end{pmatrix}
+\end{align*}
+
+\begin{align*}
+\mathbf{H} &= 
+\begin{bmatrix}
+h_{11} & h_{12} & h_{13}\\
+h_{21} & h_{22} & h_{23} \\
+h_{31} & h_{32} & 1
+\end{bmatrix} \\
+\begin{pmatrix} x'\\ y'\\ 1\end{pmatrix} &= 
+\mathbf{H} 
+\begin{pmatrix} x\\ y\\ 1\end{pmatrix} \\
+\begin{pmatrix} x'\\ y'\\ 1\end{pmatrix} &= 
+\begin{bmatrix}
+h_{11} & h_{12} & h_{13}\\
+h_{21} & h_{22} & h_{23} \\
+h_{31} & h_{32} & 1
+\end{bmatrix}
+\begin{pmatrix} x\\ y\\ 1\end{pmatrix} \\
+x' &= h_{11}x + h_{12}y + h_{13}\\
+y' &= h_{21}x + h_{22}y + h_{23}\\
+1 &= h_{31}x + h_{32}y + 1\\
+\end{align*}
+
+Any homogeneous coordinates $\begin{pmatrix} x_h\\ y_h\\ z_h\end{pmatrix}$ is coresponding to physical coordinate $(x_p,y_p)$ following these relationships:
+\begin{align*}
+x_p &= \frac{x_h}{z_h}\\
+y_p &= \frac{y_h}{z_h}\\
+\end{align*}
+
+From this reletionship, we get:
+\begin{align*}
+\frac{x'}{1} &= \frac{ h_{11}x + h_{12}y + h_{13}}{h_{31}x + h_{32}y + 1}\\
+x'(h_{31}x + h_{32}y + 1) &= h_{11}x + h_{12}y + h_{13} \\
+x' &= h_{11}x + h_{12}y + h_{13} - h_{31}xx' -  h_{32}yx' \\
+\frac{y'}{1} &= \frac{ h_{21}x + h_{22}y + h_{23}}{h_{31}x + h_{32}y + 1}\\
+y'(h_{31}x + h_{32}y + 1) &= h_{21}x + h_{22}y + h_{23} \\
+y' &= h_{21}x + h_{22}y + h_{23} - h_{31}xy' -  h_{32}yy' \\
+\end{align*}
+
+As a result, there are 8 unknown variables. To find the values of these unknown, at least 8 equations are needed. As each pixel has both $x$ and $y$, 4 pairs of corresponding are needed. The final system of linear equation is as below.
+\begin{align*}
+\begin{bmatrix}
+x_1^{'}\\ x_2^{'}\\ x_3^{'} \\ x_4^{'} \\ y_1^{'} \\ y_2^{'} \\ y_3^{'} \\ y_4^{'}
+\end{bmatrix} &=
+\begin{bmatrix}
+x_{1} & y_{1} & 1  & 0 & 0 & 0 & -x_{1}x_1^{'} & -y_{1}x_1^{'}\\ 
+x_{2} & y_{2} & 1  & 0 & 0 & 0 & -x_{2}x_2^{'} & -y_{2}x_2^{'}\\ 
+x_{3} & y_{3} & 1  & 0 & 0 & 0 & -x_{3}x_3^{'} & -y_{3}x_3^{'}\\ 
+x_{4} & y_{4} & 1  & 0 & 0 & 0 & -x_{4}x_4^{'} & -y_{4}x_4^{'}\\ 
+0 & 0 & 0 & x_{1} & y_{1} & 1 & -x_{1}y_1^{'} & -y_{1}y_1^{'}\\ 
+0 & 0 & 0 & x_{2} & y_{2} & 1 & -x_{2}y_2^{'} & -y_{2}y_2^{'}\\ 
+0 & 0 & 0 & x_{3} & y_{3} & 1 & -x_{3}y_3^{'} & -y_{3}y_3^{'}\\ 
+0 & 0 & 0 & x_{4} & y_{4} & 1 & -x_{4}y_4^{'} & -y_{4}y_4^{'}
+\end{bmatrix}
+\begin{bmatrix}
+h_{11} \\ h_{12}\\ h_{13} \\ h_{21} \\ h_{22} \\ h_{23} \\ h_{31} \\ h_{32}
+\end{bmatrix} \\
+\begin{bmatrix}
+h_{11} \\ h_{12}\\ h_{13} \\ h_{21} \\ h_{22} \\ h_{23} \\ h_{31} \\ h_{32}
+\end{bmatrix} &=
+\begin{bmatrix}
+x_{1} & y_{1} & 1  & 0 & 0 & 0 & -x_{1}x_1^{'} & -y_{1}x_1^{'}\\ 
+x_{2} & y_{2} & 1  & 0 & 0 & 0 & -x_{2}x_2^{'} & -y_{2}x_2^{'}\\ 
+x_{3} & y_{3} & 1  & 0 & 0 & 0 & -x_{3}x_3^{'} & -y_{3}x_3^{'}\\ 
+x_{4} & y_{4} & 1  & 0 & 0 & 0 & -x_{4}x_4^{'} & -y_{4}x_4^{'}\\ 
+0 & 0 & 0 & x_{1} & y_{1} & 1 & -x_{1}y_1^{'} & -y_{1}y_1^{'}\\ 
+0 & 0 & 0 & x_{2} & y_{2} & 1 & -x_{2}y_2^{'} & -y_{2}y_2^{'}\\ 
+0 & 0 & 0 & x_{3} & y_{3} & 1 & -x_{3}y_3^{'} & -y_{3}y_3^{'}\\ 
+0 & 0 & 0 & x_{4} & y_{4} & 1 & -x_{4}y_4^{'} & -y_{4}y_4^{'}
+\end{bmatrix}^{-1}
+\begin{bmatrix}
+x_1^{'}\\ x_2^{'}\\ x_3^{'} \\ x_4^{'} \\ y_1^{'} \\ y_2^{'} \\ y_3^{'} \\ y_4^{'}
+\end{bmatrix}
+\end{align*}
+
+After $\mathbf{H}$ is solve, the inverse of $\mathbf{H}$ can be used to remove distortions.
+
+-----------------------------------------------------------------------------------
+
+\subsection*{Result}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task1_1_ori}
+\caption{Original picture with P, Q, R, S points}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task1_1_result}
+\caption{Result from point-to-point method}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task1_2_ori}
+\caption{Original picture with P, Q, R, S points}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task1_2_result}
+\caption{Result from point-to-point method}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task1_3_ori}
+\caption{Original picture with P, Q, R, S points}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task1_3_result}
+\caption{Result from point-to-point method}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task1_4_ori}
+\caption{Original picture with P, Q, R, S points}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task1_4_result}
+\caption{Result from point-to-point method}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task1_5_ori}
+\caption{Original picture with P, Q, R, S points}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task1_5_result}
+\caption{Result from point-to-point method}
+\label{}
+\end{figure}
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Code}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+# Import necessary libraries
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt  
+
+def compute_h (coordinates):
+    ''' This function will compute the homography matrix
+        Input: A list of 4 lists following this format [x, y, x', y']
+        where x and y are pixel from destination image
+        and x' and y' are the pixel from source image
+        Output: A homograply 3x3 matrix'''
+
+        # Create Ax=b where x is the solution
+    A = np.zeros((8, 8))
+    b = np.zeros((8, 1))
+    for i in range(len(coordinates)):
+        A[i][0] = coordinates[i][0]
+        A[i][1] = coordinates[i][1]
+        A[i][2] = 1
+        A[i][3] = 0
+        A[i][4] = 0
+        A[i][5] = 0
+        A[i][6] = -1*coordinates[i][0]*coordinates[i][2]
+        A[i][7] = -1*coordinates[i][1]*coordinates[i][2]
+
+        A[i+4][0] = 0
+        A[i+4][1] = 0
+        A[i+4][2] = 0
+        A[i+4][3] = coordinates[i][0]
+        A[i+4][4] = coordinates[i][1]
+        A[i+4][5] = 1
+        A[i+4][6] = -1*coordinates[i][0]*coordinates[i][3]
+        A[i+4][7] = -1*coordinates[i][1]*coordinates[i][3]
+
+        b[i][0] = coordinates[i][2]
+        b[i+4][0] = coordinates[i][3]
+    
+    A_inv = np.linalg.pinv(A)
+    H = np.matmul(A_inv, b)
+    H = np.append(H, 1)
+    H = H.reshape((3, 3))
+
+    return H
+
+''' Parameter list for all images '''
+image_files = [
+    {
+        'filename': 'Img1.jpg',
+        'savename': 'ece661_pics\hw3_task1_1_result.jpg',
+        'coordinates': [
+            [0, 0, 449, 593],
+            [75, 0, 476, 597],
+            [0, 85, 448, 629],
+            [75, 85,471, 630]]
+    },
+    {
+        'filename': 'Img2.jpeg',
+        'savename': 'ece661_pics\hw3_task1_2_result.jpg',
+        'coordinates': [
+            [475, 564, 0, 0],
+            [593, 546, 84, 0],
+            [475, 706, 0, 74],
+            [594, 720, 84, 74]]
+    },
+    {
+        'filename': 'Img3.jpg',
+        'savename': 'ece661_pics\hw3_task1_3_result.jpg',
+        'coordinates': [
+            [1011, 349, 0, 0],
+            [1304, 359, 55, 0],
+            [1023, 728, 0, 36],
+            [1322, 653, 55, 36]]
+    },
+    {
+        'filename': 'Img4.jpg',
+        'savename': 'ece661_pics\hw3_task1_4_result.jpg',
+        'coordinates': [
+            [723, 240, 0, 0],
+            [1471, 186, 13, 0],
+            [802, 983, 0, 13],
+            [1502, 1005, 13, 13]]
+    },
+    {
+        'filename': 'Img5.jpg',
+        'savename': 'ece661_pics\hw3_task1_5_result.jpg',
+        'coordinates': [
+            [429, 76, 0, 0],
+            [1099, 196, 142, 0],
+            [513, 923, 0, 107],
+            [1127, 701, 142, 107]]
+    },
+]
+
+''' Calculate homography matrix and inverse of it '''
+image = image_files[3]
+source_img = cv.imread(image['filename'])
+plt.imshow(source_img)
+w = source_img.shape[1]
+h = source_img.shape[0]
+H = compute_h(image['coordinates'])
+H_inv = np.linalg.pinv(H)
+H_inv = H_inv / H_inv[2, 2]
+
+''' Parameters for creating result canvas '''
+img_p = np.asarray([0, 0, 1])
+world_p = np.dot(H, img_p)
+world_p = world_p / world_p[2]
+
+img_q = np.asarray([w-1, 0, 1])
+world_q = np.dot(H, img_q)
+world_q = world_q / world_q[2]
+
+img_r = np.asarray([0, h-1, 1])
+world_r = np.dot(H, img_r)
+world_r = world_r / world_r[2]
+
+img_s = np.asarray([w-1, h-1, 1])
+world_s = np.dot(H, img_s)
+world_s = world_s / world_s[2]
+
+min_x = int(min(world_p[0], world_q[0], world_r[0], world_s[0]))
+max_x = int(max(world_p[0], world_q[0], world_r[0], world_s[0]))
+min_y = int(min(world_p[1], world_q[1], world_r[1], world_s[1]))
+max_y = int(max(world_p[1], world_q[1], world_r[1], world_s[1]))
+
+scale1 = source_img.shape[0] / (max_y - min_y)
+scale2 = source_img.shape[1] / (max_x - min_x)
+scale = max(scale1, scale2)
+
+offset_x = int(min_x) 
+offset_y = int(min_y) 
+
+size_x = int((max_x - min_x) * scale)
+size_y = int((max_y - min_y) * scale)
+
+result_img = np.zeros((size_y, size_x, 3))
+
+''' Progess to get the result '''
+for i in range(result_img.shape[1]):
+    for j in range(result_img.shape[0]):
+        point = np.asarray([i/scale + offset_x, j/scale + offset_y, 1])
+        result_pts = np.dot(H_inv, point)
+        result_x = result_pts[0] / result_pts[2]
+        result_y = result_pts[1] / result_pts[2]
+        if result_x > 0 and result_y > 0 and result_x < w and result_y < h:
+            result_img[j][i] = source_img[int(result_y)][int(result_x)]
+
+plt.imshow(result_img.astype(np.int))
+cv.imwrite(image['savename'], result_img.astype(np.int))
+\end{lstlisting}
+
+-----------------------------------------------------------------------------------
+
+\subsection*{Two step method}
+
+Projection distortion makes pararel line becomes unpararel. To remove this effect, we use Vanishing Line $\mathbf{l_\infty}$. This line can be calculated from two vanishing points $\mathbf{p_{vl}}$. These points are the intersection of distorted pararel lines. Let define 4 corners of the rectangular object $\mathbf{p}, \mathbf{q}, \mathbf{r},$ and $\mathbf{s}$ The lines between each corner are result of product of two corners.
+
+\begin{align*}
+\mathbf{l_1} &= \mathbf{p} \times \mathbf{q} \\
+\mathbf{l_2} &= \mathbf{r} \times \mathbf{s} \\
+\mathbf{l_3} &= \mathbf{p} \times \mathbf{e} \\
+\mathbf{l_4} &= \mathbf{q} \times \mathbf{s} \\
+\end{align*}
+
+After getting all lines, we can find vanishing points by
+
+\begin{align*}
+\mathbf{p_{vl1}} &= \mathbf{l_1} \times \mathbf{l_3} \\
+\mathbf{p_{vl2}} &= \mathbf{l_2} \times \mathbf{l_4} \\
+\end{align*}
+
+And eventaully vinishing line.
+\begin{align*}
+ \mathbf{l_\infty} &= \mathbf{p_{vl1}} \times \mathbf{p_{vl2}} 
+\end{align*}
+
+The vanishing line can be written as $ \mathbf{l_\infty} = [l_1, l_2,l_3]^T$. From now, we can from homography as follow.
+
+\begin{align*}
+\mathbf{H_{vl}} &= 
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0 \\
+l_1 & l_2 & l_3
+\end{bmatrix} \\
+\end{align*}
+
+Apply the inverse of $\mathbf{H_{vl}}$ will remov e effect of projection distortion. Next, we will remove the effect of Affine distortion which cause changing of angles. Define two lines as $\mathbf{l} = [l_1, l_2,l_3]^T $ and $\mathbf{m} = [m_1, m_2,m_3]^T $, the angle of these two line is
+
+
+\begin{align*}
+ cos \theta &= \frac{\mathbf{l}^T \mathbf{C_{\infty}^*}\mathbf{m}}{\sqrt{(\mathbf{l}^T \mathbf{C_{\infty}^*}\mathbf{m}})(\mathbf{m}^T \mathbf{C_{\infty}^*}\mathbf{l})} 
+\end{align*}
+
+We will consider the right angle so we know that the angle is 90 degree and $cos 90 = 0$. We know that $\mathbf{l} = \mathbf{H} \mathbf{l}'$. Where 
+
+\begin{align*}
+\mathbf{H_a} &= 
+\begin{bmatrix}
+\mathbf{A} & 0 \\
+0 & 1  \\
+\end{bmatrix} \\
+\mathbf{C_{\infty}^*} &= 
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0 \\
+0 & 0 & 0
+\end{bmatrix} \\
+\end{align*}
+
+We get
+
+\begin{align*}
+ cos \theta = \frac{\mathbf{l}^T \mathbf{C_{\infty}^*}\mathbf{m}}{\sqrt{(\mathbf{l}^T \mathbf{C_{\infty}^*}\mathbf{m}})(\mathbf{m}^T \mathbf{C_{\infty}^*}\mathbf{l})} &= 0 \\
+\mathbf{l}^T \mathbf{C_{\infty}^*}\mathbf{m}  &= 0\\
+\mathbf{l'}^T\mathbf{H_a} \mathbf{C_{\infty}^*}\mathbf{H_a}^T\mathbf{m'}  &= 0\\
+\mathbf{l'}^T
+\begin{bmatrix}
+\mathbf{A} & 0 \\
+0 & 1  \\
+\end{bmatrix} 
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0 \\
+0 & 0 & 0
+\end{bmatrix} 
+\begin{bmatrix}
+\mathbf{A}^T & 0 \\
+0 & 1  \\
+\end{bmatrix} 
+\mathbf{m'} &= 0\\
+\end{align*}
+
+
+\begin{align*}
+\begin{bmatrix}
+l_1 & l_2 & l_3
+\end{bmatrix}
+\begin{bmatrix}
+\mathbf{A}\mathbf{A}^T & 0 \\
+0 & 0  \\
+\end{bmatrix} 
+\begin{bmatrix}
+m_1 \\ ml_2 \\ m_3
+\end{bmatrix}
+ &= 0\\
+\end{align*}
+
+Denote $\mathbf{S} = \mathbf{A}\mathbf{A}^T = \begin{bmatrix}
+s_{11} & s_{12} \\
+s_{12} & s_{22} \\
+\end{bmatrix} $ We can get $s_{11}l'_1m'_1 + s_{12}(l'_1m'_2+l'_2m'_1)+s_{22}l'_2m'_2 = 0$ Since we can set $s_{22} = 1$, therer are 2 unknown so that 2 equations are needed. Two pairs of orthogonal lines can give us 2 equations. After obtain $\mathbf{S}$, we can fine $\mathbf{S}$ by using singular value decomposition. Then $\mathbf{H_a}$ can be used to remove affine distortion.
+
+-----------------------------------------------------------------------------------
+
+\subsection*{Result}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task2_1_ori}
+\caption{Original picture}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task2_1_result_1}
+\caption{Result after removing projection distortion}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task2_1_result_2}
+\caption{Result after removing affine distortion}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task2_2_ori}
+\caption{Original picture}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.08]{hw3_task2_2_result_1}
+\caption{Result after removing projection distortion}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.08]{hw3_task2_2_result_2}
+\caption{Result after removing affine distortion}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task2_3_ori}
+\caption{Original picture}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task2_3_result_1}
+\caption{Result after removing projection distortion}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task2_3_result_2}
+\caption{Result after removing affine distortion}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task2_4_ori}
+\caption{Original picture}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task2_4_result_1}
+\caption{Result after removing projection distortion}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task2_4_result_2}
+\caption{Result after removing affine distortion}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task2_5_ori}
+\caption{Original picture}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task2_5_result_1}
+\caption{Result after removing projection distortion}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task2_5_result_2}
+\caption{Result after removing affine distortion}
+\label{}
+\end{figure}
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Code}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+# Import necessary libraries
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt  
+
+''' Parameter list for all images '''
+image_files = [
+    {
+        'filename': 'Img1.jpg',
+        'savename1': 'ece661_pics\hw3_task2_1_result_1.jpg',
+        'savename2': 'ece661_pics\hw3_task2_1_result_2.jpg',
+        'p': np.asarray([573, 207, 1]),
+        'q': np.asarray([966, 342, 1]),
+        'r': np.asarray([549, 719, 1]),
+        's': np.asarray([1005, 759, 1])
+    },
+    {
+        'filename': 'Img2.jpeg',
+        'savename1': 'ece661_pics\hw3_task2_2_result_1.jpg',
+        'savename2': 'ece661_pics\hw3_task2_2_result_2.jpg',
+        'p': np.asarray([367, 554, 1]),
+        'q': np.asarray([662, 510, 1]),
+        'r': np.asarray([364, 853, 1]),
+        's': np.asarray([642, 973, 1])
+    },
+    {
+        'filename': 'Img3.jpg',
+        'savename1': 'ece661_pics\hw3_task2_3_result_1.jpg',
+        'savename2': 'ece661_pics\hw3_task2_3_result_2.jpg',
+        'p': np.asarray([1011, 349, 1]),
+        'q': np.asarray([1304, 359, 1]),
+        'r': np.asarray([1023, 728, 1]),
+        's': np.asarray([1322, 653, 1])
+    },
+    {
+        'filename': 'Img4.jpg',
+        'savename1': 'ece661_pics\hw3_task2_4_result_1.jpg',
+        'savename2': 'ece661_pics\hw3_task2_4_result_2.jpg',
+        'p': np.asarray([730, 237, 1]),
+        'q': np.asarray([1481, 178, 1]),
+        'r': np.asarray([800, 977, 1]),
+        's': np.asarray([1496, 1008, 1])
+    },
+    {
+        'filename': 'Img5.jpg',
+        'savename1': 'ece661_pics\hw3_task2_5_result_1.jpg',
+        'savename2': 'ece661_pics\hw3_task2_5_result_2.jpg',
+        'p': np.asarray([406, 21, 1]),
+        'q': np.asarray([1320, 204, 1]),
+        'r': np.asarray([502, 1009, 1]),
+        's': np.asarray([1338, 668, 1])
+    },
+]
+
+image = image_files[2]
+source_img = cv.imread(image['filename'])
+plt.imshow(source_img)
+w = source_img.shape[1]
+h = source_img.shape[0]
+
+''' Find vanishing line and homoghaphy matrix '''
+l1 = np.cross(image['p'], image['q'])
+l2 = np.cross(image['r'], image['s'])
+l3 = np.cross(image['p'], image['r'])
+l4 = np.cross(image['q'], image['s'])
+l1 = l1 / l1[2]
+l2 = l2 / l2[2]
+l3 = l3 / l3[2]
+l4 = l4 / l4[2]
+
+vp1 = np.cross(l1, l2)
+vp2 = np.cross(l3, l4)
+vp1 = vp1 / vp1[2]
+vp2 = vp2 / vp2[2]
+
+vl = np.cross(vp1, vp2)
+vl = vl / vl[2]
+
+H_vl = np.eye(3)
+H_vl[2] = vl
+
+H_vl_inv = np.linalg.pinv(H_vl)
+H_vl_inv = H_vl_inv / H_vl_inv[2][2]
+
+img_p = np.asarray([0, 0, 1])
+world_p = np.dot(H_vl, img_p)
+world_p = world_p / world_p[2]
+
+img_q = np.asarray([w-1, 0, 1])
+world_q = np.dot(H_vl, img_q)
+world_q = world_q / world_q[2]
+
+img_r = np.asarray([0, h-1, 1])
+world_r = np.dot(H_vl, img_r)
+world_r = world_r / world_r[2]
+
+img_s = np.asarray([w-1, h-1, 1])
+world_s = np.dot(H_vl, img_s)
+world_s = world_s / world_s[2]
+
+min_x = int(min(world_p[0], world_q[0], world_r[0], world_s[0]))
+max_x = int(max(world_p[0], world_q[0], world_r[0], world_s[0]))
+min_y = int(min(world_p[1], world_q[1], world_r[1], world_s[1]))
+max_y = int(max(world_p[1], world_q[1], world_r[1], world_s[1]))
+
+scale1 = source_img.shape[0] / (max_y - min_y)
+scale2 = source_img.shape[1] / (max_x - min_x)
+scale = max(scale1, scale2)
+
+offset_x = int(min_x) 
+offset_y = int(min_y) 
+
+size_x = int((max_x - min_x) * scale)
+size_y = int((max_y - min_y) * scale)
+
+result_img = np.zeros((size_y, size_x, 3))
+
+'''Remove projection distortion '''
+for i in range(result_img.shape[1]):
+    for j in range(result_img.shape[0]):
+        point = np.asarray([i/scale + offset_x, j/scale + offset_y, 1])
+        result_pts = np.dot(H_vl_inv, point)
+        result_x = result_pts[0] / result_pts[2]
+        result_y = result_pts[1] / result_pts[2]
+        if result_x > 0 and result_y > 0 and result_x < w and result_y < h:
+            result_img[j][i] = source_img[int(result_y)][int(result_x)]
+plt.imshow(result_img.astype(np.int))
+cv.imwrite(image['savename1'], result_img.astype(np.int))
+
+''' Find affine homopgraghy '''
+new_p = np.dot(H_vl, image['p'])
+new_p = new_p / new_p[2]
+new_q = np.dot(H_vl, image['q'])
+new_q = new_q / new_q[2]
+new_r = np.dot(H_vl, image['r'])
+new_r = new_r / new_r[2]
+new_s = np.dot(H_vl, image['s'])
+new_s = new_s / new_s[2]
+
+new_l1 = np.cross(new_p, new_q)
+new_l2 = np.cross(new_r, new_s)
+new_l3 = np.cross(new_p, new_r)
+new_l4 = np.cross(new_q, new_s)
+new_l1 = new_l1 / new_l1[2]
+new_l2 = new_l2 / new_l2[2]
+new_l3 = new_l3 / new_l3[2]
+new_l4 = new_l4 / new_l4[2]
+
+A = np.zeros((2, 2))
+b = np.zeros((2, 1))
+A[0][0] = new_l1[0] * new_l3[0]
+A[0][1] = new_l1[0] * new_l3[1] + new_l1[1] * new_l3[0]
+A[1][0] = new_l3[0] * new_l2[0]
+A[1][1] = new_l3[0] * new_l2[1] + new_l3[1] * new_l2[0]
+b[0] = -1 * new_l1[1] * new_l3[1]
+b[1] = -1 * new_l3[1] * new_l2[1]
+A_inv = np.linalg.pinv(A)
+s = np.dot(A_inv, b)
+S = np.ones((2, 2))
+S[0][0] = s[0]
+S[0][1] = s[1]
+S[1][0] = s[1]
+u, s, vh = np.linalg.svd(S)
+D = np.sqrt(np.diag(s))
+H_a = np.zeros((3, 3))
+H_a[:2, :2] = np.dot(np.dot(vh, D), vh.T)
+H_a[2, 2] = 1
+H_a_inv = np.linalg.pinv(H_a)
+H_a_inv = H_a_inv / H_a_inv[2][2]
+
+H = np.dot(H_vl, H_a_inv)
+H_inv = np.linalg.pinv(H)
+H_inv = H_inv / H_inv[2][2]
+
+''' Parameters for creating result canvas '''
+img_p = np.asarray([0, 0, 1])
+world_p = np.dot(H, img_p)
+world_p = world_p / world_p[2]
+
+img_q = np.asarray([w-1, 0, 1])
+world_q = np.dot(H, img_q)
+world_q = world_q / world_q[2]
+
+img_r = np.asarray([0, h-1, 1])
+world_r = np.dot(H, img_r)
+world_r = world_r / world_r[2]
+
+img_s = np.asarray([w-1, h-1, 1])
+world_s = np.dot(H, img_s)
+world_s = world_s / world_s[2]
+
+min_x = int(min(world_p[0], world_q[0], world_r[0], world_s[0]))
+max_x = int(max(world_p[0], world_q[0], world_r[0], world_s[0]))
+min_y = int(min(world_p[1], world_q[1], world_r[1], world_s[1]))
+max_y = int(max(world_p[1], world_q[1], world_r[1], world_s[1]))
+
+scale1 = source_img.shape[0] / (max_y - min_y)
+scale2 = source_img.shape[1] / (max_x - min_x)
+scale = max(scale1, scale2)
+
+offset_x = int(min_x) 
+offset_y = int(min_y) 
+
+size_x = int((max_x - min_x) * scale)
+size_y = int((max_y - min_y) * scale)
+
+result_img = np.zeros((size_y, size_x, 3))
+
+''' Process to get the result '''
+for i in range(result_img.shape[1]):
+    for j in range(result_img.shape[0]):
+        point = np.asarray([i/scale + offset_x, j/scale + offset_y, 1])
+        result_pts = np.dot(H_inv, point)
+        result_x = result_pts[0] / result_pts[2]
+        result_y = result_pts[1] / result_pts[2]
+        if result_x > 0 and result_y > 0 and result_x < w and result_y < h:
+            result_img[j][i] = source_img[int(result_y)][int(result_x)]
+
+plt.imshow(result_img.astype(np.int))
+cv.imwrite(image['savename2'], result_img.astype(np.int))
+\end{lstlisting}
+
+-----------------------------------------------------------------------------------
+
+\subsection*{One step method}
+
+
+\begin{align*}
+\mathbf{C_{\infty}^*} &= 
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0 \\
+0 & 0 & 0
+\end{bmatrix} \\
+\mathbf{H} &= 
+\begin{bmatrix}
+\mathbf{A} & 0\\
+\mathbf{v^T}& 1\\
+\end{bmatrix} \\
+\mathbf{H}\mathbf{C_{\infty}^*}\mathbf{H}^T &= 
+\begin{bmatrix}
+\mathbf{A}\mathbf{A}^T & \mathbf{A}\mathbf{v}\\
+\mathbf{v}^T\mathbf{A}^T & \mathbf{v}^T\mathbf{v}\\
+\end{bmatrix} \\
+ &=
+\begin{bmatrix}
+a & \frac{b}{2} & \frac{d}{2}\\
+\frac{b}{2} & c & \frac{e}{2} \\
+\frac{d}{2} & \frac{e}{2} & f
+\end{bmatrix} \\
+ &= \mathbf{C_{\infty}^{*'}} \\
+ \mathbf{l'}^T\mathbf{C_{\infty}^{*'}}\mathbf{m'} &= 0 \\
+\begin{bmatrix}
+l_1 & l_2 & l_3
+\end{bmatrix}
+\begin{bmatrix}
+a & \frac{b}{2} & \frac{d}{2}\\
+\frac{b}{2} & c & \frac{e}{2} \\
+\frac{d}{2} & \frac{e}{2} & f
+\end{bmatrix} 
+\begin{bmatrix}
+m_1 \\ ml_2 \\ m_3
+\end{bmatrix} &= 0\\
+\end{align*}
+
+Since we only concern about ratio so we can set $f = 1$, there will be 5 unknown variables remain. At least 5 pairs of orthogonal lines are needed to solve this problem. After obtaining all variable, component of homography matrix can be derived by singular value decomposition. 
+
+-----------------------------------------------------------------------------------
+
+\subsection*{Result}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task3_1_ori}
+\caption{Original picture}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task3_1_result}
+\caption{Result one step method}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task3_2_ori}
+\caption{Original picture}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task3_2_result}
+\caption{Result one step method}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task3_3_ori}
+\caption{Original picture}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.05]{hw3_task3_3_result}
+\caption{Result one step method}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task3_4_ori}
+\caption{Original picture}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task3_4_result}
+\caption{Result one step method}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task3_5_ori}
+\caption{Original picture}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_task3_5_result}
+\caption{Result one step method}
+\label{}
+\end{figure}
+
+
+-----------------------------------------------------------------------------------
+
+\subsection*{Code}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+# Import necessary libraries
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt  
+
+''' Parameter list for all images '''
+image_files = [
+    {
+        'filename': 'Img1.jpg',
+        'savename': 'ece661_pics\hw3_task3_1_result.jpg',
+        'p': np.asarray([573, 207, 1]),
+        'q': np.asarray([966, 342, 1]),
+        'r': np.asarray([549, 719, 1]),
+        's': np.asarray([1005, 759, 1]),
+        't': np.asarray([109, 542, 1]),
+        'u': np.asarray([96, 675, 1]),
+        'v': np.asarray([239, 686, 1])
+    },
+    {
+        'filename': 'Img2.jpeg',
+        'savename': 'ece661_pics\hw3_task3_2_result.jpg',
+        'p': np.asarray([367, 554, 1]),
+        'q': np.asarray([662, 510, 1]),
+        'r': np.asarray([364, 853, 1]),
+        's': np.asarray([642, 973, 1]),
+        't': np.asarray([478, 567, 1]),
+        'u': np.asarray([480, 711, 1]),
+        'v': np.asarray([597, 723, 1])
+    },
+    {
+        'filename': 'Img3.jpg',
+        'savename': 'ece661_pics\hw3_task3_3_result.jpg',
+        'p': np.asarray([1011, 349, 1]),
+        'q': np.asarray([1304, 359, 1]),
+        'r': np.asarray([1023, 728, 1]),
+        's': np.asarray([1322, 653, 1]),
+        't': np.asarray([1462, 381, 1]),
+        'u': np.asarray([1638, 384, 1]),
+        'v': np.asarray([1623, 566, 1])
+    },
+    {
+        'filename': 'Img4.jpg',
+        'savename': 'ece661_pics\hw3_task3_4_result.jpg',
+        'p': np.asarray([730, 237, 1]),
+        'q': np.asarray([1481, 178, 1]),
+        'r': np.asarray([800, 977, 1]),
+        's': np.asarray([1496, 1008, 1]),
+        't': np.asarray([1285, 572, 1]),
+        'u': np.asarray([1295, 646, 1]),
+        'v': np.asarray([943, 659, 1])
+    },
+    {
+        'filename': 'Img5.jpg',
+        'savename': 'ece661_pics\hw3_task3_5_result.jpg',
+        'p': np.asarray([406, 21, 1]),
+        'q': np.asarray([1320, 204, 1]),
+        'r': np.asarray([502, 1009, 1]),
+        's': np.asarray([1338, 668, 1]),
+        't': np.asarray([1101, 196, 1]),
+        'u': np.asarray([1132, 703, 1]),
+        'v': np.asarray([516, 927, 1])
+    },
+]
+
+image = image_files[0]
+source_img = cv.imread(image['filename'])
+plt.imshow(source_img)
+w = source_img.shape[1]
+h = source_img.shape[0]
+
+''' creat 5 pairs of line '''
+l1 = np.cross(image['p'], image['q'])
+m1 = np.cross(image['p'], image['r'])
+l2 = np.cross(image['r'], image['s'])
+m2 = np.cross(image['r'], image['p'])
+l3 = np.cross(image['p'], image['q'])
+m3 = np.cross(image['q'], image['s'])
+l4 = np.cross(image['r'], image['s'])
+m4 = np.cross(image['q'], image['s'])
+l5 = np.cross(image['t'], image['u'])
+m5 = np.cross(image['u'], image['v'])
+l1 = l1 / l1[2]
+l2 = l2 / l2[2]
+l3 = l3 / l3[2]
+l4 = l4 / l4[2]
+l5 = l5 / l5[2]
+m1 = m1 / m1[2]
+m2 = m2 / m2[2]
+m3 = m3 / m3[2]
+m4 = m4 / m4[2]
+m5 = m5 / m5[2]
+
+A = []
+b = []
+
+A.append([l1[0]*m1[0], (l1[0]*m1[1] + l1[1]*m1[0])/2, l1[1]*m1[1], (l1[0]*m1[2] + l1[2]*m1[0])/2, (l1[1]*m1[2] + l1[2]*m1[1])/2])
+b.append([-1 * l1[2] * m1[2]])
+A.append([l2[0]*m2[0], (l2[0]*m2[1] + l2[1]*m2[0])/2, l2[1]*m2[1], (l2[0]*m2[2] + l2[2]*m2[0])/2, (l2[1]*m2[2] + l2[2]*m2[1])/2])
+b.append([-1 * l2[2] * m2[2]])
+A.append([l3[0]*m3[0], (l3[0]*m3[1] + l3[1]*m3[0])/2, l3[1]*m3[1], (l3[0]*m3[2] + l3[2]*m3[0])/2, (l3[1]*m3[2] + l3[2]*m3[1])/2])
+b.append([-1 * l3[2] * m3[2]])
+A.append([l4[0]*m4[0], (l4[0]*m4[1] + l4[1]*m4[0])/2, l4[1]*m4[1], (l4[0]*m4[2] + l4[2]*m4[0])/2, (l4[1]*m4[2] + l4[2]*m4[1])/2])
+b.append([-1 * l4[2] * m4[2]])
+A.append([l5[0]*m5[0], (l5[0]*m5[1] + l5[1]*m5[0])/2, l5[1]*m5[1], (l5[0]*m5[2] + l5[2]*m5[0])/2, (l5[1]*m5[2] + l5[2]*m5[1])/2])
+b.append([-1 * l5[2] * m5[2]])
+
+A = np.asarray(A)
+b = np.asarray(b)
+
+A = np.asarray(A)
+A_inv = np.linalg.pinv(A)
+abcde = np.dot(A_inv, b)
+abcde = abcde / np.max(abcde)
+
+C = np.zeros((3, 3))
+C[0][0] = abcde[0]
+C[0][1] = abcde[1]/2
+C[0][2] = abcde[3]/2
+C[1][0] = abcde[1]/2
+C[1][1] = abcde[2]
+C[1][2] = abcde[4]/2
+C[2][0] = abcde[3]/2
+C[2][1] = abcde[4]/2
+C[2][2] = 1
+
+''' build homography matrix '''
+S = C[:2, :2]
+u, s, vh = np.linalg.svd(S)
+D = np.sqrt(np.diag(s))
+
+A = np.dot(np.dot(vh, D), vh.T)
+t = np.asarray([C[2][0], C[2][1]])
+v = np.dot(np.linalg.pinv(A), t)
+
+H = np.zeros((3, 3))
+H[:2, :2] = A
+H[2, :2] = v
+H[2][2] = 1
+H_inv = np.linalg.pinv(H)
+H_inv = H_inv / H_inv[2, 2]
+
+''' Parameters for creating result canvas '''
+img_p = np.asarray([0, 0, 1])
+world_p = np.dot(H_inv, img_p)
+world_p = world_p / world_p[2]
+
+img_q = np.asarray([w-1, 0, 1])
+world_q = np.dot(H_inv, img_q)
+world_q = world_q / world_q[2]
+
+img_r = np.asarray([0, h-1, 1])
+world_r = np.dot(H_inv, img_r)
+world_r = world_r / world_r[2]
+
+img_s = np.asarray([w-1, h-1, 1])
+world_s = np.dot(H_inv, img_s)
+world_s = world_s / world_s[2]
+
+min_x = int(min(world_p[0], world_q[0], world_r[0], world_s[0]))
+max_x = int(max(world_p[0], world_q[0], world_r[0], world_s[0]))
+min_y = int(min(world_p[1], world_q[1], world_r[1], world_s[1]))
+max_y = int(max(world_p[1], world_q[1], world_r[1], world_s[1]))
+
+scale1 = source_img.shape[0] / (max_y - min_y)
+scale2 = source_img.shape[1] / (max_x - min_x)
+scale = max(scale1, scale2)
+
+offset_x = int(min_x) 
+offset_y = int(min_y) 
+
+size_x = int((max_x - min_x) * scale)
+size_y = int((max_y - min_y) * scale)
+
+result_img = np.zeros((size_y, size_x, 3))
+
+'''Remove projection distortion '''
+for i in range(result_img.shape[1]):
+    for j in range(result_img.shape[0]):
+        point = np.asarray([i/scale + offset_x, j/scale + offset_y, 1])
+        result_pts = np.dot(H, point)
+        result_x = result_pts[0] / result_pts[2]
+        result_y = result_pts[1] / result_pts[2]
+        if result_x > 0 and result_y > 0 and result_x < w and result_y < h:
+            result_img[j][i] = source_img[int(result_y)][int(result_x)]
+plt.imshow(result_img.astype(np.int))
+cv.imwrite(image['savename'], result_img.astype(np.int))
+
+\end{lstlisting}
+
+%-----------------------------------------------------------------------------------
+
+\subsection*{Observation}
+
+The point-to-point gives decent quality result. However, the process of obtaining the result is quite complicated. Especially, the physical length of that object must be known. Two steps method doesn't require any physical measurement. The result can be obtained with 4 points that yeild 2 pairs of pararel lines. However, the computational method are complex. One step method has the most simple procudure. The computational is also faster than the other two. 
+
+\end{document}
+
