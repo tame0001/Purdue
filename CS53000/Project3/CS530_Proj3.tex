@@ -1,0 +1,358 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./cs530_pics/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{CS 530: Project 3}}
+
+Thirawat Bureetes
+
+(Spring 2020)
+\end{center}
+
+\subsection*{Task 1. Salient Isovalues}
+
+For CT scan dataset, there are 4 main components: skin, muscle, bone, and teeth. 
+At isovalue = 700, the skin is solely shown.
+Unlike skin, muscle isovalue is hard to determind. There is a small range of isovalue that shows muscle. However, there is no perfect isovalue since there are either skin or bone shown. Isovalue = 1020 is selected because it has minimum skin and bone.
+Bone has wide range of isovalue. Isovalue = 1300 is selected because it contains complete bone structure. The values less than 1300 still have unwanted part. While the values more than 1300, bone structure starts disappeared. At isovalue = 2900, all bone structure is disaapeared. Only teeth remains.
+
+
+Unlike CT dataset, CFD dataset is continuous. There are core flame and outer flame. From the maximum value, the core flame disappears little by little as well as the outer flame moves outwords when the isovalue goes down. This is obvious when consider isovalue = 53000 (figure \ref{fig:hw3_1_2_5} and \ref{fig:hw3_1_2_10}), isovalue = 42000 (figure \ref{fig:hw3_1_2_4} and \ref{fig:hw3_1_2_9}), and isovalue = 13000 (figure \ref{fig:hw3_1_2_3} and \ref{fig:hw3_1_2_8}). At the low isovalue, the outter flame moves outwards significantly as shown in figure \ref{fig:hw3_1_2_2} and \ref{fig:hw3_1_2_7}.
+
+\newpage
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_1_1_1}
+\caption{Image shows all isosurfaces combined using transparency}
+\label{fig:hw3_1_1_1}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_1_2}
+  \caption{Skin. Isovalue = 700}
+  \label{fig:hw3_1_1_2}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_1_3}
+  \caption{Muscle. Isovalue = 1020}
+  \label{fig:hw3_1_1_3}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_1_4}
+  \caption{Bone. Isovalue = 1300}
+  \label{fig:hw3_1_1_4}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_1_5}
+  \caption{Teeth. Isovalue = 2900}
+  \label{fig:hw3_1_1_5}
+\end{subfigure}
+\caption{Images show individual isosurface}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_1_1_6}
+\caption{Image shows all isosurfaces combined using transparency}
+\label{fig:hw3_1_1_6}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_1_7}
+  \caption{Skin. Isovalue = 700}
+  \label{fig:hw3_1_1_7}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_1_8}
+  \caption{Muscle. Isovalue = 1020}
+  \label{fig:hw3_1_1_8}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_1_9}
+  \caption{Bone. Isovalue = 1300}
+  \label{fig:hw3_1_1_9}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_1_10}
+  \caption{Teeth. Isovalue = 2900}
+  \label{fig:hw3_1_1_10}
+\end{subfigure}
+\caption{Images show individual isosurface}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_1_2_1}
+\caption{Image shows all isosurfaces combined using transparency}
+\label{fig:hw3_1_2_1}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_2_2}
+  \caption{Isovalue = 700}
+  \label{fig:hw3_1_2_2}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_2_3}
+  \caption{Isovalue = 13000}
+  \label{fig:hw3_1_2_3}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_2_4}
+  \caption{Isovalue = 42000}
+  \label{fig:hw3_1_2_4}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_2_5}
+  \caption{Isovalue = 53000}
+  \label{fig:hw3_1_2_5}
+\end{subfigure}
+\caption{Images show individual isosurface}
+\label{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_1_2_6}
+\caption{Image shows all isosurfaces combined using transparency}
+\label{fig:hw3_1_2_6}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_2_7}
+  \caption{Isovalue = 700}
+  \label{fig:hw3_1_2_7}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_2_8}
+  \caption{Isovalue = 13000}
+  \label{fig:hw3_1_2_8}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_2_9}
+  \caption{Isovalue = 42000}
+  \label{fig:hw3_1_2_9}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_2_10}
+  \caption{Isovalue = 53000}
+  \label{fig:hw3_1_2_10}
+\end{subfigure}
+\caption{Images show individual isosurface}
+\label{}
+\end{figure}
+
+\subsection*{Task 2. Transfer Function Design}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_2_1_1}
+\caption{Volume rendering of CT dataset}
+\label{fig:hw3_2_1_1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_2_1_2}
+\caption{Volume rendering of CT dataset}
+\label{fig:hw3_2_1_2}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_2_1_3}
+\caption{Volume rendering of CT dataset}
+\label{fig:hw3_2_1_3}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_2_1_0}
+\caption{Transfer function of CT dataset}
+\label{fig:hw3_2_1_0}
+\end{figure}
+
+Figure \ref{fig:hw3_2_1_0} shows the transfer function used in volume rendering of CT dataset. There are 4 non-zero ranges represents 4 main components. 
+The skin starts from 500 to 800 with peak at isovalue = 700. At the peak, opacity level is 0.3, Because it is a layer the shows the boudary of the rendering, it has to be seen while doesn't block components inside. 
+The muscle starts from 980 to 1070 with peak at isovalue = 1020. Opcaity at the peak level is 0.1 because it is an intermediate layer.
+Bone and teeth are inner components start from 1125 to 1600 and 2700 to 4000 respectively. At the peak, opacity level is 1.0. Isovalue 1300 and 2900 are the peak of bone and teeth respectively. All isovalues were obtained by varying isovalue of dataset using slider bar.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_2_2_1}
+\caption{Volume rendering of CFD dataset}
+\label{fig:hw3_2_2_1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_2_2_2}
+\caption{Volume rendering of CFD dataset}
+\label{fig:hw3_2_2_2}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_2_2_3}
+\caption{Volume rendering of CFD dataset}
+\label{fig:hw3_2_2_3}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_2_2_0}
+\caption{Transfer function of CFD dataset}
+\label{fig:hw3_2_2_0}
+\end{figure}
+
+The CFD dataset is continuous. Therefore, the transfer function used in rendering is also continuous function. The low isovalue represents the most outter flame starts from 200 to 10000.
+The opacity at isovalue = 200 is set to 0 and opacity at isovalue = 10000 is set to 0.03. At isovalue  = 42000, the opacity is set to 0.15. Thus, the slope from 10000 to 42000 is changed.
+The peak is set to 0.8 at isovalue = 60000 to shows the core flame. Then the opacity drops to 0 at isovalue = 65000.
+
+\subsection*{Task 3. Volume Rendering vs. Isosurfacing}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_1_1}
+  \caption{Isosurfacing}
+  \label{fig:hw3_1_1_1}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_2_1_1}
+  \caption{volume rendering}
+  \label{fig:hw3_2_1_1}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_1_6}
+  \caption{Isosurfacing}
+  \label{fig:hw3_1_1_6}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_2_1_2}
+  \caption{volume rendering}
+  \label{fig:hw3_2_1_2}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_2_1}
+  \caption{Isosurfacing}
+  \label{fig:hw3_1_2_1}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_2_2_1}
+  \caption{volume rendering}
+  \label{fig:hw3_2_2_1}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_1_2_6}
+  \caption{Isosurfacing}
+  \label{fig:hw3_1_2_6}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_2_2_2}
+  \caption{volume rendering}
+  \label{fig:hw3_2_2_2}
+\end{subfigure}
+
+\caption{Comparing volume rendering and isosurfacing}
+\label{fig:hw3_3}
+\end{figure}
+
+Figure \ref{fig:hw3_3} shows the comparing at the same camera setting between isosurfacing technique and volume rendering technique. Images in the left column are from isosurfacing while images in the right column are from volume rendering.
+For CT dataset, the difference between two techniques is not significant. The bone structure can be seen more clearly in isosurfacing technique than volume rendering. In the other hand, the muscle structure is better in volume rendering than isosurfacing. In conclude, isosurfacing is slightly better than volume rendering for CT data. Because in isosufacing, certain structure can be shown clearly with proper selected isovalue.
+For CFD dataset, it is obvious that volume rendering performs much better than isosurfacing. Because the data is continuous, volume rendering can visualize data from all isovalue. While using isosurfacing technique, there will be missing data since one isosurface represents only one isovalue data.
+
+
+\subsection*{Summary Analysis}
+
+Pros and Cons of volume rendering technique
+
+\begin{itemize}
+
+\item [$\ast$] Pros
+
+\begin{itemize}
+
+\item [--] Can visualize range of isovalue rether than single value.
+\item [--] Transfer function can be used to adjust opacity of value for better quality of rendering
+
+\end{itemize}
+
+\item [$\ast$] Cons
+
+\begin{itemize}
+
+\item [--] Transfer function must be well designed to hide unwanted range of isovalue
+
+\end{itemize}
+
+\end{itemize}
+
+
+\end{document}
+

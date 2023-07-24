@@ -1,0 +1,8 @@
+venv
+*.vti
+*.vtp
+*.jpg
+.vscode
+Project 2/test.py
+*.vtk
+Project 4/isosurface.py

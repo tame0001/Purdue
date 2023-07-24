@@ -1,0 +1,332 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./cs530_pics/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{CS 530: Project 4}}
+
+Thirawat Bureetes
+
+(Spring 2020)
+\end{center}
+
+\subsection*{Task 1. Glyphs}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_1_1}
+  \caption{Plane position}
+  \label{fig:hw4_1_1}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_1_2}
+  \caption{Plane zoom-in}
+  \label{fig:hw4_1_2}
+\end{subfigure}
+\caption{The first cutting plane}
+\label{fig:hw4_1}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_1}
+  \caption{Plane position}
+  \label{fig:hw4_2_1}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_2}
+  \caption{Plane zoom-in}
+  \label{fig:hw4_2_2}
+\end{subfigure}
+\caption{The second cutting plane}
+\label{fig:hw4_2}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_3_1}
+  \caption{Plane position}
+  \label{fig:hw4_3_1}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_3_2}
+  \caption{Plane zoom-in}
+  \label{fig:hw4_3_2}
+\end{subfigure}
+\caption{The third cutting plane}
+\label{fig:hw4_3}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_4_1}
+  \caption{}
+  \label{fig:hw4_4_1}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_4_2}
+  \caption{}
+  \label{fig:hw4_4_2}
+\end{subfigure}
+\caption{All three cutting plane combine}
+\label{fig:hw4_4}
+\end{figure}
+
+
+From printing the data source, the x-coordinate ranges from -100 to 500. The tip of the airplane is x = 0.
+The first plane locates at x = 50 (figure \ref{fig:hw4_1_1}). The reason is to show the information at the near of the head of the plane.
+The second plane locates at x = 150 (figure \ref{fig:hw4_2_1}). This plane shows the dynamics of data at the middle of the airplane.
+The last plane locates at x = 300 (figure \ref{fig:hw4_3_1}). This plane locates behinds the airplane. 
+\newline \newline
+The zoom-in of the first plane (figure \ref{fig:hw4_1_2}) shows that there arer some high value vectures (colored in blue) at the mid-bottom of the plane. These vector's area increase in the second and third plane. However, the vector's values values decrease
+
+%---------------------------------------------------------------------------------------------------------------------------------------
+
+\subsection*{Task 2. Streamlines, Stream Tubes and Stream Surfaces}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_1_1}
+  \caption{}
+  \label{fig:hw4_2_1_1}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_1_2}
+  \caption{}
+  \label{fig:hw4_2_1_2}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_1_3}
+  \caption{}
+  \label{fig:hw4_2_1_3}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_1_4}
+  \caption{}
+  \label{fig:hw4_2_1_4}
+\end{subfigure}
+\caption{Streamlines}
+\label{fig:hw4_2_1}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_2_1}
+  \caption{}
+  \label{fig:hw4_2_2_1}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_2_2}
+  \caption{}
+  \label{fig:hw4_2_2_2}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_2_3}
+  \caption{}
+  \label{fig:hw4_2_2_3}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_2_4}
+  \caption{}
+  \label{fig:hw4_2_2_4}
+\end{subfigure}
+\caption{Streamtubes}
+\label{fig:hw4_2_2}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_3_1}
+  \caption{}
+  \label{fig:hw4_2_3_1}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_3_2}
+  \caption{}
+  \label{fig:hw4_2_3_2}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_3_3}
+  \caption{}
+  \label{fig:hw4_2_3_3}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_3_4}
+  \caption{}
+  \label{fig:hw4_2_3_4}
+\end{subfigure}
+\caption{Streamsurfaces}
+\label{fig:hw4_2_3}
+\end{figure}
+
+Base on the first plane of task 1 (figure \ref{fig:hw4_1}), the high value vecters are at the bottom of plane. 
+Thus, the x-coordinate of seeding is fix equally to the first plane at x = 50.
+The z-coordinate range from 0 to 99.99. The value 7 is fix as the interesting area locates at bottom of the plane.
+The y-coordinate is span from -80 to 80 in order to represent the width of the airplane.
+\newline \newline
+Since the magnitute of velocity vector range from 0.0869 to 157 (as shown in task 1), in task two the range of color transfer function is round from 0 to 160.
+
+%---------------------------------------------------------------------------------------------------------------------------------------
+
+\subsection*{Task 3. Combining Scalar and Vector Visualization}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_3_1_1}
+  \caption{}
+  \label{fig:hw4_3_1_1}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_3_1_2}
+  \caption{}
+  \label{fig:hw4_3_1_2}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_3_1_3}
+  \caption{}
+  \label{fig:hw4_3_1_3}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_3_1_4}
+  \caption{}
+  \label{fig:hw4_3_1_4}
+\end{subfigure}
+\caption{Combination of Streamlines and Isosurface}
+\label{fig:hw4_3_1}
+\end{figure}
+
+The scalar data has range from 0 to the order of 30,000. However, using the isosurface task from  previous  project, the meaningful isovalues are in range that less than 1,000. The value 300 is selected since it covers the verteces and shows the boundary. 
+The isosurface is color in green because blue and red are used in streamline. Thus green color provides the best contast to both color.
+Transparency of isosurface is set to 0.3 to reveal the streamlines inside while the isosurface is clearly seen.
+
+%---------------------------------------------------------------------------------------------------------------------------------------
+
+\subsection*{Task 4. Analysis}
+
+Streamlines
+
+\begin{itemize}
+
+\item [$\ast$] Pros
+
+\begin{itemize}
+
+\item [--] Provides the greatest details data
+
+\end{itemize}
+
+\item [$\ast$] Cons
+
+\begin{itemize}
+
+\item [--] There are numberous of lines which could be too many to spefic certain interest area
+
+\end{itemize}
+
+\end{itemize}
+
+Streamtubes
+
+\begin{itemize}
+
+\item [$\ast$] Pros
+
+\begin{itemize}
+
+\item [--] Less number of tube compared to steamlines. This could help to track dynamics of each tubes easier
+
+\end{itemize}
+
+\item [$\ast$] Cons
+
+\begin{itemize}
+
+\item [--] The number of tubes must be well decided.
+\item [--] The outter tubes can cover the inner tubes.
+
+\end{itemize}
+
+\end{itemize}
+
+Streamsurfaces
+
+\begin{itemize}
+
+\item [$\ast$] Pros
+
+\begin{itemize}
+
+\item [--] Show the smooth surfaces that represent dynamics of data well.
+
+\end{itemize}
+
+\item [$\ast$] Cons
+
+\begin{itemize}
+
+\item [--] Might not be suitable for this kind of dataset.
+
+\end{itemize}
+
+\end{itemize}
+
+In task 3, the isosurface can show the boudary of the data. However, using streamlines is able to intuitively represents the information that isosurface deliver.  In this case, adding isosurface might not add more meaningful information.
+
+
+\end{document}
+

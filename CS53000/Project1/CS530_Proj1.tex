@@ -1,0 +1,330 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./cs530_proj1/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{CS 530: Project 1}}
+
+Thirawat Bureetes
+
+(Spring 2020)
+\end{center}
+
+\subsection*{Task 1. Height Map Visualization and Texture Mapping}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{task1_1}
+\caption{Visualization result of task 1. Scale factor can be adjusted by slide bar at the bottom}
+\label{fig: task1_1}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{1\textwidth}
+  \centering
+  % include first image
+  \includegraphics[width=1\linewidth]{task1_2_a}
+  \caption{}
+  \label{fig:task1_2_a}
+\end{subfigure}
+\begin{subfigure}{1\textwidth}
+  \centering
+  % include second image
+  \includegraphics[width=1\linewidth]{task1_2_b}
+  \caption{}
+  \label{fig:task1_2_b}
+\end{subfigure}
+
+\caption{Close-up visualization}
+\label{fig:task1_2}
+\end{figure}
+
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include first image
+  \includegraphics[width=1\linewidth]{task1_3_a}
+  \caption{Low scale factor}
+  \label{fig:task1_3_a}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include second image
+  \includegraphics[width=1\linewidth]{task1_3_b}
+  \caption{High scale factor}
+  \label{fig:task1_3_b}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include third image
+  \includegraphics[width=1\linewidth]{task1_3_c} 
+  \caption{Low scale factor}
+  \label{fig:task1_3_c}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include fourth image
+  \includegraphics[width=1\linewidth]{task1_3_d}
+  \caption{High scale factor}
+  \label{fig:task1_3_d}
+\end{subfigure}
+\caption{Visualization with differrent scale factor}
+\label{fig:fig}
+\end{figure}
+
+
+\subsection*{Task 2. Isocontours and Color Mapping}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{task2_1}
+\caption{Visualization result of task 2 .Radius can be adjusted by slide bar at the bottom}
+\label{fig: task2_1}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{1\textwidth}
+  \centering
+  % include first image
+  \includegraphics[width=1\linewidth]{task2_2_a}
+  \caption{}
+  \label{fig:task2_2_a}
+\end{subfigure}
+\begin{subfigure}{1\textwidth}
+  \centering
+  % include second image
+  \includegraphics[width=1\linewidth]{task2_2_b}
+  \caption{}
+  \label{fig:task2_2_b}
+\end{subfigure}
+
+\caption{Close-up visualization}
+\label{fig:task2_2}
+\end{figure}
+
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include first image
+  \includegraphics[width=1\linewidth]{task2_3_a}
+  \caption{Low radius}
+  \label{fig:task2_3_a}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include second image
+  \includegraphics[width=1\linewidth]{task2_3_b}
+  \caption{High radius}
+  \label{fig:task2_3_b}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include third image
+  \includegraphics[width=1\linewidth]{task2_3_c} 
+  \caption{Low radius}
+  \label{fig:task2_3_c}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include fourth image
+  \includegraphics[width=1\linewidth]{task2_3_d}
+  \caption{High radius}
+  \label{fig:task2_3_d}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include third image
+  \includegraphics[width=1\linewidth]{task2_3_e} 
+  \caption{Low radius}
+  \label{fig:task2_3_e}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include fourth image
+  \includegraphics[width=1\linewidth]{task2_3_f}
+  \caption{High radius}
+  \label{fig:task2_3_f}
+\end{subfigure}
+\caption{Visualization with differrent radius}
+\label{fig:task2_3}
+\end{figure}
+
+\subsection*{Task 3. Putting It All Together On A Sphere}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{task3_1_a}
+\caption{Visualization result of task 3 (a)}
+\label{fig: task3_1_a}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{task3_1_b}
+\caption{Visualization result of task 3 (b)}
+\label{fig: task3_1_b}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{task3_1_c}
+\caption{Visualization result of task 3 (c)}
+\label{fig: task3_1_c}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{task3_1_d}
+\caption{Visualization result of task 3 (d)}
+\label{fig: task3_1_d}
+\end{figure}
+
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include first image
+  \includegraphics[width=1\linewidth]{task3_2_a}
+  \caption{Low scale factor}
+  \label{fig:task3_2_a}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include second image
+  \includegraphics[width=1\linewidth]{task3_2_b}
+  \caption{High  scale factor}
+  \label{fig:task3_2_b}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include third image
+  \includegraphics[width=1\linewidth]{task3_2_c} 
+  \caption{Low  scale factor}
+  \label{fig:task3_2_c}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include fourth image
+  \includegraphics[width=1\linewidth]{task3_2_d}
+  \caption{High  scale factor}
+  \label{fig:task3_2_d}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include third image
+  \includegraphics[width=1\linewidth]{task3_2_e} 
+  \caption{Low  scale factor}
+  \label{fig:task3_2_e}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include fourth image
+  \includegraphics[width=1\linewidth]{task3_2_f}
+  \caption{High  scale factor}
+  \label{fig:task3_2_f}
+\end{subfigure}
+\caption{Close-up visualization with differrent  scale factor}
+\label{fig:task3_2}
+\end{figure}
+
+\subsection*{Discussion}
+
+\noindent Considering the height map technique used in Task 1:
+
+\begin{enumerate}[label=\arabic*.]
+
+\item What properties of the dataset were effectively visualized with this technique?
+
+\noindent\textbf{Answer} The hieght of this dataset is shown clearly and mapped with texture picture which makes hieght information understandable easily.
+
+\item What are in your opinion the main limitations of this technique and how could you address them?
+
+\noindent\textbf{Answer} The camera always points to the center of plane. This means we can not look into other part of the plane.
+
+\item How useful did you find the slider interface in your usage of the height field representation?
+
+\noindent\textbf{Answer} Too low scale factor can't visualize the hieght information while too high scale factor makes the visualization looks strange. The GUI slide bar enables users to tune the right scale factor.
+
+\item How effective do you find this visualization technique for this dataset?
+
+\noindent\textbf{Answer} It is okay to get broad visualzation of entire globe. But if the users want more detail in specific area, this technique is not effective.
+
+\end{enumerate}
+
+\noindent Considering the level sets considered in Task 2:
+
+\begin{enumerate}[label=\arabic*.]
+
+\item What specific aspects of the data were readily visible with isocontours?
+
+\noindent\textbf{Answer} With isocontours, it is very easy to get sense of height of area compared to nearby area.
+
+\item How useful did you find the color map and why?
+
+\noindent\textbf{Answer} The color helps to indentify the value of that certain isocontour much easier. 
+Because isocontour shows the area which the values are in the same range and the line helps to separate from adjacent zone.
+It is hard to compare the isocontours that are not adjacent to each other. But color map solves this issue.
+
+\end{enumerate}
+
+\noindent Considering the sphere representation in Task 3:
+
+\begin{enumerate}[label=\arabic*.]
+
+\item What benefits did you see to the perform the visualization on a sphere?
+
+\noindent\textbf{Answer} We can zoom into any area on the globe.
+
+\item How did the resulting visualization compare to the previous ones?
+
+\noindent\textbf{Answer} The rotation on sphere is much easier than rotation on plane. This helps to nagivate to interesting area easier.
+
+\end{enumerate}
+
+\noindent Considering your findings in tasks 1, 2, and 3:
+
+\begin{enumerate}[label=\arabic*.]
+
+\item Did you find that the combined use of these visualization techniques in Task 3 improved upon the results of each technique applied separately? Why or why not?
+
+\noindent\textbf{Answer} Yes. Since scale factor provides nice visualzation of hieght but it is hard to compare precisionly. Isocontour provides the precision of information. Combine them together is better than applying each technique separately.
+
+\end{enumerate}
+
+
+\end{document}
+

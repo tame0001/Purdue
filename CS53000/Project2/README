@@ -1,0 +1,6 @@
+For task#2
+isoval.txt provides set of isoval for 3 structures: bone, muscle and skin. More value(s) can be added to generate more isosurface(s).
+colormap.txt provides default colop transfer function. More color(s) can be added.
+
+For task#4
+head_params.txt and feet_params.txt are the parameters files for head and feet respectively. 

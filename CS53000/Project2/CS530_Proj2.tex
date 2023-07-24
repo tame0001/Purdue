@@ -1,0 +1,477 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./cs530_pics/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{CS 530: Project 2}}
+
+Thirawat Bureetes
+
+(Spring 2020)
+\end{center}
+
+\subsection*{Task 1. Interactive Isosurfacing}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_1_1}
+\caption{Bone structure of head CT scan data. Isovalue = 1500.}
+\label{fig:hw2_1_1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_1_2}
+\caption{Muscle structure of head CT scan data. Isovalue = 1070.}
+\label{fig:hw2_1_2}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_1_3}
+\caption{Skin structure of head CT scan data. Isovalue = 700.}
+\label{fig:hw2_1_3}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_1_3}
+  \caption{No clipping}
+  \label{fig:hw2_1_3}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_1_4}
+  \caption{Clip along X axis}
+  \label{fig:hw2_1_4}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_1_5}
+  \caption{Clip along Y axis}
+  \label{fig:hw2_1_5}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_1_6}
+  \caption{Clip along Z axis}
+  \label{fig:hw2_1_6}
+\end{subfigure}
+\caption{Clipped head CT scan data}
+\label{fig:hw2_1_3-6}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_1_7}
+\caption{Bone structure of feet CT scan data. Isovalue = 1500.}
+\label{fig:hw2_1_7}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_1_8}
+\caption{Muscle structure of feet CT scan data. Isovalue = 1070.}
+\label{fig:hw2_1_8}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_1_9}
+\caption{Skin structure of feet CT scan data. Isovalue = 700.}
+\label{fig:hw2_1_9}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_1_9}
+  \caption{No clipping}
+  \label{fig:hw2_1_9}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_1_10}
+  \caption{Clip along X axis}
+  \label{fig:hw2_1_10}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_1_11}
+  \caption{Clip along Y axis}
+  \label{fig:hw2_1_11}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_1_12}
+  \caption{Clip along Z axis}
+  \label{fig:hw2_1_12}
+\end{subfigure}
+\caption{Clipped feet CT scan data}
+\label{fig:hw2_1_9-12}
+\end{figure}
+
+\begin{enumerate}[label=\arabic*.]
+
+\item Which isosurfaces look the most interesting? Justify your answer
+
+\noindent\textbf{Answer} The bone structure is the most interesting because the objective of CT scan is to visualize the internal structure which cannot be seen by normal camera device.
+
+\item How did you select the position of clipping planes?
+
+\noindent\textbf{Answer} As there are 3 separated clipping planes along with X, Y and Z Axis so these 3 planes can cover entire space. Therefore, each clipping plan starts with position (0, 0, 0) and increase value of its axis. 
+
+\end{enumerate}
+
+
+\subsection*{Task 2. Value vs. Gradient Magnitude}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_2_1}
+\caption{Head CT scan data coloring by gradient value. Isovalue for skin, muscle and bone isosurfaces are 700, 1070 and 1500 respectively.}
+\label{fig:hw2_2_1}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_2_1}
+  \caption{No clipping}
+  \label{fig:hw2_2_1}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_2_2}
+  \caption{Clip along X axis}
+  \label{fig:hw2_2_2}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_2_3}
+  \caption{Clip along Y axis}
+  \label{fig:hw2_2_3}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_2_4}
+  \caption{Clip along Z axis}
+  \label{fig:hw2_2_4}
+\end{subfigure}
+\caption{Clipped head CT scan data coloring by gradient value.}
+\label{fig:hw2_2_1-4}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_2_5}
+\caption{Feet CT scan data coloring by gradient value. Isovalue for skin, muscle and bone isosurfaces are 700, 1070 and 1500 respectively.}
+\label{fig:hw2_2_5}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_2_5}
+  \caption{No clipping}
+  \label{fig:hw2_2_5}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_2_6}
+  \caption{Clip along X axis}
+  \label{fig:hw2_2_6}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_2_7}
+  \caption{Clip along Y axis}
+  \label{fig:hw2_2_7}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_2_8}
+  \caption{Clip along Z axis}
+  \label{fig:hw2_2_8}
+\end{subfigure}
+\caption{Clipped feet CT scan data coloring by gradient value.}
+\label{fig:hw2_2_5-8}
+\end{figure}
+
+\begin{enumerate}[label=\arabic*.]
+
+\item What differences can you identify between the various isosurfaces in terms of thier associated gradient magnitude distribution?
+
+\noindent\textbf{Answer} Each isosurface has equal value for entire surface. However, after mapping with gradient value, the color of isosurface becomes non-uniform.
+
+\item How do you interpret these results? Justify your answer.
+
+\noindent\textbf{Answer} The non-uniformity of color of isosurfaces reveals that the gradient values are not constant for any particular isosurfaces.
+
+\item What does that tell you about the value of the resulting visualization?
+
+\noindent\textbf{Answer} The skin and bone have overlap gradient values while muscle's gradient value is furthur away from the rest.
+
+\end{enumerate}
+
+
+\subsection*{Task 3. Two-dimensional Transfer Function}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_3_1_a}
+  \caption{No gradient value filter}
+  \label{fig:hw2_3_1_a}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_3_1_b}
+  \caption{15000 $<$ gradient value $<$ 150000}
+  \label{fig:hw2_3_1_b}
+\end{subfigure}
+\caption{Bone structure (isovalue = 1500) of head CT scan data coloring by gradient value.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_3_2_a}
+  \caption{No gradient value filter}
+  \label{fig:hw2_3_2_a}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_3_2_b}
+  \caption{0 $<$ gradient value $<$ 12000}
+  \label{fig:hw2_3_2_b}
+\end{subfigure}
+\caption{Muscle structure (isovalue = 1050) of head CT scan data coloring by gradient value.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_3_3_a}
+  \caption{No gradient value filter}
+  \label{fig:hw2_3_3_a}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_3_3_b}
+  \caption{5000 $<$ gradient value $<$ 60000}
+  \label{fig:hw2_3_3_b}
+\end{subfigure}
+\caption{Skin structure (isovalue = 700) of head CT scan data coloring by gradient value.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_3_4_a}
+  \caption{No gradient value filter}
+  \label{fig:hw2_3_4_a}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_3_4_b}
+  \caption{10000 $<$ gradient value $<$ 110000}
+  \label{fig:hw2_3_4_b}
+\end{subfigure}
+\caption{Bone structure (isovalue = 1200) of feet CT scan data coloring by gradient value.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_3_5_a}
+  \caption{No gradient value filter}
+  \label{fig:hw2_3_5_a}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_3_5_b}
+  \caption{0 $<$ gradient value $<$ 8000}
+  \label{fig:hw2_3_5_b}
+\end{subfigure}
+\caption{Muscle structure (isovalue = 1050) of feet CT scan data coloring by gradient value.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_3_6_a}
+  \caption{No gradient value filter}
+  \label{fig:hw2_3_6_a}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_3_6_b}
+  \caption{0 $<$ gradient value $<$ 70000}
+  \label{fig:hw2_3_6_b}
+\end{subfigure}
+\caption{Skin structure (isovalue = 600) of feet CT scan data coloring by gradient value.}
+\end{figure}
+
+\begin{enumerate}[label=\arabic*.]
+
+\item To what extent did the gradient magnitute filtering help in refining the isosurface selection? Be specific.
+
+\noindent\textbf{Answer} In each isosurface, there are unwanted structure that has the similar isovalue. If these unwanted part have different gradient values, they can be filtered out by gradient filter. Therefore, only wanted structure remains.
+
+\item Which isosurfaces benefited the most frim this filtering? Why?
+
+\noindent\textbf{Answer} Muscle surface gets the most benifit. Since its isovalue is in the same range as skin and bone CT values. However, muscle gradient is clearly separeated from the other two structures. Thus, gradient filter can remove other structures from muscle isosurface effectively.
+
+\end{enumerate}
+
+\subsection*{Task 4. Complete visualization}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_4_1}
+\caption{Complete head CT scan.}
+\label{fig:hw2_4_1}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_4_1}
+  \caption{No clipping}
+  \label{fig:hw2_4_1}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_4_2}
+  \caption{Clip along X axis}
+  \label{fig:hw2_4_2}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_4_3}
+  \caption{Clip along Y axis}
+  \label{fig:hw2_4_3}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_4_4}
+  \caption{Clip along Z axis}
+  \label{fig:hw2_4_4}
+\end{subfigure}
+\caption{Clipped head CT scan.}
+\label{fig:hw2_4_1-4}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_4_5}
+\caption{Complete feet CT scan.}
+\label{fig:hw2_4_5}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_4_5}
+  \caption{No clipping}
+  \label{fig:hw2_4_5}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_4_6}
+  \caption{Clip along X axis}
+  \label{fig:hw2_4_6}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_4_7}
+  \caption{Clip along Y axis}
+  \label{fig:hw2_4_7}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw2_4_8}
+  \caption{Clip along Z axis}
+  \label{fig:hw2_4_8}
+\end{subfigure}
+\caption{Clipped feet CT scan.}
+\label{fig:hw2_4_5-8}
+\end{figure}
+
+\begin{enumerate}[label=\arabic*.]
+
+\item Comment on your selection of the transparency for each isosurfaces.
+
+\noindent\textbf{Answer} The bone structure is the most inner part so the opeccity is set to 1 (no transparency). The muscle structure's opacity is set to 0.2 as it is not the main focus. The skin opacity is set to 0.5 to keep the clear visualize from the boundary of object since it is the most outer part.
+
+\item How does the transperency benefit your visualization? Explain.
+
+\noindent\textbf{Answer} If all isosurfaces are not transparent, we can only see the outer most isosurface. Transparency can help us to see all isosurfaces in the same time.
+
+\end{enumerate}
+
+\subsection*{Summary Analysis}
+
+\begin{enumerate}[label=\arabic*.]
+
+\item What explanation can you propose for this success?
+
+\noindent\textbf{Answer} This project can successfully visualize the important strcutures of human body from CT scan data. The visualization can be tuned by selecting different parameters such isovalue or range of grandient value.
+
+\item Comment on the quality of the images you were able to obtain in this case.
+
+\noindent\textbf{Answer} The bone structures can be clearly seen from both dataset. However, there are a tube that have similar values, both CT value and gradient value, to the bone. Thus it can not be remove.
+
+\item Discuss any shortcomings of the isosurfacing technique you may have come across in this project.
+
+\noindent\textbf{Answer}The quality of visualization heavily depends on selecting proper isovalue and range of grandient values of each isosurface. The values are in the range of hundreds thousand which is hard to exemine all values to find optimum point. 
+
+\item Comment on the role and meaning of gradient magnitude to filter isosurfaces. 
+
+\noindent\textbf{Answer} Each isosurface has the constant CT value but has different gradient magnitute. Therefore, gradient magnitude can be used to filter out unwanted part of that isosurface. 
+
+\item Comment on the benefits and limitations of transparency and clipping planes to enhance the visualization.
+
+\noindent\textbf{Answer} Transparency can help us to see multiple isosurfaces together. However, the detail of isosurface is diluted since it is harder to see as it becomes transparent.
+ In the other hand, clipping plane can help us to reveal inner isosurfaces with full detail. But it can be seen only from the axis of clipping plane. To see the inner isosurface from other direction need to be done by using other cliping plane.
+
+\end{enumerate}
+
+
+\end{document}
+
