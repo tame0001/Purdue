@@ -1,0 +1,817 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./ece595_pics/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{ECE 595: Homework 4}}
+
+Thirawat Bureetes, 10
+
+(Spring 2020)
+\end{center}
+
+\subsection*{Exercise 1}
+
+\begin{enumerate}[label=(\alph*)]
+
+%------------------Task a------------------------------
+
+\item 
+
+\begin{enumerate}[label=(\roman*)]
+
+\item 
+
+\noindent\textbf{Answer}
+
+If two classes are linearly separable, it means that there are some distances between vertex of each class. 
+Consider the cost function 
+
+$J(\mathbf{\theta}) = - \sum_{j=1}^N{\{y_jlogh_{\mathbf{\theta}}(\mathbf{x_j})+(1-y_j)log(1-logh_{\mathbf{\theta}}(\mathbf{x_j})\}}$ 
+
+In case $y_j = 1$, the cost will be tend to be 0 when $logh_{\mathbf{\theta}}(\mathbf{x_j})$ is close to 0 or $h_{\mathbf{\theta}}(\mathbf{x_j})$ is close to 1. 
+Consider $h_{\mathbf{\theta}}(\mathbf{x_j}) = \frac{1}{1+e^{-(\omega^T\mathbf{x_j}+\omega_0)}}$ will be close to 1 when term $e^{-(\omega^T\mathbf{x_j}+\omega_0)}$ is close to $\infty$. To achive that, to more $||\omega||_2$ and $|\omega_0|$, the closer $e^{-(\omega^T\mathbf{x_j}+\omega_0)}$ to $\infty$ and the lower cost function. 
+
+As $||\omega||_2$ and $|\omega_0|$ will increase every iteration from the reason above, so $||\theta^{k+1}||_2$ will always increase from $||\theta^{k}||_2$ 
+
+\item 
+
+\noindent\textbf{Answer}
+
+As $||\omega||_2$ and $|\omega_0|$  will increase every iteration, if there is a maximum gap for both, the iteration will stop after the value of $||\omega||_2$ and $|\omega_0|$ reach their restriction. Limited number of iteration is one possible way to handle nonconvergence issue. Another way is setting acceptable $J(\mathbf{\theta})$ to $\epsilon$. The iteration will stop after $J(\mathbf{\theta}) < \epsilon$
+
+\item 
+
+\noindent\textbf{Answer}
+
+
+
+\end{enumerate}
+
+%------------------Task b------------------------------
+
+\item  \textbf{Answer}
+
+\begin{enumerate}[label=(\roman*)]
+
+\item 
+
+\noindent\textbf{Answer}
+
+\item 
+
+\noindent\textbf{Answer}
+
+\end{enumerate}
+
+%------------------Task c------------------------------
+
+\item  \textbf{Answer}
+
+\begin{enumerate}[label=(\roman*)]
+
+\item 
+
+\noindent\textbf{Answer}
+
+\item 
+
+\noindent\textbf{Answer}
+
+\item 
+
+\noindent\textbf{Answer}
+
+\end{enumerate}
+
+%------------------Task d------------------------------
+
+\item  \textbf{Answer}
+
+\begin{enumerate}[label=(\roman*)]
+
+\item 
+
+\noindent\textbf{Answer}
+
+\item 
+
+\noindent\textbf{Answer}
+
+\end{enumerate}
+
+\end{enumerate}
+
+%-------------------------------------------------------------------------------------------------------------------------------------------------------
+\newpage
+\subsection*{Exercise 2}
+
+\begin{enumerate}[label=(\alph*)]
+
+%------------------Task a------------------------------
+
+\item  \textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+import csv
+import cvxpy as cp
+import numpy as np
+import matplotlib.pyplot as plt
+
+train_data =[]
+with open("hw04_sample_vectors.csv", "r") as csv_file:
+    reader = csv.reader(csv_file, delimiter=',')    
+    for data in reader:
+        train_data.append(data)        
+csv_file.close()
+
+label =[]
+with open("hw04_labels.csv", "r") as csv_file:    
+    reader = csv.reader(csv_file, delimiter=',')    
+    for data in reader:
+        label.append(data)        
+csv_file.close()
+
+label = np.asarray(label, dtype=np.float32)
+train_data = np.asarray(train_data, dtype=np.float32)
+one_arr = np.ones(train_data.shape[0])
+one_arr = np.resize(one_arr, (train_data.shape[0], 1))
+train_data = np.concatenate((train_data, one_arr), axis=1)
+
+x2 = np.arange(-0.6, 0.4, 0.01)
+
+def plot_graph(name, theta):
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+    ax1.scatter(train_data[:1000, 0], train_data[:1000, 1], c='b', s=3)
+    ax1.scatter(train_data[1000:, 0], train_data[1000:, 1], c='r', s=3)
+    x1 = (0.5 - theta[1]*x2 - theta[2]) / theta[0]
+    ax1.plot(x1, x2, 'g-')
+    ax1.set_xlabel('x1')
+    ax1.set_ylabel('x2')
+    fig.savefig('hw4_2_b_{}.pdf'.format(name))
+
+iteration = 100
+checkpoint = [iteration*0.2, iteration*0.4, iteration*0.6, iteration*0.8]
+learning_rate = 0.1
+theta = np.array([1 , 1, 1])
+norms = []
+
+for k in range(iteration):
+    cost = np.zeros(3)
+    for i in range(len(label)):
+        h = 1 / (1 + np.exp(-1*np.dot(train_data[i], theta)))
+        cost = cost + ((h-label[i]) * train_data[i])
+    
+    theta = theta - learning_rate * cost
+    norms.append(np.linalg.norm(theta))
+    
+    if k in checkpoint:
+        plot_graph(k, theta)
+
+plot_graph(k, theta)
+
+fig2 = plt.figure()
+ax2 = fig2.add_subplot(111)
+ax2.plot(list(range(1, 101)), norms, '-')
+ax2.set_ylabel(r'$||\theta||_2$')
+ax2.set_xlabel('iteration')
+fig2.savefig('hw4_2_b_1.pdf')
+
+fig3 = plt.figure()
+ax3 = fig3.add_subplot(111)
+ax3.plot(list(range(1, 101))[-20:], norms[-20:], '-')
+ax3.set_ylabel(r'$||\theta||_2$')
+ax3.set_xlabel('iteration')
+fig3.savefig('hw4_2_b_2.pdf')
+
+\end{lstlisting}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_a_20}
+  \caption{Iteration 20}
+  \label{fig:hw4_2_a_20}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_a_40}
+  \caption{Iteration 40}
+  \label{fig:hw4_2_a_40}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_a_60}
+  \caption{Iteration 60}
+  \label{fig:hw4_2_a_60}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_a_80}
+  \caption{Iteration 80}
+  \label{fig:hw4_2_a_80}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_a_99}
+  \caption{Iteration 100}
+  \label{fig:hw4_2_a_99}
+\end{subfigure}
+
+\caption{Logistics Regression}
+\label{fig:hw4_2_a}
+\end{figure}
+
+At the early round of iteration, the decision boundary still goes throught the data set. This means that there are somedata misclassified.
+After certain iteration, the decision boundary perform better. The line tends to lay between gap of the dataset. 
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_a_1}
+  \caption{}
+  \label{fig:hw4_2_a_1}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_a_2}
+  \caption{}
+  \label{fig:hw4_2_a_2}
+\end{subfigure}
+
+\caption{$||\theta||_2$ vs iteration}
+\label{fig:hw4_2_a_2}
+\end{figure}
+
+The figure \ref{fig:hw4_2_a_1} shows the $||\theta||_2$ vs iteration for entire iteration. The $||\theta||_2$ increases at the starting of iteration but seems to be constant after certain iteration. However, figure \ref{fig:hw4_2_a_2} shows the $||\theta||_2$ vs iteration for last 20 iteration shows that the $||\theta||_2$ keeps increasing.
+
+%------------------Task b------------------------------
+
+\item
+
+\begin{enumerate}[label=(\roman*)]
+
+\item  \textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+import csv
+import cvxpy as cp
+import numpy as np
+import matplotlib.pyplot as plt
+
+train_data =[]
+with open("hw04_sample_vectors.csv", "r") as csv_file:
+    reader = csv.reader(csv_file, delimiter=',')    
+    for data in reader:
+        train_data.append(data)        
+csv_file.close()
+
+label =[]
+with open("hw04_labels.csv", "r") as csv_file:    
+    reader = csv.reader(csv_file, delimiter=',')    
+    for data in reader:
+        label.append(data)        
+csv_file.close()
+
+for data in label:
+    if np.linalg.norm(data) == 0:
+        data[0] = -1
+
+x2 = np.arange(-0.6, 0.4, 0.01)
+        
+def plot_graph(name, theta):
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+    ax1.scatter(train_data[:1000, 0], train_data[:1000, 1], c='b', s=3)
+    ax1.scatter(train_data[1000:, 0], train_data[1000:, 1], c='r', s=3)
+    x1 = ( -1*theta[1]*x2 - theta[2]) / theta[0]
+    ax1.plot(x1, x2, 'g-')
+    ax1.set_xlabel('x1')
+    ax1.set_ylabel('x2')
+    fig.savefig('hw4_2_b_{}.pdf'.format(name))
+        
+label = np.asarray(label, dtype=np.float32)
+train_data = np.asarray(train_data, dtype=np.float32)
+one_arr = np.ones(train_data.shape[0])
+one_arr = np.resize(one_arr, (train_data.shape[0], 1))
+train_data = np.concatenate((train_data, one_arr), axis=1)
+
+iteration = 100
+theta = np.array([1 , 1, 1])
+theta_list = []
+
+for k in range(iteration):
+    theta_list.append(theta)
+    shuffled_index = np.random.permutation(label.size) 
+    x = train_data[shuffled_index, :] 
+    y = label[shuffled_index] 
+    for i in range(len(y)):
+        if np.dot(theta, x[i])*y[i] < 0:
+            theta = theta + 0.1*y[i]*x[i]
+            break
+    if i == 1999:
+        break
+
+checkpoint = [k*0.2, k*0.4, k*0.6, k*0.8]
+for point in checkpoint:
+    plot_graph(int(point), theta_list[int(point)])
+        
+plot_graph(k+1, theta)
+\end{lstlisting}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_b_12}
+  \caption{Iteration 12}
+  \label{fig:hw4_2_b_12}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_b_25}
+  \caption{Iteration 25}
+  \label{fig:hw4_2_b_25}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_b_38}
+  \caption{Iteration 38}
+  \label{fig:hw4_2_b_38}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_b_51}
+  \caption{Iteration 51}
+  \label{fig:hw4_2_b_51}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_b_65}
+  \caption{Iteration 64}
+  \label{fig:hw4_2_b_65}
+\end{subfigure}
+
+\caption{Perceptron  Regression Online Mode}
+\label{fig:hw4_2_b_1}
+\end{figure}
+
+\newpage
+
+\item  \textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+import csv
+import cvxpy as cp
+import numpy as np
+import matplotlib.pyplot as plt
+
+train_data =[]
+with open("hw04_sample_vectors.csv", "r") as csv_file:
+    reader = csv.reader(csv_file, delimiter=',')    
+    for data in reader:
+        train_data.append(data)        
+csv_file.close()
+
+label =[]
+with open("hw04_labels.csv", "r") as csv_file:    
+    reader = csv.reader(csv_file, delimiter=',')    
+    for data in reader:
+        label.append(data)        
+csv_file.close()
+
+for data in label:
+    if np.linalg.norm(data) == 0:
+        data[0] = -1
+
+x2 = np.arange(-0.6, 0.4, 0.01)
+        
+def plot_graph(name, theta):
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+    ax1.scatter(train_data[:1000, 0], train_data[:1000, 1], c='b', s=3)
+    ax1.scatter(train_data[1000:, 0], train_data[1000:, 1], c='r', s=3)
+    x1 = ( -1*theta[1]*x2 - theta[2]) / theta[0]
+    ax1.plot(x1, x2, 'g-')
+    ax1.set_xlabel('x1')
+    ax1.set_ylabel('x2')
+    fig.savefig('hw4_2_b_{}.pdf'.format(name))
+        
+label = np.asarray(label, dtype=np.float32)
+train_data = np.asarray(train_data, dtype=np.float32)
+one_arr = np.ones(train_data.shape[0])
+one_arr = np.resize(one_arr, (train_data.shape[0], 1))
+train_data = np.concatenate((train_data, one_arr), axis=1)
+
+iteration = 100
+theta = np.array([1 , 1, 1])
+theta_list = []
+
+for k in range(iteration):
+    theta_list.append(theta)
+    shuffled_index = np.random.permutation(label.size) 
+    x = train_data[shuffled_index, :] 
+    y = label[shuffled_index] 
+    for i in range(len(y)):
+        if np.dot(theta, x[i])*y[i] < 0:
+            theta = theta + 0.1*y[i]*x[i]
+            break
+    if i == 1999:
+        break
+
+checkpoint = [k*0.2, k*0.4, k*0.6, k*0.8]
+for point in checkpoint:
+    plot_graph(int(point), theta_list[int(point)])
+        
+plot_graph(k+1, theta)
+\end{lstlisting}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_b_5}
+  \caption{Iteration 5}
+  \label{fig:hw4_2_b_5}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_b_10}
+  \caption{Iteration 10}
+  \label{fig:hw4_2_b_10}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_b_15}
+  \caption{Iteration 15}
+  \label{fig:hw4_2_b_15}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_b_20}
+  \caption{Iteration 20}
+  \label{fig:hw4_2_b_20}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_2_b_26}
+  \caption{Iteration 25}
+  \label{fig:hw4_2_b_26}
+\end{subfigure}
+
+\caption{Perceptron  Regression Batch Mode}
+\label{fig:hw4_2_b_2}
+\end{figure}
+
+Batch mode requires less number of iteration. However, each iteration has to go through entire dataset. With a few iteration, decision boundary is clse to the ultimate one. However, there are only a few differnet in each iteration.
+In the other, online mode performs faster since it doesn't need to go through the entire dataset in every iteration. In this mode, it requires more iteration to reach the ultimate solution. Each iteration shows significant improvement.
+
+\end{enumerate}
+
+%------------------Task c------------------------------
+
+\newpage
+
+\item
+
+\begin{enumerate}[label=(\roman*)]
+
+\item  \textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+import csv
+import cvxpy as cp
+import numpy as np
+import matplotlib.pyplot as plt
+
+train_data =[]
+with open("hw04_sample_vectors.csv", "r") as csv_file:
+    reader = csv.reader(csv_file, delimiter=',')    
+    for data in reader:
+        train_data.append(data)        
+csv_file.close()
+
+label =[]
+with open("hw04_labels.csv", "r") as csv_file:    
+    reader = csv.reader(csv_file, delimiter=',')    
+    for data in reader:
+        label.append(data)        
+csv_file.close()
+
+for data in label:
+    if np.linalg.norm(data) == 0:
+        data[0] = -1
+        
+x2 = np.arange(-0.6, 0.4, 0.01)
+        
+def plot_graph(name, omega, omega_0):
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+    ax1.scatter(train_data[:1000, 0], train_data[:1000, 1], c='b', s=3)
+    ax1.scatter(train_data[1000:, 0], train_data[1000:, 1], c='r', s=3)
+    x1 = (-1*omega[1]*x2 - omega_0) / omega[0]
+    ax1.plot(x1, x2, 'g-')
+    ax1.set_xlabel('x1')
+    ax1.set_ylabel('x2')
+    fig.savefig('hw4_2_c_{}.pdf'.format(name))
+        
+label = np.asarray(label, dtype=np.float32)
+train_data = np.asarray(train_data, dtype=np.float32)
+#one_arr = np.ones(train_data.shape[0])
+#one_arr = np.resize(one_arr, (train_data.shape[0], 1))
+#train_data = np.concatenate((train_data, one_arr), axis=1)
+
+omega = cp.Variable(2)
+omega_0 = cp.Variable(1)
+
+objective = cp.Minimize(cp.norm(omega))
+constraints = [label[i] * (omega.T * train_data[i] + omega_0) >= 1  
+               for i in range(len(label))]
+prob = cp.Problem(objective, constraints)
+
+result = prob.solve()
+
+print(omega.value)
+print(omega_0.value)
+
+plot_graph('1', omega.value, omega_0.value)
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_2_c_1}
+\caption{Hard SVM}
+\label{fig:hw4_2_c_1}
+\end{figure}
+
+\item  \textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+import csv
+import cvxpy as cp
+import numpy as np
+import matplotlib.pyplot as plt
+
+train_data =[]
+with open("hw04_sample_vectors.csv", "r") as csv_file:
+    reader = csv.reader(csv_file, delimiter=',')    
+    for data in reader:
+        train_data.append(data)        
+csv_file.close()
+
+label =[]
+with open("hw04_labels.csv", "r") as csv_file:    
+    reader = csv.reader(csv_file, delimiter=',')    
+    for data in reader:
+        label.append(data)        
+csv_file.close()
+
+for data in label:
+    if np.linalg.norm(data) == 0:
+        data[0] = -1
+        
+x2 = np.arange(-0.6, 0.4, 0.01)
+        
+def plot_graph(name, omega, omega_0):
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+    ax1.scatter(train_data[:1000, 0], train_data[:1000, 1], c='b', s=3)
+    ax1.scatter(train_data[1000:, 0], train_data[1000:, 1], c='r', s=3)
+    x1 = (-1*omega[1]*x2 - omega_0) / omega[0]
+    ax1.plot(x1, x2, 'g-')
+    ax1.set_xlabel('x1')
+    ax1.set_ylabel('x2')
+    fig.savefig('hw4_2_c_{}.pdf'.format(name))
+        
+label = np.asarray(label, dtype=np.float32)
+train_data = np.asarray(train_data, dtype=np.float32)
+#one_arr = np.ones(train_data.shape[0])
+#one_arr = np.resize(one_arr, (train_data.shape[0], 1))
+#train_data = np.concatenate((train_data, one_arr), axis=1)
+
+omega = cp.Variable(2)
+omega_0 = cp.Variable(1)
+xi = cp.Variable(2000)
+C = 1
+
+objective = cp.Minimize(cp.norm(omega)/2 + C*cp.sum_squares(xi))
+constraint1 = [label[i] * (omega.T * train_data[i] + omega_0) >= 1-xi[i] 
+                for i in range(len(label))] 
+constraint2 = [xi[i] >= 0 for i in range(len(label))]
+constraints = constraint1 + constraint2
+prob = cp.Problem(objective, constraints)
+
+result = prob.solve()
+
+print(omega.value)
+print(omega_0.value)
+
+plot_graph('2', omega.value, omega_0.value)
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_2_c_2}
+\caption{Soft SVM}
+\label{fig:hw4_2_c_2}
+\end{figure}
+
+
+When set C = 1, 10 and 100, the result is $
+\theta = 
+\begin{bmatrix}
+10.261 \\ -7.70 \\ 0.0287
+\end{bmatrix} ,
+\theta = 
+\begin{bmatrix}
+11.664 \\ -8.80 \\ 0.0147
+\end{bmatrix},
+\theta = 
+\begin{bmatrix}
+12.055 \\ -9.115 \\ 0.00973
+\end{bmatrix} $ repectively. The result is slightly changed. 
+
+Compared to Hard SVM, there is no obvious different in performance to Soft SVM.
+
+\end{enumerate}
+
+%------------------Task d------------------------------
+
+
+\item  \textbf{Answer}
+
+Since this dataset is linearly separable, all classifiers can perform without misclasification. The Logistic and perceptron finish the training progress fast while SVM requires more training time. For logistic and percerptron, $\alpha_k$ contributes to modification to $\theta$ in each iteration. High $\alpha_k$ can help training process faster however, it could lead to overshoting and the final $\theta$ cannot be reach. SVM is more robut than other two since it has margin to each side of dataset while logistic and perceptron algorithm give the classifer what at touch the data sample. 
+
+\end{enumerate}
+
+\newpage 
+
+%-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+\subsection*{Exercise 3}
+
+\begin{enumerate}[label=(\alph*)]
+
+%------------------Task a------------------------------
+
+\item  \textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+import numpy as np
+
+coins = np.random.binomial(10, .5, 1000)
+
+np.random.seed = 1
+rand = np.random.randint(0, 1000, 1)
+
+print(coins[0]/10)
+print(coins[rand][0]/10)
+print(np.min(coins)/10)
+\end{lstlisting}
+
+As  all coins are fair coin so $u_i = 0.5$
+
+%------------------Task b------------------------------
+
+\item  \textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+coins = np.resize(coins, (1000, 1))
+for i in range(10000-1):
+    coin = np.random.binomial(10, .5, 1000)
+    coin = np.resize(coin, (1000, 1))
+    coins = np.concatenate((coins, coin), axis=1)
+    
+min_index = np.where(coins == np.min(coins, axis=0))[0][0]
+
+fig1 = plt.figure()
+ax1 = fig1.add_subplot(111)
+ax1.hist(coins[0], bins=11)
+fig1.savefig('hw4_3_b_1.pdf')
+
+fig2 = plt.figure()
+ax2 = fig2.add_subplot(111)
+ax2.hist(coins[rand[0]], bins=11)
+fig2.savefig('hw4_3_b_2.pdf')
+
+fig3 = plt.figure()
+ax3 = fig3.add_subplot(111)
+ax3.hist(coins[min_index], bins=11)
+fig3.savefig('hw4_3_b_3.pdf')
+\end{lstlisting}
+
+\begin{figure}[H]
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_3_b_1}
+  \caption{$c_1$}
+  \label{fig:hw4_3_b_1}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_3_b_2}
+  \caption{$c_{rand}$}
+  \label{fig:hw4_3_b_2}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw4_3_b_3}
+  \caption{$c_{min}$}
+  \label{fig:hw4_3_b_3}
+\end{subfigure}
+
+\caption{Perceptron  Regression Batch Mode}
+\label{fig:hw4_2_b_2}
+\end{figure}
+
+All histrograms look indentical. The curve is gaussien. 
+
+%------------------Task c------------------------------
+
+\item  \textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+index = [1, rand[0], min_index]
+coins = coins/10
+epsilon_list = np.arange(0,0.51, 0.05)
+p_array = np.zeros((3, 1))
+h_bounds = []
+
+for epsilon in epsilon_list:
+    h_bound = 2*np.exp(-2*(epsilon**2)*coins.shape[1])
+    h_bounds.append(h_bound)
+    p_list = []
+    for i in index:
+        p = 0
+        for j in range(coins.shape[1]):
+            if abs(coins[i][j] - 0.5) > epsilon:
+                p = p+1
+        p_list.append(p)
+    p_array = np.concatenate((p_array, np.reshape(np.asarray(p_list), (3, 1))), axis=1)
+    
+p_array = np.delete(p_array, 0, axis=1)
+p_array = p_array/coins.shape[1]
+
+fig4 = plt.figure()
+ax4 = fig4.add_subplot(111)
+ax4.plot(epsilon_list, h_bounds, 'black')
+ax4.scatter(epsilon_list, p_array[0], c='r', s=10, label='$c_1$')
+ax4.scatter(epsilon_list, p_array[1], c='g', s=10, label='$c_{rand}$')
+ax4.scatter(epsilon_list, p_array[2], c='b', s=10, label='$c_{min}$')
+ax4.legend()
+fig4.savefig('hw4_3_c_1.pdf')
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw4_3_c_1}
+\caption{Hoeffding's bound}
+\label{fig:hw4_3_c_1}
+\end{figure}
+
+%------------------Task d------------------------------
+
+\item  \textbf{Answer}
+
+As the experiment repeat 100,000 times, N = 100,000. The term $e^{-2\epsilon^2N}$ goes to 0 even with small $\epsilon$.
+None of coin follow the Hoeffding’s bound. And because each experiment consist with 10 toss, the $v$ can be only [0, 0.1, ..., 1]. Therefore the $\mathbb{P}[|v-\mu|] > \epsilon$ is the same for $\epsilon = 0$ and 0.05, 0.15 and 0.2 and so on.
+
+%------------------Task e------------------------------
+
+\item  \textbf{Answer}
+
+\end{enumerate}
+
+
+\end{document}
+

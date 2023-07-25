@@ -1,0 +1,216 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./ece595_pics/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{ECE 595: Homework 5}}
+
+Thirawat Bureetes, 10
+
+(Spring 2020)
+\end{center}
+
+\newpage
+
+\subsection*{Exercise 1}
+
+\begin{enumerate}[label=(\alph*)]
+
+%------------------Task a------------------------------
+
+\item 
+
+\begin{enumerate}[label=(\roman*)]
+
+\item 
+
+\noindent\textbf{Answer}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw5_1}
+\caption{}
+\label{}
+\end{figure}
+
+This figure shows that the classifier fails to clasify when there are 2 data points. So the VC dimenstion is 1
+
+\item 
+
+\noindent\textbf{Answer}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw5_2}
+\caption{}
+\label{}
+\end{figure}
+
+If there are 2 points, this classifier can perform correctly. However, when there are 3 data points, the classifier will fail to perform correctly. Thus VC dimenstion is 2.
+
+\newpage
+\item 
+
+\noindent\textbf{Answer}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw5_3}
+\caption{}
+\label{}
+\end{figure}
+
+If there are two points, the classifier can adject radius (b) to be able to classify correctly. But, as show in the figure, when there are 3 data points, the classifier fail. So the VC dimension is 2.
+
+\newpage
+\item 
+
+\noindent\textbf{Answer}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw5_4}
+\caption{}
+\label{}
+\end{figure}
+The classifier can adject radius (b) and center (a) to be able to classify3 data points correctly. But, as show in the figure, when there are 4 data points, the classifier fail.So the VC dimension is 3.
+
+\end{enumerate}
+
+%------------------Task b------------------------------
+
+\item  \textbf{Answer}
+
+
+
+
+\end{enumerate}
+
+%-------------------------------------------------------------------------------------------------------------------------------------------------------
+\newpage
+\subsection*{Exercise 2}
+
+\begin{enumerate}[label=(\alph*)]
+
+%------------------Task a------------------------------
+
+\item  \textbf{Answer}
+
+The weight vector for linear clasifier is $\mathbf{\theta} = (\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}\mathbf{A}^T\mathbf{Y}$. In this particular condition, there is noise in target function $y(\mathbf{x}) = f(\mathbf{x}) + \epsilon$
+
+\begin{align*}
+y(\mathbf{x}) &= f(\mathbf{x}) + \epsilon\\
+y(\mathbf{x}) &= \mathbf{\theta_f^T}\mathbf{x} + \epsilon\\
+\mathbf{Y} &= \mathbf{A}\mathbf{\theta_f} + \mathbf{\epsilon}\\
+\mathbf{\theta_D} &= (\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}\mathbf{A}^T\mathbf{Y}\\
+\mathbf{\theta_D} &= (\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}\mathbf{A}^T(\mathbf{A}\mathbf{\theta_f} + \mathbf{\epsilon})
+\end{align*}
+
+
+%------------------Task b------------------------------
+
+\item  \textbf{Answer}
+
+\begin{align*}
+\mathbf{\theta_D} &= (\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}\mathbf{A}^T(\mathbf{A}\mathbf{\theta_f} + \mathbf{\epsilon})\\
+\mathbf{\theta_D} &= (\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}\mathbf{A}^T\mathbf{A}\mathbf{\theta_f} + (\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1} \mathbf{\epsilon}\\
+\mathbf{\theta_D} &= (\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}(\mathbf{A}^T\mathbf{A}+\lambda \mathbf{I}-\lambda \mathbf{I})\mathbf{\theta_f} + (\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1} \mathbf{\epsilon}\\
+\mathbf{\theta_D} &= (\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}(\mathbf{A}^T\mathbf{A}+\lambda \mathbf{I})\mathbf{\theta_f}-(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}(\lambda \mathbf{I})\mathbf{\theta_f} + (\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1} \mathbf{\epsilon}\\
+\mathbf{\theta_D} &= \mathbf{\theta_f}-(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}(\lambda \mathbf{I})\mathbf{\theta_f} + (\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1} \mathbf{\epsilon}\\
+\mathbf{\theta_D} &= \mathbf{\theta_f}- \lambda(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}\mathbf{\theta_f} + (\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1} \mathbf{\epsilon}\\
+\end{align*}
+
+%------------------Task c------------------------------
+
+\newpage
+
+\item
+
+\begin{enumerate}[label=(\roman*)]
+
+\item  \textbf{Answer}
+
+\begin{align*}
+\bar{g}(\mathbf{x}) &= \mathbb{E}_D [h^{(D)}(\mathbf{x})]\\
+\bar{g}(\mathbf{x}) &= \mathbb{E}_D [\mathbf{\theta_D^T}\mathbf{x}]\\
+\bar{g}(\mathbf{x}) &= \mathbb{E}_D [(\mathbf{\theta_f}- \lambda(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}\mathbf{\theta_f} + (\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1} \mathbf{\epsilon})^T\mathbf{x}]\\
+\bar{g}(\mathbf{x}) &= \mathbb{E}_D [(\mathbf{\theta_f})^T\mathbf{x} - (\lambda(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}\mathbf{\theta_f})^T\mathbf{x} + ((\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1} \mathbf{\epsilon})^T\mathbf{x}]\\
+\bar{g}(\mathbf{x}) &= \mathbf{\theta_f}^T\mathbf{x} - \mathbb{E}_D [(\lambda(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}\mathbf{\theta_f})^T\mathbf{x}] && \mathbb{E}_D[\epsilon] = 0  \\
+\bar{g}(\mathbf{x}) &= \mathbf{\theta_f}^T\mathbf{x} - \lambda\mathbb{E}_D [\mathbf{\theta_f}^T(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}\mathbf{x}]\\
+\bar{g}(\mathbf{x}) &= \mathbf{\theta_f}^T\mathbf{x} - \lambda  \mathbf{x}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbf{\theta_f} && \mathbf{\theta_f}^T\mathbf{x} = \mathbf{x}^T\mathbf{\theta_f}  \\
+\end{align*}
+
+\item  \textbf{Answer}
+
+\begin{align*}
+\bar{g}(\mathbf{x}) &= \mathbf{\theta_f}^T\mathbf{x} - \lambda  \mathbf{x}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbf{\theta_f}  \\
+f(\mathbf{x}) &=  \mathbf{\theta_f}^T\mathbf{x} \\
+(\bar{g}(\mathbf{x})-f(\mathbf{x}))^2 &= ( - \lambda  \mathbf{x}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbf{\theta_f})^2 \\
+(\bar{g}(\mathbf{x})-f(\mathbf{x}))^2 &=  \lambda^2  (\mathbf{x}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbf{\theta_f})^2 \\
+(\bar{g}(\mathbf{x})-f(\mathbf{x}))^2 &=  \lambda^2  (\mathbf{x}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbf{\theta_f}) (\mathbf{x}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbf{\theta_f})^T \\
+(\bar{g}(\mathbf{x})-f(\mathbf{x}))^2 &=  \lambda^2  (\mathbf{x}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbf{\theta_f}) (\mathbf{\theta_f}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbf{x}) \\
+(\bar{g}(\mathbf{x})-f(\mathbf{x}))^2 &=  \lambda^2  (\mathbf{x}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbf{\theta_f}\mathbf{\theta_f}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbf{x}) \\
+(\bar{g}(\mathbf{x})-f(\mathbf{x}))^2 &=  \lambda^2  trace(\mathbf{x}\mathbf{x}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbf{\theta_f}\mathbf{\theta_f}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]) \\
+\end{align*}
+
+\item  \textbf{Answer}
+
+\begin{align*}
+(\bar{g}(\mathbf{x})-f(\mathbf{x}))^2 &=  \lambda^2  trace(\mathbf{x}\mathbf{x}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbf{\theta_f}\mathbf{\theta_f}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]) \\
+\mathbb{E}_x[(\bar{g}(\mathbf{x})-f(\mathbf{x}))^2] &=  \mathbb{E}_x[\lambda^2  trace(\mathbf{x}\mathbf{x}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbf{\theta_f}\mathbf{\theta_f}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}])] \\
+\mathbb{E}_x[(\bar{g}(\mathbf{x})-f(\mathbf{x}))^2] &= \lambda^2 trace(\mathbb{E}_x[ \mathbf{x}\mathbf{x}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbf{\theta_f}\mathbf{\theta_f}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]]) \\
+\mathbb{E}_x[(\bar{g}(\mathbf{x})-f(\mathbf{x}))^2] &= \lambda^2 trace(\mathbf{I} \mathbb{E}_x[\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbf{\theta_f}\mathbf{\theta_f}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]]) \\
+\mathbb{E}_x[(\bar{g}(\mathbf{x})-f(\mathbf{x}))^2] &= \lambda^2 trace(\mathbf{I} \mathbb{E}_x[\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbf{\theta_f}\mathbf{\theta_f}^T\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]]) \\
+\mathbb{E}_x[(\bar{g}(\mathbf{x})-f(\mathbf{x}))^2] &= \lambda^2 trace(\mathbf{I} \mathbb{E}_x[\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]^T\mathbf{\theta_f}\mathbf{\theta_f}^T]) \\
+\mathbb{E}_x[(\bar{g}(\mathbf{x})-f(\mathbf{x}))^2] &= \lambda^2 trace(\mathbf{I} \mathbb{E}_x[\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]^T])trace((\mathbf{I} \mathbb{E}_x[\mathbf{\theta_f}\mathbf{\theta_f}^T]) \\
+\mathbb{E}_x[(\bar{g}(\mathbf{x})-f(\mathbf{x}))^2] &= \lambda^2 trace(\mathbf{I} \mathbb{E}_x[\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]^T])||\theta_f||_2^2 \\
+\mathbb{E}_x[(\bar{g}(\mathbf{x})-f(\mathbf{x}))^2] &= \lambda^2 trace(\mathbf{I} \mathbb{E}_x[\mathbb{E}_D [(\mathbf{A^T}\mathbf{A}+\lambda \mathbf{I})^{-1}]^2)||\theta_f||_2^2 \\
+\mathbb{E}_x[(\bar{g}(\mathbf{x})-f(\mathbf{x}))^2] &= \frac{\lambda^2}{(\lambda + N)^2}||\theta_f||_2^2 \\
+\end{align*}
+
+\item  \textbf{Answer}
+
+\item  \textbf{Answer}
+
+\end{enumerate}
+
+%------------------Task d------------------------------
+
+
+\item  \textbf{Answer}
+
+When $\lambda$ is equal to 0, the bias will be equal to $0$. When $\lambda$ increases, the value of bias will increase and reach $||\theta_f||_2^2$ when $\lambda$ reaches $\infty$. For variance, it will be equal to $\sigma^2$ when $\lambda$ is equal to 0. The variace will converse to certain number when $\lambda$ reaches $\infty$.
+When N is equal to 0, the bias value will be equal to $||\theta_f||_2^2$. The bias value will be lower when N increases. When N increass, the varinece value will also decrease.
+
+\end{enumerate}
+
+
+\end{document}
+

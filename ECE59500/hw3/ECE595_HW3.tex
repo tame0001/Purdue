@@ -1,0 +1,667 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./ece595_pics/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{ECE 595: Homework 3}}
+
+Thirawat Bureetes, 10
+
+(Spring 2020)
+\end{center}
+
+\subsection*{Exercise 1}
+
+\begin{enumerate}[label=(\alph*)]
+
+\item 
+
+\begin{enumerate}[label=(\roman*)]
+
+\item 
+
+\noindent\textbf{Answer}
+
+\begin{align*}
+\mathbf{x^T}\mathbf{A}\mathbf{x}&= trace[\mathbf{Axx^T}]\\
+\mathbf{x^T}[a_{ij}]\mathbf{x}&= trace[[a_{ij}]\mathbf{xx^T}]  && \text{$i, j \in (1,D)$}\\
+\mathbf{x^T}[\sum_{j=1}^D{a_{ij}x_j}]&= trace[[a_{ij}][x_ix_j]]  && \text{$i, j \in (1,D)$}\\
+\sum_{i=1}^D\sum_{j=1}^D{x_ia_{ij}x_j}&= \sum_{i=1}^D\sum_{j=1}^D{a_{ij}x_jx_i}  \\
+\end{align*}
+
+\item 
+
+\noindent\textbf{Answer}
+
+\begin{align*}
+p(\mathbf{x_1,...,x_N|\Sigma}) &= \sum_{n=1}^N{\frac{1}{(2\pi)^{d/2}|\Sigma|^{1/2}}exp{\{-\frac{1}{2}}(\mathbf{x_n-\mu})^T\Sigma^{-1}(\mathbf{x_n-\mu})\}}\\
+p(\mathbf{x_1,...,x_N|\Sigma}) &= \frac{1}{(2\pi)^{Nd/2}|\Sigma|^{N/2}}exp{\{}\sum_{n=1}^N{-\frac{1}{2}{(\mathbf{x_n-\mu})^T\Sigma^{-1}(\mathbf{x_n-\mu})}\}}\\
+p(\mathbf{x_1,...,x_N|\Sigma}) &= \frac{1}{(2\pi)^{Nd/2}|\Sigma|^{N/2}}exp{\{-\frac{1}{2}}trace[\Sigma^{-1}\sum_{n=1}^N{{(\mathbf{x_n-\mu})^T(\mathbf{x_n-\mu})}]\}}\\
+\end{align*}
+
+\item 
+
+\noindent\textbf{Answer}
+
+\begin{align*}
+p(\mathbf{x_1,...,x_N|\Sigma}) &= \frac{1}{(2\pi)^{Nd/2}|\Sigma|^{N/2}}exp{\{-\frac{1}{2}}trace[\Sigma^{-1}\sum_{n=1}^N{{(\mathbf{x_n-\mu})^T(\mathbf{x_n-\mu})}]\}}\\
+p(\mathbf{x_1,...,x_N|\Sigma}) &= \frac{|\Sigma|^{-N/2}}{(2\pi)^{Nd/2}}exp{\{-\frac{1}{2}}trace[\Sigma^{-1}\frac{N}{N}\sum_{n=1}^N{{(\mathbf{x_n-\mu})^T(\mathbf{x_n-\mu})}]\}}\\
+p(\mathbf{x_1,...,x_N|\Sigma}) &= \frac{|A|^{N/2}}{(2\pi)^{Nd/2}|\hat{\Sigma}_{MSE}|^{N/2}}exp{\{-\frac{N}{2}trace[\Sigma^{-1}\hat{\Sigma}_{MSE}]\}}\\
+p(\mathbf{x_1,...,x_N|\Sigma}) &= \frac{(\prod_{i=1}^d{\lambda_i})^{N/2}}{(2\pi)^{Nd/2}|\hat{\Sigma}_{MSE}|^{N/2}}exp{\{-\frac{N}{2}trace[A]\}}\\
+p(\mathbf{x_1,...,x_N|\Sigma}) &= \frac{1}{(2\pi)^{Nd/2}|\hat{\Sigma}_{MSE}|^{N/2}}(\prod_{i=1}^d{\lambda_i})^{N/2}exp{\{-\frac{N}{2}\sum_{i=1}^d{\lambda_i}\}}\\
+\end{align*}
+
+\item 
+
+\noindent\textbf{Answer}
+
+\begin{align*}
+p(\mathbf{x_1,...,x_N|\Sigma}) &= \frac{1}{(2\pi)^{Nd/2}|\hat{\Sigma}_{MSE}|^{N/2}}(\prod_{i=1}^d{\lambda_i})^{N/2}exp{\{-\frac{N}{2}\sum_{i=1}^d{\lambda_i}\}}\\
+p(\mathbf{x_1,...,x_N|\Sigma}) &= (2\pi)^{-Nd/2}|\hat{\Sigma}_{MSE}|^{-N/2}(\prod_{i=1}^d{\lambda_i})^{N/2}exp{\{-\frac{N}{2}\sum_{i=1}^d{\lambda_i}\}}\\
+log(p(\mathbf{x_1,...,x_N|\Sigma})) &= -\frac{Nd}{2}log(2\pi) - \frac{N}{2}log(|\hat{\Sigma}_{MSE}|) + \frac{N}{2}log(\prod_{i=1}^d{\lambda_i}) -\frac{N}{2}\sum_{i=1}^d{\lambda_i} \\ 
+\frac{\partial{log(p(\mathbf{x_1,...,x_N|\Sigma}))}}{\partial{\lambda}} &=\frac{\partial{log(\prod_{i=1}^d{\lambda_i})}}{\partial{\lambda}}- \frac{\partial{\sum_{i=1}^d{\lambda_i}}}{\partial{\lambda}} = 0 \\
+\frac{\partial{\sum_{i=1}^d{\lambda_i}}}{\partial{\lambda}} &=\frac{\partial{log(\prod_{i=1}^d{\lambda_i})}}{\partial{\lambda}} \\
+\sum_{i=1}^d{1} &=\frac{1}{\prod_{i=1}^d{\lambda_i}}\frac{\partial{(\prod_{i=1}^d{\lambda_i})}}{\partial{\lambda}} \\
+d &=\frac{1}{\lambda_i^d}\frac{\partial{(\lambda_i^d)}}{\partial{\lambda}} && \lambda_ i =\lambda_ j ,\forall(i,j) \\
+d &=\frac{d\lambda_i^{d-1}}{\lambda_i^d} \\
+1 &=\frac{1}{\lambda_i} \\
+\lambda_i &=1 \\
+\end{align*}
+
+\end{enumerate}
+
+\newpage
+
+\item  \textbf{Answer}
+
+\begin{align*}
+p(\mathbf{x_1,...,x_N|\Sigma}) &= \frac{1}{(2\pi)^{Nd/2}|\Sigma|^{N/2}}exp{\{-\frac{1}{2}}trace[\Sigma^{-1}\sum_{n=1}^N{{(\mathbf{x_n-\mu})^T(\mathbf{x_n-\mu})}]\}}\\
+p(\mathbf{x_1,...,x_N|\Sigma}) &= \frac{1}{(2\pi)^{Nd/2}|\Sigma|^{N/2}}exp{\{-\frac{N}{2}}tr[\Sigma^{-1}{\hat{\Sigma}_{MSE}]\}}\\
+p(\mathbf{x_1,...,x_N|\Sigma}) &= \frac{|P|^{N/2}}{(2\pi)^{Nd/2}}exp{\{-\frac{N}{2}}tr[P{\hat{\Sigma}_{MSE}]\}}&& \Sigma^{-1} = P\\
+log(p(\mathbf{x_1,...,x_N|\Sigma})) &= \frac{N}{2}log(|P|) -\frac{Nd}{2}log(2\pi) -\frac{N}{2}tr[P\hat{\Sigma}_{MSE}] \\
+\frac{\partial{log(p(\mathbf{x_1,...,x_N|\Sigma}))}}{\partial{P}} &= \frac{\partial{log(|P|)}}{\partial{P}} - \frac{\partial{tr[P\hat{\Sigma}_{MSE}]}}{\partial{P}} = 0 \\
+\frac{\partial{tr[P\hat{\Sigma}_{MSE}]}}{\partial{P}} &= \frac{\partial{log(|P|)}}{\partial{P}} \\
+\hat{\Sigma}_{MSE}&= \frac{\partial{|P|}}{\partial{P}} \frac{1}{|P|}\\
+\hat{\Sigma}_{MSE}&= |P|P^{-1} \frac{1}{|P|}\\
+\hat{\Sigma}_{MSE}&= P^{-1}\\
+\hat{\Sigma}_{MSE}&= \Sigma \\
+\end{align*}
+
+\end{enumerate}
+
+\subsection*{Exercise 2}
+
+\begin{enumerate}[label=(\alph*)]
+
+
+\item  \textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+import numpy as np
+import matplotlib.pyplot as plt
+
+def compute_mean(sample):
+    dimension = sample.shape[0]
+    sum_vector = np.zeros((dimension,1))
+    sum_vector = sum_vector.flatten('F') 
+    
+    for x in range(sample.shape[1]):
+        sum_vector = sum_vector + sample[:,x].flatten('F')
+
+    return (sum_vector/sample.shape[1]).T
+
+def compute_cov(sample):
+    mean = compute_mean(sample)
+    dimension = sample.shape[0]
+    err_sum_vector = np.zeros((dimension, dimension))
+    
+    for x in range(sample.shape[1]):
+        err_vector = sample[:,x].flatten('F').T - mean
+        err_sum_vector = err_sum_vector + np.dot(err_vector, err_vector.T)
+        
+    return (err_sum_vector/(sample.shape[1]-1))
+
+def compute_prior(samples):
+    total_sample = 0
+    for sample in samples:
+        total_sample = total_sample + sample.shape[1]
+        
+    prior = []
+    for sample in samples:
+        prior.append(sample.shape[1]/total_sample)
+        
+    return prior
+
+train_cat = np.matrix(np.loadtxt('train_cat.txt', delimiter = ','))
+train_grass = np.matrix(np.loadtxt('train_grass.txt', delimiter = ','))
+
+cat_mean = compute_mean(train_cat)
+grass_mean = compute_mean(train_grass)
+cat_cov = compute_cov(train_cat)
+grass_cov = compute_cov(train_grass)
+prior_prob = compute_prior([train_grass, train_cat])
+d = train_cat.shape[0]
+
+params = [{
+    'class': 'grass',
+    'value': 0,
+    'mean': grass_mean,
+    'cov': grass_cov,
+    'inv_cov': np.linalg.inv(grass_cov),
+    'det_cov': np.linalg.det(grass_cov),
+    'log_det_cov': (1/2) * np.log(np.linalg.det(grass_cov)),
+    'prior_prob': prior_prob[0],
+    'log_prior_prob': np.log(prior_prob[0])
+    }, {
+    'class': 'cat',
+    'value': 1,
+    'mean': cat_mean,
+    'cov': cat_cov,
+    'inv_cov': np.linalg.inv(cat_cov),
+    'det_cov': np.linalg.det(cat_cov),
+    'log_det_cov': (1/2) * np.log(np.linalg.det(cat_cov)),
+    'prior_prob': prior_prob[1],
+    'log_prior_prob': np.log(prior_prob[1])
+    }]
+\end{lstlisting}
+
+\newpage
+
+\item
+
+\begin{enumerate}[label=(\roman*)]
+
+\item  \textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+Y = plt.imread('cat_grass.jpg') / 255
+\end{lstlisting}
+
+\item  \textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+output = np.zeros((Y.shape[0]-8, Y.shape[1]-8))
+pi_term = (d/2) *  np.log(2*np.pi)
+for i in range(Y.shape[0]-8):
+    for j in range(Y.shape[1]-8):
+        x = Y[i:i+8, j:j+8]
+        x = x.flatten('F')
+        g = []
+        for param in params:
+            diff = (x - param['mean'].flatten('F')).reshape((d, 1))
+            g.append((param['log_prior_prob']
+                     - pi_term
+                     - param['log_det_cov']
+                      - (1/2) * np.dot(diff.T, 
+                         np.dot(param['inv_cov'], diff)))[0 ,0])       
+                    
+        output[i, j] = params[g.index(max(g))]['value']
+        
+plt.imshow(output*255, cmap = 'gray')
+plt.savefig("hw3_2_b_1.pdf")
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_2_b_1}
+\caption{Cat mark layer resulting from Gaussian classifier}
+\label{fig:hw3_2_b_1}
+\end{figure}
+
+\item  \textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+output2 = np.zeros((Y.shape[0]-8, Y.shape[1]-8))
+for i in range(Y.shape[0]-8):
+    if (i % 8) != 0 or i+8 >= Y.shape[0]-8:
+        continue
+    for j in range(Y.shape[1]-8):
+        if (j % 8) != 0 or j+8 >= Y.shape[1]-8:
+            continue
+        x = Y[i:i+8, j:j+8]
+        x = x.flatten('F')
+        g = []
+        for param in params:
+            diff = (x - param['mean'].flatten('F')).reshape((d, 1))
+            g.append((param['log_prior_prob']
+                     - pi_term
+                     - param['log_det_cov']
+                      - (1/2) * np.dot(diff.T, 
+                         np.dot(param['inv_cov'], diff)))[0 ,0])       
+        
+        value = params[g.index(max(g))]['value']
+        for m in range(8):
+            for n in range(8):
+                try:
+                    output2[i+m, j+n] = value
+                except IndexError:
+                    print(f'({i}+{m}, {j}+{n})')
+        
+plt.imshow(output2*255, cmap = 'gray')  
+plt.savefig("hw3_2_b_2.pdf")    
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw3_2_b_2}
+\caption{Cat mark layer resulting from Gaussian classifier without overlapping}
+\label{fig:hw3_2_b_2}
+\end{figure}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+GT = plt.imread('truth.png')          
+
+MAE1 = np.sum(np.absolute(GT[:output.shape[0],:output.shape[1]]-output))/output.size
+MAE2 = np.sum(np.absolute(GT[:output2.shape[0],:output2.shape[1]]-output2))/output2.size
+
+print(MAE1)
+print(MAE2)
+\end{lstlisting}
+
+The Mean Absolute Value of Gaussian classifier with overlapping is 0.0933
+
+The Mean Absolute Value of Gaussian classifier without overlapping is 0.0920
+
+\newpage
+
+\item  \textbf{Answer}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{cat1}
+  \caption{Original figure}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_2_b_3}
+  \caption{Grey scale figure}
+  \label{fig:hw3_2_b_3}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_2_b_4}
+  \caption{Result from classifier with overlapping}
+  \label{fig:hw3_2_b_4}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_2_b_5}
+  \caption{Result from classifier without overlapping}
+  \label{fig:hw3_2_b_5}
+\end{subfigure}
+\caption{Sample cat figure from internet}
+\label{fig:fig3}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{cat2}
+  \caption{Original figure}
+  \label{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_2_b_6}
+  \caption{Grey scale figure}
+  \label{fig:hw3_2_b_6}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_2_b_7}
+  \caption{Result from classifier with overlapping}
+  \label{fig:hw3_2_b_7}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{hw3_2_b_8}
+  \caption{Result from classifier without overlapping}
+  \label{fig:hw3_2_b_8}
+\end{subfigure}
+\caption{Sample cat figure from internet}
+\label{fig:fig4}
+\end{figure}
+
+The figures \ref{fig:fig3} and \ref{fig:fig4} are downloaded from internet. Figures \ref{fig:hw3_2_b_4}, \ref{fig:hw3_2_b_5}, \ref{fig:hw3_2_b_7}, and \ref{fig:hw3_2_b_8} are results from classifier. It is clearly that the classifier performs badly. Because
+
+\begin{itemize}
+\item The training data doesn't cover numerous dataset in various situations.
+\item Features are not big enough
+\end{itemize}
+
+\end{enumerate}
+
+
+\end{enumerate}
+
+\newpage
+
+\subsection*{Exercise 3}
+
+\begin{enumerate}[label=(\alph*)]
+
+\item  \textbf{Answer}
+
+\begin{align*}
+\begin{bmatrix}
+\mathbf{\beta} \\ \beta_0
+\end{bmatrix}_{d+1}  
+ &= (\mathbf{A}^T \mathbf{A} )^{-1}\mathbf{A}^T \mathbf{b}  \\
+\end{align*}
+
+Where $\beta \in \mathbb{R}^{d}$ and $\beta_0$ is a scalar. Since $x \in \mathbb{R}^{d}$, choose one $x_i$  where $ i \in (1,...,d)$. 
+The remaining $x_i$ can be writen in term of selected $x_i, \beta$ and $\beta_0$ . 
+
+\item
+
+\begin{enumerate}[label=(\roman*)]
+
+\item  \textbf{Answer}
+
+As $A \in \mathbb{R}^{(N_1+N_2)x(d+1)}$, so $A^TA \in \mathbb{R}^{(d+1)x(d+1)}$
+
+\begin{align*}
+ \mathbf{A}^T \mathbf{A}  &=
+\begin{bmatrix}
+\begin{bmatrix}
+a
+\end{bmatrix}_{dxd}  && 
+\begin{bmatrix}
+b
+\end{bmatrix}_{dx1} 
+\\
+\begin{bmatrix}
+c
+\end{bmatrix}_{1xd} && 
+\begin{bmatrix}
+d
+\end{bmatrix}_{1x1} 
+\end{bmatrix}_{(d+1)x(d+1)}  
+\\
+ \mathbf{A}^T \mathbf{A}  &=
+\begin{bmatrix}
+x_i^{(1)} && x_i^{(2)} \\
+1 && 1
+\end{bmatrix}
+\begin{bmatrix}
+x_i^{T(1)} && 1 \\
+x_i^{T(2)} && 1
+\end{bmatrix} \\
+\begin{bmatrix}
+d
+\end{bmatrix}_{1x1} &= \sum_{i=1}^{N_1+N_2}1 \\
+&= N \\
+\begin{bmatrix}
+b
+\end{bmatrix}_{dx1} &= 
+\begin{bmatrix}
+\sum_{i=1}^{N_1}{x_i^{(1)}} + \sum_{i=1}^{N_2}{x_i^{(2)}}
+\end{bmatrix} \\
+ &= 
+\begin{bmatrix}
+N_1\hat{\mu}_1 +N_2\hat{\mu}_2
+\end{bmatrix} \\
+\begin{bmatrix}
+c
+\end{bmatrix}_{1xd} &= 
+\begin{bmatrix}
+\sum_{i=1}^{N_1}{x_i^{T(1)}} + \sum_{i=1}^{N_2}{x_i^{T(2)}}
+\end{bmatrix} \\
+ &= 
+\begin{bmatrix}
+N_1\hat{\mu}_1^T +N_2\hat{\mu}_2^T
+\end{bmatrix} \\
+\end{align*}
+
+\item  \textbf{Answer}
+\begin{align*}
+ \mathbf{A}^T \mathbf{b}  &=
+\begin{bmatrix}
+\begin{bmatrix}
+e
+\end{bmatrix}_{d}
+\\
+\begin{bmatrix}
+f
+\end{bmatrix}_{1}
+\end{bmatrix}_{(d+1)}  
+\\
+ \mathbf{A}^T \mathbf{b}  &=
+\begin{bmatrix}
+x_i^{(1)} && x_i^{(2)} \\
+1 && 1
+\end{bmatrix}
+\begin{bmatrix}
+c_1 \\
+c_2
+\end{bmatrix}_{N_1+N_2} \\
+\begin{bmatrix}
+f
+\end{bmatrix}_{1} &= \sum_{i=1}^{N_1}c_1 +\sum_{i=1}^{N_2}c_2 \\
+&= N_1c_1+N_2c_2 \\
+\begin{bmatrix}
+e
+\end{bmatrix}_{d} &= 
+\begin{bmatrix}
+c_1\sum_{i=1}^{N_1}{x_i^{(1)}} + c_2\sum_{i=1}^{N_2}{x_i^{(2)}}
+\end{bmatrix} \\
+ &= 
+\begin{bmatrix}
+c_1N_1\hat{\mu}_1 +c_2N_2\hat{\mu}_2
+\end{bmatrix} \\
+\end{align*}
+
+\newpage
+
+\item  \textbf{Answer}
+
+\begin{align*}
+\mathbf{A}^T \mathbf{A}  
+\begin{bmatrix}
+\omega \\ \omega_0
+\end{bmatrix}  &= 
+\mathbf{A}^T \mathbf{b} \\
+(N_1\hat{\mu}_1^T+N_2\hat{\mu}_2^T)\omega + N\omega_0 &= N_1c_1+N_2c_2\\
+N\omega_0 &= N_1c_1+N_2c_2-(N_1\hat{\mu}_1^T+N_2\hat{\mu}_2^T)\omega\\
+[(N-2)\hat{\Sigma}+N_1\hat{\mu}_1\hat{\mu}_1^T+N_2\hat{ \mu_2}\hat{\mu}_2^T]\omega
++[N_1\hat{\mu}_1+N_2\hat{\mu}_2]\omega_0 &= c_1N_1\hat{\mu}_1 +c_2N_2\hat{\mu}_2 \\
+[(N-2)\hat{\Sigma}+N_1\hat{\mu}_1\hat{\mu}_1^T+N_2\hat{ \mu_2}\hat{\mu}_2^T]\omega \\
++(N_1\hat{\mu}_1+N_2\hat{\mu}_2)
+(\frac{N_1c_1+N_2c_2}{N} 
+-\frac{(N_1\hat{\mu}_1^T+N_2\hat{\mu}_2^T)\omega}{N} )
+&= c_1N_1\hat{\mu}_1 +c_2N_2\hat{\mu}_2 \\
+\end{align*}
+
+\item  \textbf{Answer}
+
+\begin{align*}
+[(N-2)\hat{\Sigma}+N_1\hat{\mu}_1\hat{\mu}_1^T+N_2\hat{ \mu_2}\hat{\mu}_2^T]\omega \\
++(N_1\hat{\mu}_1+N_2\hat{\mu}_2)
+(\frac{N_1c_1+N_2c_2}{N} 
+-\frac{(N_1\hat{\mu}_1^T+N_2\hat{\mu}_2^T)\omega}{N} )
+&= c_1N_1\hat{\mu}_1 +c_2N_2\hat{\mu}_2 \\
+\end{align*}
+
+Consider term without $\omega$ in LHS
+
+\begin{align*}
+(N_1\hat{\mu}_1+N_2\hat{\mu}_2)
+(\frac{N_1c_1+N_2c_2}{N})  \\
+\end{align*}
+
+Consider term $(N_1\hat{\mu}_1+N_2\hat{\mu}_2)(-\frac{(N_1\hat{\mu}_1^T+N_2\hat{\mu}_2^T)\omega}{N})$ in LHS
+
+
+\begin{align*}
+(N_1\hat{\mu}_1+N_2\hat{\mu}_2)(-\frac{(N_1\hat{\mu}_1^T+N_2\hat{\mu}_2^T)\omega}{N})) &=
+(-\frac{N_1^2\hat{\mu}_1\hat{\mu}_1^T}{N}
+-\frac{N_1N_2\hat{\mu}_1\hat{\mu}_2^T}{N}
+-\frac{N_1N_2\hat{\mu}_1^T\hat{\mu}_2}{N}
+-\frac{N_2^2\hat{\mu}_2\hat{\mu}_2^T}{N})\omega  \\
+&=
+(-\frac{N_1^2\hat{\mu}_1\hat{\mu}_1^T}{N}
+-\frac{2N_1N_2\hat{\mu}_1\hat{\mu}_2^T}{N}
+-\frac{N_2^2\hat{\mu}_2\hat{\mu}_2^T}{N})\omega  \\
+\end{align*}
+
+Addr term $[(N-2)\hat{\Sigma}+N_1\hat{\mu}_1\hat{\mu}_1^T+N_2\hat{ \mu_2}\hat{\mu}_2^T]\omega$ into equation above
+
+\begin{align*}
+&=
+(-\frac{N_1^2\hat{\mu}_1\hat{\mu}_1^T}{N}
+-\frac{2N_1N_2\hat{\mu}_1\hat{\mu}_2^T}{N}
+-\frac{N_2^2\hat{\mu}_2\hat{\mu}_2^T}{N})\omega
++  [(N-2)\hat{\Sigma}+N_1\hat{\mu}_1\hat{\mu}_1^T+N_2\hat{ \mu_2}\hat{\mu}_2^T]\omega\\
+&= [(N-2)\hat{\Sigma}]\omega
++ (N_1\hat{\mu}_1\hat{\mu}_1^T
++N_2\hat{ \mu_2}\hat{\mu}_2^T
+-\frac{N_1^2\hat{\mu}_1\hat{\mu}_1^T}{N}
+-\frac{2N_1N_2\hat{\mu}_1\hat{\mu}_2^T}{N}
+-\frac{N_2^2\hat{\mu}_2\hat{\mu}_2^T}{N}
+)\omega\\
+&= [(N-2)\hat{\Sigma}]\omega
++ (\frac{N_1N_2}{N}(\hat{\mu}_2-\hat{\mu}_1)(\hat{\mu}_2-\hat{\mu}_1)^T
+)\omega\\
+\end{align*}
+
+\newpage
+
+Add term without $\omega$
+
+\begin{align*}
+LHS 
+&= [(N-2)\hat{\Sigma}
++ \frac{N_1N_2}{N}(\hat{\mu}_2-\hat{\mu}_1)(\hat{\mu}_2-\hat{\mu}_1)^T
+]\omega
++(N_1\hat{\mu}_1+N_2\hat{\mu}_2)
+(\frac{N_1c_1+N_2c_2}{N})
+\end{align*}
+
+\item  \textbf{Answer}
+
+from (iii) and (iv). $K=(N-2)\hat{\Sigma}+ \frac{N_1N_2}{N}(\hat{\mu}_2-\hat{\mu}_1)(\hat{\mu}_2-\hat{\mu}_1)^T$
+
+\begin{align*}
+K\omega+(N_1\hat{\mu}_1+N_2\hat{\mu}_2)
+(\frac{N_1c_1+N_2c_2}{N})  &= c_1N_1\hat{\mu}_1+c_2N_2\hat{\mu}_2\\
+K\omega  &= c_1N_1\hat{\mu}_1+c_2N_2\hat{\mu}_2
+-(N_1\hat{\mu}_1+N_2\hat{\mu}_2)(\frac{N_1c_1+N_2c_2}{N})\\
+\end{align*}
+
+Consider only RHS
+
+\begin{align*}
+RHS &= c_1N_1\hat{\mu}_1+c_2N_2\hat{\mu}_2
+-(N_1\hat{\mu}_1+N_2\hat{\mu}_2)(\frac{N_1c_1+N_2c_2}{N})\\
+ &= c_1N_1\hat{\mu}_1+c_2N_2\hat{\mu}_2
+- \frac{N_1^2c_1\hat{\mu}_1}{N}
+- \frac{N_1N_2c_2\hat{\mu}_1}{N}
+- \frac{N_1N_2c_1\hat{\mu}_2}{N}
+- \frac{N_2^2c_2\hat{\mu}_2}{N}\\
+&= \frac{1}{N}(
+    c_1NN_1\hat{\mu}_1
++ c_2NN_2\hat{\mu}_2
+- N_1^2c_1\hat{\mu}_1
+- N_1N_2c_2\hat{\mu}_1
+- N_1N_2c_1\hat{\mu}_2
+- N_2^2c_2\hat{\mu}_2)\\
+&= \frac{1}{N}(
+    c_1(N_1+N_2)N_1\hat{\mu}_1
++ c_2(N_1+N_2)N_2\hat{\mu}_2
+- N_1^2c_1\hat{\mu}_1
+- N_1N_2c_2\hat{\mu}_1
+- N_1N_2c_1\hat{\mu}_2
+- N_2^2c_2\hat{\mu}_2)\\
+\end{align*}
+
+Consider only term with $\hat{\mu}_1$
+
+\begin{align*}
+&= c_1(N_1+N_2)N_1\hat{\mu}_1
+- N_1^2c_1\hat{\mu}_1
+- N_1N_2c_2\hat{\mu}_1\\
+&= c_1N_1^2\hat{\mu}_1
++c_1N_2N_1\hat{\mu}_1
+- N_1^2c_1\hat{\mu}_1
+- N_1N_2c_2\hat{\mu}_1\\
+&= c_1N_1N_2\hat{\mu}_1
+- c_2N_1N_2\hat{\mu}_1\\
+\end{align*}
+
+Consider only term with $\hat{\mu}_2$
+
+\begin{align*}
+&= c_2(N_1+N_2)N_2\hat{\mu}_2
+- N_2^2c_2\hat{\mu}_2
+- N_1N_2c_1\hat{\mu}_2\\
+&= c_2N_2^2\hat{\mu}_2
++c_2N_2N_1\hat{\mu}_2
+- N_2^2c_2\hat{\mu}_2
+- N_1N_2c_1\hat{\mu}_2\\
+&= c_2N_1N_2\hat{\mu}_2
+- c_1N_1N_2\hat{\mu}_2\\
+\end{align*}
+
+\newpage
+Combine two terms
+\begin{align*}
+RHS &= \frac{1}{N}(
+c_1N_1N_2\hat{\mu}_1
+- c_2N_1N_2\hat{\mu}_1
++c_2N_1N_2\hat{\mu}_2
+- c_1N_1N_2\hat{\mu}_2)\\
+RHS &= \frac{1}{N}(
+c_2N_1N_2\hat{\mu}_2
+- c_1N_1N_2\hat{\mu}_2
+- c_2N_1N_2\hat{\mu}_1
++c_1N_1N_2\hat{\mu}_1
+)\\
+K\omega &= \frac{1}{N}(
+c_2N_1N_2
+- c_1N_1N_2
+)(\hat{\mu}_2-\hat{\mu}_1)\\
+[(N-2)\hat{\Sigma}+ \frac{N_1N_2}{N}(\hat{\mu}_2-\hat{\mu}_1)(\hat{\mu}_2-\hat{\mu}_1)^T]\omega &= 
+(\frac{c_2N_1N_2- c_1N_1N_2}{N}
+)(\hat{\mu}_2-\hat{\mu}_1)\\
+\end{align*}
+
+\end{enumerate}
+
+\item  \textbf{Answer}
+
+\end{enumerate}
+
+
+\end{document}
+

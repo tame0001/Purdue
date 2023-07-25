@@ -1,0 +1,690 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\graphicspath{{./ece595_pics/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{ECE 595: Homework 2}}
+
+Thirawat Bureetes, 10
+
+(Spring 2020)
+\end{center}
+
+\subsection*{Exercise 1}
+
+\noindent\textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+import csv
+import cvxpy as cp
+import numpy as np
+import matplotlib.pyplot as plt
+
+male_train_data =[]
+with open("male_train_data.csv", "r") as csv_file:
+    reader = csv.reader(csv_file, delimiter=',')    
+    for data in reader:
+        male_train_data.append(data)        
+    male_train_data.pop(0)   
+csv_file.close()
+
+female_train_data =[]
+with open("female_train_data.csv", "r") as csv_file:    
+    reader = csv.reader(csv_file, delimiter=',')    
+    for data in reader:
+        female_train_data.append(data)        
+    female_train_data.pop(0)   
+csv_file.close()
+
+print('male training data set')
+print(male_train_data[0:10])
+print()
+print('female training data set')
+print(female_train_data[0:10])
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_1}
+\caption{Result of reading training data set}
+\label{fig: hw2_1}
+\end{figure}
+
+The figure \ref{fig: hw2_1} shows the there are 1664 and 1560 data in female training dataset and male training data set respectively to confirm that datasets are read successfully. The first 10 data in each dataset were printed and shown in figure \ref{fig: hw2_1}. This verifies that the data are read correctly.
+
+\subsection*{Exercise 2}
+
+\begin{enumerate}[label=(\alph*)]
+
+\item  \textbf{Answer}
+
+\begin{align*}
+\mathbf{A}& = 
+\begin{bmatrix}
+\mathbf{x_j^T} & 1 
+\end{bmatrix} 
+ && \text{$ j \in (1,N)$} \\
+\mathbf{b} &=
+\begin{bmatrix}
+\mathbf{y_j}
+\end{bmatrix} 
+ && \text{$ j \in (1,N)$}
+\end{align*}
+
+\newpage
+
+\item  \textbf{Answer}
+
+$\mathbf{A}$ is invertible if none of its eigenvalue equals to 0. In case that the invert is not existed, pseudo-inverses can be used.
+
+\begin{align*}
+\mathbf{e}& = \mathbf{b}-\mathbf{A} \mathbf{\theta}^* \\
+\mathbf{e}^2& =\mathbf{e}^T \mathbf{e} \\
+\mathbf{e}^2& = (\mathbf{b}-\mathbf{A} \mathbf{\theta}^*)^T(\mathbf{b}-\mathbf{A} \mathbf{\theta}^*) \\
+& = (\mathbf{A} \mathbf{\theta}^*-\mathbf{b})^T(\mathbf{A} \mathbf{\theta}^*-\mathbf{b}) \\
+&= (\mathbf{A} \mathbf{\theta}^*)^T(\mathbf{A} \mathbf{\theta}^*)-(\mathbf{A} \mathbf{\theta}^*)^T \mathbf{b} - \mathbf{b}^T(\mathbf{A} \mathbf{\theta}^*) + \mathbf{b}^T\mathbf{b}\\
+&=(\mathbf{\theta}^*)^T \mathbf{A}^T \mathbf{A} \mathbf{\theta}^* -2(\mathbf{A} \mathbf{\theta}^*)^T \mathbf{b}+ \mathbf{b}^T \mathbf{b} \\
+\frac{\partial{\mathbf{e}^T \mathbf{e}}}{\partial{\mathbf{\theta}^*}} &= 2\mathbf{A}^T \mathbf{A} \mathbf{\theta}^* -2\mathbf{A}^T \mathbf{b}\\
+0 &= 2\mathbf{A}^T \mathbf{A} \mathbf{\theta}^* -2\mathbf{A}^T \mathbf{b}\\
+2\mathbf{A}^T \mathbf{b} &= 2\mathbf{A}^T \mathbf{A} \mathbf{\theta}^* \\
+\mathbf{A}^T \mathbf{A} \mathbf{\theta}^* &= \mathbf{A}^T \mathbf{b}  \\
+\mathbf{\theta}^* &= (\mathbf{A}^T \mathbf{A} )^{-1}\mathbf{A}^T \mathbf{b}  \\
+\end{align*}
+
+\item  \textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+male_train_data = np.asarray(male_train_data, dtype=np.float32)
+male_train_data = np.delete(male_train_data, 0, 1)
+one_arr = np.ones(male_train_data.shape[0])
+one_arr = np.resize(one_arr, (male_train_data.shape[0], 1))
+male_train_data = np.concatenate((male_train_data, one_arr), axis=1)
+
+female_train_data = np.asarray(female_train_data, dtype=np.float32)
+female_train_data = np.delete(female_train_data, 0, 1)
+one_arr = np.ones(female_train_data.shape[0])
+one_arr = np.resize(one_arr, (female_train_data.shape[0], 1))
+female_train_data = np.concatenate((female_train_data, one_arr), axis=1)
+
+A = np.concatenate((male_train_data, female_train_data), axis=0)
+b = np.concatenate((np.ones(male_train_data.shape[0]), 
+                    -1*np.ones(female_train_data.shape[0])), axis=0)
+
+theta = np.dot(np.linalg.inv(np.dot(A.T,A)),
+               np.dot(A.T, b))
+
+print()
+print(theta)
+\end{lstlisting}
+
+From calculation, $\theta^* = 
+\begin{bmatrix}
+-0.0123397 \\
+0.00667487 \\
+-10.7018
+\end{bmatrix}$
+
+\item  \textbf{Answer} 
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+x = cp.Variable(theta.shape[0])
+objective = cp.Minimize(cp.sum_squares(A*x-b))
+prob = cp.Problem(objective)
+result = prob.solve()
+print()
+print(x.value)
+\end{lstlisting}
+
+From calculation, $\theta^* = 
+\begin{bmatrix}
+-0.0123397 \\
+0.00667487 \\
+-10.7018
+\end{bmatrix}$ which equals to result from part (c).
+
+\end{enumerate}
+
+\subsection*{Exercise 3}
+
+\begin{enumerate}[label=(\alph*)]
+
+\item 
+
+\begin{enumerate}[label=(\roman*)]
+
+\item  \textbf{Answer}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_3_a_1}
+\caption{Scatter plot of training dataset}
+\label{fig: hw2_3_a_1}
+\end{figure}
+
+\newpage
+\item  \textbf{Answer}
+
+\begin{align*}
+\mathbf{\omega}^{*T} \mathbf{x}+\omega_0^{*}& = 0 \\
+\omega_1 x_1 + \omega_2 x_2 + \omega_0 &= 0  \\
+\omega_2 x_2  &= -\omega_0 -  \omega_1 x_1 \\
+ x_2  &= -\frac{\omega_0 +  \omega_1 x_1}{\omega_2} \\
+\end{align*}
+
+Classifier decision boundary is $
+\begin{bmatrix}
+x_1 \\
+-\frac{\omega_0 +  \omega_1 x_1}{\omega_2}
+\end{bmatrix}$
+
+\item  \textbf{Answer}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_3_a_3}
+\caption{Scatter plot of training dataset with decision line}
+\label{fig: hw2_3_a_3}
+\end{figure}
+
+\end{enumerate}
+
+\newpage
+\item  \textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+male_test_data =[]
+with open("male_test_data.csv", "r") as csv_file:
+    reader = csv.reader(csv_file, delimiter=',')    
+    for data in reader:
+        male_test_data.append(data)        
+    male_test_data.pop(0)   
+csv_file.close()
+
+female_test_data =[]
+with open("female_test_data.csv", "r") as csv_file:    
+    reader = csv.reader(csv_file, delimiter=',')    
+    for data in reader:
+        female_test_data.append(data)        
+    female_test_data.pop(0)   
+csv_file.close()
+
+male_test_data = np.asarray(male_test_data, dtype=np.float32)
+male_test_data = np.delete(male_test_data, 0, 1)
+one_arr = np.resize(one_arr, (male_test_data.shape[0], 1))
+male_test_data = np.concatenate((male_test_data, one_arr), axis=1)
+male_test_result = np.dot(male_test_data, theta)
+male_test_result = np.sign(male_test_result)
+male_test_result = male_test_result + 1 
+male_success = np.count_nonzero(male_test_result, axis=0)
+
+female_test_data = np.asarray(female_test_data, dtype=np.float32)
+female_test_data = np.delete(female_test_data, 0, 1)
+one_arr = np.resize(one_arr, (female_test_data.shape[0], 1))
+female_test_data = np.concatenate((female_test_data, one_arr), axis=1)
+female_test_result = np.dot(female_test_data, theta)
+female_test_result = np.sign(female_test_result)
+female_test_result = female_test_result - 1
+female_success = np.count_nonzero(female_test_result, axis=0)
+
+success_rate = ((male_success + female_success)/
+                (male_test_data.shape[0] + female_test_data.shape[0]))
+print(success_rate)
+\end{lstlisting}
+
+The classifier’s accuracy is 83.93\%
+
+\end{enumerate}
+
+\newpage
+
+\subsection*{Exercise 4}
+
+\begin{enumerate}[label=(\alph*)]
+
+\item
+
+\begin{enumerate}[label=(\roman*)]
+
+\item \noindent\textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+import csv
+import numpy as np
+import matplotlib.pyplot as plt
+
+male_train_data =[]
+with open("male_train_data.csv", "r") as csv_file:
+    reader = csv.reader(csv_file, delimiter=',')    
+    for data in reader:
+        male_train_data.append(data)        
+    male_train_data.pop(0)   
+csv_file.close()
+
+female_train_data =[]
+with open("female_train_data.csv", "r") as csv_file:    
+    reader = csv.reader(csv_file, delimiter=',')    
+    for data in reader:
+        female_train_data.append(data)        
+    female_train_data.pop(0)   
+csv_file.close()
+
+male_train_data = np.asarray(male_train_data, dtype=np.float32)
+male_train_data = np.delete(male_train_data, 0, 1)
+one_arr = np.ones(male_train_data.shape[0])
+one_arr = np.resize(one_arr, (male_train_data.shape[0], 1))
+male_train_data = np.concatenate((male_train_data, one_arr), axis=1)
+
+female_train_data = np.asarray(female_train_data, dtype=np.float32)
+female_train_data = np.delete(female_train_data, 0, 1)
+one_arr = np.ones(female_train_data.shape[0])
+one_arr = np.resize(one_arr, (female_train_data.shape[0], 1))
+female_train_data = np.concatenate((female_train_data, one_arr), axis=1)
+
+A = np.concatenate((male_train_data, female_train_data), axis=0)
+A[:, 1] = A[:, 1] / 100
+
+b = np.concatenate((np.ones(male_train_data.shape[0]), 
+                    -1*np.ones(female_train_data.shape[0])), axis=0)
+
+norm_theta_lambda = []
+norm_residual_lambda = []
+theta_list = []
+lambda_list = np.arange(0.1, 10, 0.1)
+for l in lambda_list:
+    theta_lambda = np.dot(np.linalg.inv(np.dot(A.T,A) + 
+                                        l*np.eye(A.shape[1])), 
+                          np.dot(A.T, b))
+    theta_list.append(theta_lambda)
+    norm_theta_lambda.append(np.linalg.norm(theta_lambda)**2)
+    residual = np.dot(A, theta_lambda) - b
+    norm_residual_lambda.append(np.linalg.norm(residual)**2)
+    
+norm_theta_lambda = np.asarray(norm_theta_lambda)
+norm_residual_lambda = np.asarray(norm_residual_lambda)
+theta_list = np.asarray(theta_list)
+
+fig1 = plt.figure()
+ax1 = fig1.add_subplot(111)
+ax1.plot(norm_theta_lambda, norm_residual_lambda)
+ax1.set_xlabel(r'$||{\theta}_\lambda ||_2^2$')
+ax1.set_ylabel(r'$||A{\theta}_\lambda -b||_2^2$')
+fig1.savefig("hw2_4_a_1.pdf")
+
+fig2 = plt.figure()
+ax2 = fig2.add_subplot(111)
+ax2.plot(lambda_list, norm_residual_lambda)
+ax2.set_xlabel(r'$\lambda$')
+ax2.set_ylabel(r'$||A{\theta}_\lambda -b||_2^2$')
+fig2.savefig("hw2_4_a_2.pdf")
+
+fig3 = plt.figure()
+ax3 = fig3.add_subplot(111)
+ax3.plot(lambda_list, norm_theta_lambda)
+ax3.set_xlabel(r'$\lambda$')
+ax3.set_ylabel(r'$||{\theta}_\lambda ||_2^2$')
+fig3.savefig("hw2_4_a_3.pdf")
+
+x = np.linspace(np.amin(A[:, 0]), np.amax(A[:, 0]), 200)
+legend_str = []
+plt.figure(figsize=(15,7.5))
+for i in range(len(lambda_list))[0::10]:
+    y = -1*(theta_list[i][2]+(x*theta_list[i][0]))/theta_list[i][1]  
+    plt.plot(x, y.T)
+    legend_str.append('$\lambda = $' + str(lambda_list[i]))
+plt.legend(legend_str)
+plt.xlabel('BMI')
+plt.ylabel('Stature (dm)')
+plt.savefig("hw2_4_a_4.pdf")
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_4_a_1}
+\caption{$||A{\theta}_\lambda -b||_2^2$ with respect to $||{\theta}_\lambda ||_2^2$}
+\label{fig: hw2_4_a_1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_4_a_2}
+\caption{$||A{\theta}_\lambda -b||_2^2$ with respect to $\lambda$}
+\label{fig: hw2_4_a_2}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_4_a_3}
+\caption{$||{\theta}_\lambda ||_2^2$ with respect to $\lambda$}
+\label{fig: hw2_4_a_3}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_4_a_4}
+\caption{Decision lines with different $\lambda$}
+\label{fig: hw2_4_a_4}
+\end{figure}
+
+\newpage
+\item  When increase $\lambda$, $||A{\Theta}_\lambda -b||_2^2$ will increase. In the other hand, $||{\Theta}_\lambda ||_2^2$ will decrease when increase $\lambda$. 
+The higher $\lambda$ makes decision line's slope more steep but y-intercept will be lower.
+${\theta}_{\lambda=0.1} = \begin{bmatrix}-0.01258685 && 0.66221011 && -10.60704188\end{bmatrix}^T$.
+ 
+\end{enumerate}
+
+\item 
+
+\begin{enumerate}[label=(\roman*)]
+
+\item \noindent\textbf{Answer}
+
+\begin{align*}
+\mathcal{L}(\mathbf{\theta_\lambda}, \nu)& = ||\mathbf{A\theta_\lambda-b}||_2^2 + \lambda ||\mathbf{\theta_\lambda}||_2^2  \\
+\mathcal{L}(\mathbf{\theta_\alpha}, \nu)& = ||\mathbf{A\theta_\alpha-b}||_2^2 - \nu (\alpha-||\mathbf{\theta_\alpha}||_2^2)  \\
+\mathcal{L}(\mathbf{\theta_\epsilon}, \nu)& = ||\mathbf{\theta_\epsilon}||_2^2 - \nu (\epsilon - ||\mathbf{A\theta_\epsilon-b}||_2^2)  \\
+\end{align*}
+
+KKT Condition
+
+\begin{enumerate}[label=(\arabic*)]
+\item $\nabla_\theta \mathcal{L}(\theta, \nu) = 0$
+\item $\theta \geq 0$
+\item $\nu g(\theta) = 0$
+\item $g(\theta) \leq 0$
+\end{enumerate}
+
+\item \noindent\textbf{Answer}
+
+
+From KKT (3) $\nu g(\theta_\alpha) = 0$.  $ g(\theta_\alpha) =\alpha-||\mathbf{\theta_\alpha||}_2^2$. 
+From condition $\alpha = ||\mathbf{\theta_\lambda}||_2^2$ then  $ g(\theta_\alpha) = ||\mathbf{\theta_\lambda}||_2^2-||\mathbf{\theta_\alpha||}_2^2 = 0$
+Therefore, $\mathbf{\theta_\lambda} = \mathbf{\theta_\alpha}$
+
+\item \noindent\textbf{Answer}
+
+From KKT (3) $\nu g(\theta_\epsilon) = 0$.  $ g(\theta_\epsilon) =\epsilon - ||\mathbf{A\theta_\epsilon-b}||_2^2$. 
+From condition $\epsilon =||\mathbf{A\theta_\lambda-b}||_2^2$ then  $ g(\theta_\alpha) = ||\mathbf{A\theta_\lambda-b}||_2^2-||\mathbf{A\theta_\epsilon-b}||_2^2 = 0$
+Therefore, $\mathbf{\theta_\lambda} = \mathbf{\theta_\epsilon}$
+
+\end{enumerate}
+
+\item
+
+\begin{enumerate}[label=(\roman*)]
+
+\item \noindent\textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+import csv
+import cvxpy as cp
+import numpy as np
+import matplotlib.pyplot as plt
+
+male_train_data = []
+with open("male_train_data.csv", "r") as csv_file:
+    reader = csv.reader(csv_file, delimiter=',')
+    for data in reader:
+        male_train_data.append(data)
+    male_train_data.pop(0)
+csv_file.close()
+
+female_train_data = []
+with open("female_train_data.csv", "r") as csv_file:
+    reader = csv.reader(csv_file, delimiter=',')
+    for data in reader:
+        female_train_data.append(data)
+    female_train_data.pop(0)
+csv_file.close()
+
+male_train_data = np.asarray(male_train_data, dtype=np.float32)
+male_train_data = np.delete(male_train_data, 0, 1)
+one_arr = np.ones(male_train_data.shape[0])
+one_arr = np.resize(one_arr, (male_train_data.shape[0], 1))
+male_train_data = np.concatenate((male_train_data, one_arr), axis=1)
+
+female_train_data = np.asarray(female_train_data, dtype=np.float32)
+female_train_data = np.delete(female_train_data, 0, 1)
+one_arr = np.ones(female_train_data.shape[0])
+one_arr = np.resize(one_arr, (female_train_data.shape[0], 1))
+female_train_data = np.concatenate((female_train_data, one_arr), axis=1)
+
+A = np.concatenate((male_train_data, female_train_data), axis=0)
+A[:, 1] = A[:, 1] / 100
+b = np.concatenate((np.ones(male_train_data.shape[0]),
+                    -1*np.ones(female_train_data.shape[0])), axis=0)
+
+lamb = 0.1
+theta_lambda = np.dot(np.linalg.inv(np.dot(A.T, A) +
+                                    lamb*np.eye(A.shape[1])),
+                      np.dot(A.T, b))
+
+alpha_star = np.linalg.norm(theta_lambda)**2
+alpha_list = np.arange(-50, 51, 1)
+alpha_list = alpha_list*2 + alpha_star
+
+theta_list = []
+norm_theta = []
+norm_residual = []
+
+for alpha in alpha_list:
+    x = cp.Variable(A.shape[1])
+    objective = cp.Minimize(cp.sum_squares(A*x-b)*0.1)
+    constraints = [cp.sum_squares(x) <= alpha]
+    prob = cp.Problem(objective, constraints)
+    result = prob.solve(verbose=True)
+    theta_list.append(x.value)
+    norm_theta.append(np.linalg.norm(x.value)**2)
+    residual = np.dot(A, x.value) - b
+    norm_residual.append(np.linalg.norm(residual)**2)
+   
+print(np.argmin(norm_residual))
+print(theta_list[np.argmin(norm_residual)])
+
+fig1 = plt.figure()
+ax1 = fig1.add_subplot(111)
+ax1.plot(norm_theta, norm_residual)
+ax1.set_xlabel(r'$||{\theta}_{\alpha } ||_2^2$')
+ax1.set_ylabel(r'$||A{\theta}_{\alpha} -b||_2^2$')
+fig1.savefig("hw2_4_c_1_1.pdf")
+
+fig2 = plt.figure()
+ax2 = fig2.add_subplot(111)
+ax2.plot(alpha_list, norm_residual)
+ax2.set_xlabel(r'${\alpha}$')
+ax2.set_ylabel(r'$||A{\theta}_{\alpha} -b||_2^2$')
+fig2.savefig("hw2_4_c_1_2.pdf")
+
+fig3 = plt.figure()
+ax3 = fig3.add_subplot(111)
+ax3.plot(alpha_list, norm_theta)
+ax3.set_xlabel(r'${\alpha}$')
+ax3.set_ylabel(r'$||{\theta}_{\alpha} ||_2^2$')
+fig3.savefig("hw2_4_c_1_3.pdf")
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_4_c_1_1}
+\caption{$||A{\theta}_\alpha -b||_2^2$ with respect to $||{\theta}_\alpha ||_2^2$}
+\label{fig: hw2_4_c_1_1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_4_c_1_2}
+\caption{$||A{\theta}_\alpha -b||_2^2$ with respect to $\alpha$}
+\label{fig: hw2_4_c_1_2}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_4_c_1_3}
+\caption{$||{\theta}_\alpha ||_2^2$ with respect to $\alpha$}
+\label{fig: hw2_4_c_1_3}
+\end{figure}
+
+From figure \ref{fig: hw2_4_c_1_1}, $||A{\theta}_\alpha -b||_2^2$ decrease when $||{\theta}_\alpha ||_2^2$ increase. 
+From figure \ref{fig: hw2_4_c_1_2},  $||A{\theta}_\alpha -b||_2^2$ decrease significantly when $\alpha$ is lowin the beginning then keep approximately constant after reach certain $\alpha$.
+Likewise, shown in  figure \ref{fig: hw2_4_c_1_3},  
+$||{\theta}_\alpha||_2^2$ increase significantly when $\alpha$ is lowin the beginning then keep approximately constant after reach certain $\alpha$
+At the condition $\alpha = ||{\theta}_{\lambda=0.1} ||_2^2$, ${\theta}_{\alpha} = \begin{bmatrix}-0.01233968 && 0.66748685 && -10.70175058\end{bmatrix}^T$. 
+Which is almost equal to  ${\theta}_{\lambda=0.1}$.
+
+\item \noindent\textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+import csv
+import cvxpy as cp
+import numpy as np
+import matplotlib.pyplot as plt
+
+male_train_data = []
+with open("male_train_data.csv", "r") as csv_file:
+    reader = csv.reader(csv_file, delimiter=',')
+    for data in reader:
+        male_train_data.append(data)
+    male_train_data.pop(0)
+csv_file.close()
+
+female_train_data = []
+with open("female_train_data.csv", "r") as csv_file:
+    reader = csv.reader(csv_file, delimiter=',')
+    for data in reader:
+        female_train_data.append(data)
+    female_train_data.pop(0)
+csv_file.close()
+
+male_train_data = np.asarray(male_train_data, dtype=np.float32)
+male_train_data = np.delete(male_train_data, 0, 1)
+one_arr = np.ones(male_train_data.shape[0])
+one_arr = np.resize(one_arr, (male_train_data.shape[0], 1))
+male_train_data = np.concatenate((male_train_data, one_arr), axis=1)
+
+female_train_data = np.asarray(female_train_data, dtype=np.float32)
+female_train_data = np.delete(female_train_data, 0, 1)
+one_arr = np.ones(female_train_data.shape[0])
+one_arr = np.resize(one_arr, (female_train_data.shape[0], 1))
+female_train_data = np.concatenate((female_train_data, one_arr), axis=1)
+
+A = np.concatenate((male_train_data, female_train_data), axis=0)
+A[:, 1] = A[:, 1] / 100
+b = np.concatenate((np.ones(male_train_data.shape[0]),
+                    -1*np.ones(female_train_data.shape[0])), axis=0)
+b = np.resize(b, (b.shape[0], 1))
+
+lamb = 0.1
+theta_lambda = np.dot(np.linalg.inv(np.dot(A.T, A) +
+                                    lamb*np.eye(A.shape[1])),
+                      np.dot(A.T, b))
+
+epsilon_star = np.dot(A, theta_lambda) - b
+epsilon_star = np.linalg.norm(epsilon_star)**2
+epsilon_list = np.arange(0, 201, 1)
+epsilon_list = epsilon_list*2 + epsilon_star
+
+theta_list = []
+norm_theta = []
+norm_residual = []
+
+for epsilon in epsilon_list:
+    x = cp.Variable((A.shape[1],1))
+    objective = cp.Minimize(cp.sum_squares(x))
+    constraints = [cp.sum_squares(A*x-b) <= epsilon]
+    prob = cp.Problem(objective, constraints)
+    result = prob.solve(verbose=True)
+    theta_list.append(x.value)
+    norm_theta.append(np.linalg.norm(x.value)**2)
+    residual = np.dot(A, x.value) - b
+    norm_residual.append(np.linalg.norm(residual)**2)
+   
+print(np.argmin(norm_residual))
+print(theta_list[np.argmin(norm_residual)])
+
+
+fig1 = plt.figure()
+ax1 = fig1.add_subplot(111)
+ax1.plot(norm_theta, norm_residual)
+ax1.set_xlabel(r'$||{\theta}_{\epsilon } ||_2^2$')
+ax1.set_ylabel(r'$||A{\theta}_{\epsilon} -b||_2^2$')
+fig1.savefig("hw2_4_c_2_1.pdf")
+
+fig2 = plt.figure()
+ax2 = fig2.add_subplot(111)
+ax2.plot(epsilon_list, norm_residual)
+ax2.set_xlabel(r'${\epsilon}$')
+ax2.set_ylabel(r'$||A{\theta}_{\epsilon} -b||_2^2$')
+fig2.savefig("hw2_4_c_2_2.pdf")
+
+fig3 = plt.figure()
+ax3 = fig3.add_subplot(111)
+ax3.plot(epsilon_list, norm_theta)
+ax3.set_xlabel(r'${\epsilon}$')
+ax3.set_ylabel(r'$||{\theta}_{\epsilon} ||_2^2$')
+fig3.savefig("hw2_4_c_2_3.pdf")
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_4_c_2_1}
+\caption{$||A{\theta}_\epsilon -b||_2^2$ with respect to $||{\theta}_\epsilon ||_2^2$}
+\label{fig: hw2_4_c_2_1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_4_c_2_2}
+\caption{$||A{\theta}_\epsilon -b||_2^2$ with respect to $\epsilon$}
+\label{fig: hw2_4_c_2_2}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw2_4_c_2_3}
+\caption{$||{\theta}_\epsilon ||_2^2$ with respect to $\epsilon$}
+\label{fig: hw2_4_c_2_3}
+\end{figure}
+
+From figure \ref{fig: hw2_4_c_2_1}, $||A{\theta}_\epsilon -b||_2^2$ decrease when $||{\theta}_\epsilon ||_2^2$ increase. 
+From figure \ref{fig: hw2_4_c_2_2},  $||A{\theta}_\epsilon -b||_2^2$ is related to $\epsilon$ 
+while , shown in  figure \ref{fig: hw2_4_c_2_3},  $||{\theta}_\epsilon||_2^2$ has invert relationship wtih $\epsilon$ 
+At the condition $\alpha = ||A{\theta}_{\lambda=0.1}-b ||_2^2$, ${\theta}_{\epsilon} = \begin{bmatrix}-0.01277364 && 0.65823782 && -10.53572364\end{bmatrix}^T$. 
+Which is almost equal to  ${\theta}_{\lambda=0.1}$.
+
+\end{enumerate}
+
+\item \noindent\textbf{Answer} The relationship between $||A{\theta} -b||_2^2$ and  $||{\theta}||_2^2$ of all three optimization problems are the same:
+ $||A{\theta} -b||_2^2$ is low when $||{\theta}||_2^2$. 
+Consider Sum Square Residual $||A{\theta} -b||_2^2$, $\epsilon$ has linear positive slope. It is possible that with lower $\epsilon$, the $||A{\theta}_\epsilon -b||_2^2$ can be lower. 
+$||A{\theta}_\alpha -b||_2^2$ decrease when $\alpha$ increase until $\alpha$ reaches certain value. 
+$||A{\theta}_\lambda -b||_2^2$ has positive slope ,like $\epsilon$. However, it seems like at the low $\lambda$, the relationship is not linear. 
+$\alpha$ is more appealing than the others because the optimal point is clear. 
+
+\end{enumerate}
+
+
+\end{document}
+

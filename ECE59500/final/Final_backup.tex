@@ -1,0 +1,837 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\graphicspath{{./ece595_pics/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+
+
+\begin{document}
+
+\begin{center}
+\Large{\textbf{ECE 595: Final Project}}
+
+Thirawat Bureetes, 10
+
+(Spring 2020)
+\end{center}
+
+
+\subsection*{Exercise 1}
+\begin{enumerate}[label=(\alph*)]
+
+%------------------Task a------------------------------
+
+\item 
+
+\begin{enumerate}[label=(\roman*)]
+
+\item \noindent\textbf{Answer}
+
+Subject function $g(\mathbf{x}) = \boldsymbol{\omega^T}\mathbf{x} + \omega_0 = 0$. Try to minimize $l_2$ distance $||\mathbf{x}-\mathbf{x_0}||_2^2$ or $\frac{1}{2}||\mathbf{x}-\mathbf{x_0}||_2^2$.
+
+\begin{align*}
+L(\mathbf{x}, \lambda) &= \frac{1}{2}||\mathbf{x}-\mathbf{x_0}||_2^2 + \lambda(\boldsymbol{\omega^T}\mathbf{x} + \omega_0)\\
+\nabla_\mathbf{x} L(\mathbf{x}, \lambda) &= \mathbf{x}-\mathbf{x_0} + \lambda\boldsymbol{\omega}\\
+0 &= \mathbf{x}-\mathbf{x_0} + \lambda\boldsymbol{\omega} \\
+0 &= \boldsymbol{\omega^T}\mathbf{x}-\boldsymbol{\omega^T}\mathbf{x_0} + \lambda||\boldsymbol{\omega}||_2^2 \\
+\nabla_\lambda L(\mathbf{x}, \lambda) &= \boldsymbol{\omega^T}\mathbf{x} + \omega_0\\
+0 &= \boldsymbol{\omega^T}\mathbf{x} + \omega_0\\
+- \omega_0 &= \boldsymbol{\omega^T}\mathbf{x}\\
+0 &= - \omega_0-\boldsymbol{\omega^T}\mathbf{x_0} + \lambda||\boldsymbol{\omega}||_2^2 \\
+\lambda||\boldsymbol{\omega}||^2 &=  \omega_0 + \boldsymbol{\omega^T}\mathbf{x_0} \\
+\lambda^* &=  \frac{\omega_0 + \boldsymbol{\omega^T}\mathbf{x_0}}{||\boldsymbol{\omega}||_2^2} \\
+\mathbf{x^*} &= \mathbf{x_0} - \lambda^* \boldsymbol{\omega} \\
+\mathbf{x^*} &= \mathbf{x_0} - (\frac{\omega_0 + \boldsymbol{\omega^T}\mathbf{x_0}}{||\boldsymbol{\omega}||_2^2}) \boldsymbol{\omega} \\
+\mathbf{x^*} &= \mathbf{x_0} - (\frac{\omega_0 + \boldsymbol{\omega^T}\mathbf{x_0}}{||\boldsymbol{\omega}||_2^2})\frac{ \boldsymbol{\omega}}{||\boldsymbol{\omega}||_2^2} \\
+\end{align*}
+
+Subject function $g(\mathbf{x}) = \boldsymbol{\omega^T}\mathbf{x} + \omega_0 = 0$. Try to minimize $l_\infty $ distance $||\mathbf{x}-\mathbf{x_0}||_\infty $.
+
+\begin{align*}
+\mathbf{x}-\mathbf{x_0} &= \mathbf{r} \\
+\mathbf{x} &= \mathbf{r} + \mathbf{x_0}\\
+\boldsymbol{\omega^T}\mathbf{x} + \omega_0 &= 0 \\
+\boldsymbol{\omega^T}( \mathbf{r} + \mathbf{x_0}) + \omega_0 &= 0 \\
+\boldsymbol{\omega^T} \mathbf{r} &= - \boldsymbol{\omega^T}\mathbf{x_0} - \omega_0  \\
+b_0 &= - \boldsymbol{\omega^T}\mathbf{x_0} - \omega_0  \\
+\boldsymbol{\omega^T} \mathbf{r} &= b_0  \\
+\end{align*}
+
+Now subject function $\boldsymbol{\omega^T} \mathbf{r} = b_0$. Try to minimize $||\mathbf{r}||_\infty $.Utilize Holder’s inequality $|b_0| = |\boldsymbol{\omega^T} \mathbf{r}| \leq ||\boldsymbol{\omega}||_1||\mathbf{r}||_\infty $ or $||\mathbf{r}||_\infty \geq \frac{ |b| }{||\boldsymbol{\omega}||_1}$. This mean $\frac{ |b| }{||\boldsymbol{\omega}||_1}$ is the lowest possible value of $||\mathbf{r}||_\infty$. 
+
+\begin{align*}
+||\mathbf{r}||_\infty &= \frac{ |b| }{||\boldsymbol{\omega}||_1} \\
+\mathbf{r} &= (\frac{ |b| }{||\boldsymbol{\omega}||_1}) sign(\boldsymbol{\omega})\\
+\mathbf{r} &= (\frac{ - \boldsymbol{\omega^T}\mathbf{x_0} - \omega_0  }{||\boldsymbol{\omega}||_1}) sign(\boldsymbol{\omega})\\
+\mathbf{x^*} &= \mathbf{x_0} -  (\frac{ \boldsymbol{\omega^T}\mathbf{x_0} + \omega_0  }{||\boldsymbol{\omega}||_1}) sign(\boldsymbol{\omega})
+\end{align*}
+
+\item \noindent\textbf{Answer}
+
+Since $g((\mathbf{x})$ is non-linear function, approximate that $g((\mathbf{x}) \approx g(\mathbf{x}^{(k)})+ \nabla_x g(\mathbf{x}^{(k)})^T(\mathbf{x} - \mathbf{x}^{(k)})$. The subject function will become $ g(\mathbf{x}^{(k)})+ \nabla_x g(\mathbf{x}^{(k)})^T(\mathbf{x} - \mathbf{x^{(k)}}) = 0$ Try to minimize $||\mathbf{x}-\mathbf{x_0}||_2^2$
+
+\begin{align*}
+ g(\mathbf{x}^{(k)})+ \nabla_x g(\mathbf{x}^{(k)})^T(\mathbf{x} - \mathbf{x}^{(k)}) &= 0 \\
+ g(\mathbf{x}^{(k)})+ \nabla_x g(\mathbf{x}^{(k)})^T\mathbf{x} - g(\mathbf{x}^{(k)})^T\mathbf{x}^{(k)} &= 0 \\
+\nabla_x g(\mathbf{x}^{(k)})^T\mathbf{x} +  g(\mathbf{x}^{(k)}) -  g(\mathbf{x}^{(k)})^T\mathbf{x}^{(k)} &= 0 \\
+\end{align*}
+
+Let $\nabla_x g(\mathbf{x}^{(k)})\mathbf{x} = \boldsymbol{\omega}^{(k)}$ and $  g(\mathbf{x}^{(k)}) -  g(\mathbf{x}^{(k)})^T\mathbf{x}^{(k)} = \omega_0^{(k)}$. Now $\nabla_x g(\mathbf{x}^{(k)})^T\mathbf{x} +  g(\mathbf{x}^{(k)}) -  g(\mathbf{x}^{(k)})^T\mathbf{x}^{(k)} = 0$ can be writen in linear form as $\boldsymbol{\omega^T}\mathbf{x} + \omega_0 = 0$ So the solution will be 
+
+
+\begin{align*}
+\mathbf{x} &= \mathbf{x_0} - (\frac{\omega_0 + \boldsymbol{\omega^T}\mathbf{x_0}}{||\boldsymbol{\omega}||_2^2}) \boldsymbol{\omega} \\
+\mathbf{x^{(k+1)}} &= \mathbf{x}^{(k)} - (\frac{\omega_0^{(k)} + \boldsymbol{\omega^{(k)}}^T\mathbf{x}^{(k)}}{||\boldsymbol{\omega}^{(k)}||_2^2}) \boldsymbol{\omega}^{(k)} \\
+\boldsymbol{\omega}^{(k)} &= \nabla_x g(\mathbf{x}^{(k)})\mathbf{x} \\
+\omega_0^{(k)} &=g(\mathbf{x}^{(k)}) -  g(\mathbf{x}^{(k)})^T\mathbf{x}^{(k)} \\
+\mathbf{x}^{(k+1)} & = \mathbf{x}^{(k)} - (\frac{g(\mathbf{x}^{(k)})}{||\nabla_x g(\mathbf{x}^{(k)})||_2^2}) \nabla_x g(\mathbf{x}^{(k)})\\ 
+g(\mathbf{x}^{(k)}) &= \frac{1}{2}(\mathbf{x}^{(k)})^T(\mathbf{W_j}-\mathbf{W_t})\mathbf{x}^{(k)} + (\mathbf{w_j}-\mathbf{w_t})^T\mathbf{x}^{(k)} + (w_{j,0} - w_{t,0}) \\
+\nabla_x g(\mathbf{x}^{(k)}) &= \frac{1}{2}(\mathbf{W_j}-\mathbf{W_t})\mathbf{x}^{(k)} + (\mathbf{w_j}-\mathbf{w_t}) \\
+\end{align*}
+
+\end{enumerate}
+
+
+%------------------Task b------------------------------
+\item  \textbf{Answer}
+
+\begin{enumerate}[label=(\roman*)]
+
+\item \noindent\textbf{Answer}
+
+Subject function $||\mathbf{x}-\mathbf{x_0}||_\infty \leq \eta$. Minimize $ \boldsymbol{\omega^T}\mathbf{x} + \omega_0 $.
+
+\begin{align*}
+\mathbf{x}-\mathbf{x_0} &= \mathbf{r} \\
+\mathbf{x} &= \mathbf{r} + \mathbf{x_0}\\
+\boldsymbol{\omega^T}\mathbf{x} + \omega_0 &= \boldsymbol{\omega^T}( \mathbf{r} + \mathbf{x_0}) + \omega_0\\
+\boldsymbol{\omega^T}\mathbf{x} + \omega_0 &= \boldsymbol{\omega^T}\mathbf{r} + \boldsymbol{\omega^T}\mathbf{x_0} + \omega_0\\
+\boldsymbol{\omega^T}\mathbf{x} + \omega_0 &= \boldsymbol{\omega^T}\mathbf{r} + b_0\\
+\end{align*}
+
+Now subject function becomes $||\mathbf{r}||_\infty \leq \eta $. Minimize $ \boldsymbol{\omega^T}\mathbf{r} + b_0$ Utilize Holder’s inequality
+
+\begin{align*}
+- ||\mathbf{r}||_\infty ||\boldsymbol{\omega}||_1  & \leq  \boldsymbol{\omega^T}\mathbf{r} \\
+ -\eta  ||\boldsymbol{\omega}||_1& \leq - ||\mathbf{r}||_\infty ||\boldsymbol{\omega}||_1 \\
+ -\eta  ||\boldsymbol{\omega}||_1&  \leq  \boldsymbol{\omega^T}\mathbf{r} \\
+\end{align*}
+
+$-\eta  ||\boldsymbol{\omega}||_1$ is the lowest possible value of $\boldsymbol{\omega^T}\mathbf{r}$. Consider the minimum value $\mathbf{r} = -\eta (sign(\boldsymbol{\omega}))$ $\mathbf{x^*} = \mathbf{x_0} - \eta (sign(\boldsymbol{\omega}))$
+
+\begin{align*}
+\mathbf{x^*} = \mathbf{x_0} - \eta (sign(\boldsymbol{\omega})
+\end{align*}
+
+\item \noindent\textbf{Answer}
+
+Define lose function $J(\mathbf{x}) = -g(\mathbf{x})$. Try to maximize $J(\mathbf{x})$ subject to $||\mathbf{x}-\mathbf{x_0}||_\infty \leq \eta$. Define $\mathbf{x} = \mathbf{r} + \mathbf{x_0}$, then $J(\mathbf{x}) = J(\mathbf{r} + \mathbf{x_0}) \approx J(  \mathbf{x_0}) + \nabla_x J(  \mathbf{x_0})^T \mathbf{r}$. 
+
+Rewrite optimize objective function to maximize $J(\mathbf{x_0}) + \nabla_x J(  \mathbf{x_0})^T \mathbf{r}$ or  minimize $-J(\mathbf{x_0}) - \nabla_x J(  \mathbf{x_0})^T \mathbf{r}$ subject to  $||\mathbf{r}||_\infty \leq \eta $ Define $-J(\mathbf{x_0}) = b_0$ and $-\nabla_x J(  \mathbf{x_0}) = \boldsymbol{\omega}$, the objective function can be reform to $ \boldsymbol{\omega^T}\mathbf{r} + b_0$ which similar to previous problem. 
+
+\begin{align*}
+\mathbf{x^*} &= \mathbf{x_0} - \eta (sign(\boldsymbol{\omega}) \\
+\mathbf{x^*} &= \mathbf{x_0} - \eta (sign({-\nabla_x J(  \mathbf{x_0})}) \\
+\mathbf{x^*} &= \mathbf{x_0} + \eta (sign({\nabla_x J(  \mathbf{x_0})}) \\
+\mathbf{x^*} &= \mathbf{x_0} + \eta (sign({\nabla_x (-g(  \mathbf{x_0})})) \\
+\mathbf{x^*} &= \mathbf{x_0} - \eta (sign({\nabla_x (g( \mathbf{x_0})})) \\
+\nabla_x g(\mathbf{x}_0) &= \frac{1}{2}(\mathbf{W_j}-\mathbf{W_t})\mathbf{x}_0 + (\mathbf{w_j}-\mathbf{w_t}) \\
+\end{align*}
+
+\item \noindent\textbf{Answer}
+
+\begin{align*}
+J(\mathbf{x}) &\approx J(  \mathbf{x_0}) + \nabla_x J(  \mathbf{x_0})^T \mathbf{r} \\
+&= J(  \mathbf{x_0}) + \nabla_x J(  \mathbf{x_0})^T (\mathbf{x} - \mathbf{x_0}) \\
+&= J(  \mathbf{x_0}) + \nabla_x J(  \mathbf{x_0})^T (\mathbf{x}) - \nabla_x J(  \mathbf{x_0})^T(\mathbf{x_0}) \\
+\end{align*}
+
+The objective is to maximize $J(\mathbf{x})$ or $J(  \mathbf{x_0}) + \nabla_x J(  \mathbf{x_0})^T (\mathbf{x}) - \nabla_x J(  \mathbf{x_0})^T(\mathbf{x_0})$. As only $\nabla_x J(  \mathbf{x_0})^T (\mathbf{x})$ has  $\mathbf{x}$ term so the objective function can be reduce to maximize $\nabla_x J(  \mathbf{x_0})^T (\mathbf{x})$ subject to  $||\mathbf{x}-\mathbf{x_0}||_\infty \leq \eta$ and $0 \leq \mathbf{x} \leq 1$
+
+Rewrite into iteration format, objective function is $\nabla_x J(  \mathbf{x}^{(k)})^T (\mathbf{x})$  subject to  $||\mathbf{x}-\mathbf{x}^{(k)}||_\infty \leq \eta$ and $0 \leq \mathbf{x} \leq 1$. Consider without subject function  $0 \leq \mathbf{x} \leq 1$, the optimization is identical to previous problem. 
+
+\begin{align*}
+\mathbf{x^*} &= \mathbf{x_0} + \eta (sign({\nabla_x J(  \mathbf{x_0})}) \\
+\mathbf{x}^{(k+1)} &= \mathbf{x}^{(k)} + \eta (sign({\nabla_x J(  \mathbf{x}^{(k)})}) \\
+\end{align*}
+
+Adding the conidtion that $0 \leq \mathbf{x} \leq 1$
+
+\begin{align*}
+\mathbf{x}^{(k+1)} &= P_{[0,1]}\{\mathbf{x}^{(k)} + \eta (sign({\nabla_x J(  \mathbf{x}^{(k)})})\} \\
+\mathbf{x}^{(k+1)} &= P_{[0,1]}\{\mathbf{x}^{(k)} - \eta (sign({\nabla_x g(  \mathbf{x}^{(k)})})\} \\
+\nabla_x g(\mathbf{x}^{(k)}) &= \frac{1}{2}(\mathbf{W_j}-\mathbf{W_t})\mathbf{x}^{(k)} + (\mathbf{w_j}-\mathbf{w_t}) \\
+\end{align*}
+
+\end{enumerate}
+
+%------------------Task c------------------------------
+
+\item
+
+\begin{enumerate}[label=(\roman*)]
+
+\item \noindent\textbf{Answer}
+
+As this is a binary class problem, the objective function can be writen as $||\mathbf{x}-\mathbf{x_0}||_2^2+\lambda(\boldsymbol{\omega^T}\mathbf{x} + \omega_0)$ or $\frac{1}{2}||\mathbf{x}-\mathbf{x_0}||_2^2+\lambda(\boldsymbol{\omega^T}\mathbf{x} + \omega_0)$
+
+\begin{align*}
+\nabla_x(\frac{1}{2}||\mathbf{x}-\mathbf{x_0}||_2^2+\lambda(\boldsymbol{\omega^T}\mathbf{x} + \omega_0)) &= 0\\
+(\mathbf{x^*}-\mathbf{x_0}) + \lambda\boldsymbol{\omega} &= 0 \\
+\mathbf{x^*} &= \mathbf{x_0} - \lambda\boldsymbol{\omega}
+\end{align*}
+
+\item \noindent\textbf{Answer}
+
+Minimize $||\mathbf{x}-\mathbf{x_0}||_2^2 + \lambda \cdot max(max\{g_j(\mathbf{x})\}-g_t(\mathbf{x}),0)$. Define $i^*(\mathbf{x})$ as the index if maximum response from $g_j(\mathbf{x})$ for $j \neq t$. 
+
+\begin{align*}
+\nabla_x max(g_{i^*}(\mathbf{x})-g_t(\mathbf{x}),0) &= \nabla_x g_{i^*}(\mathbf{x}) - \nabla_xg_t(\mathbf{x}) &&  if \ g_{i^*}(\mathbf{x})-g_t(\mathbf{x}) > 0\\
+\nabla_x max(g_{i^*}(\mathbf{x})-g_t(\mathbf{x}),0) &=\mathbb{I} \{g_{i^*}(\mathbf{x})-g_t(\mathbf{x})>0\} \cdot (\nabla_x g_{i^*}(\mathbf{x}) - \nabla_xg_j(\mathbf{x})) \\
+\end{align*}
+So the grandient of the objective function is  
+
+\begin{align*}
+\nabla_x \varphi(\mathbf{x}; i^*) &= \nabla_x( ||\mathbf{x}-\mathbf{x_0}||_2^2 + \lambda \cdot max(g_{i^*}(\mathbf{x})-g_t(\mathbf{x}),0)) \\
+\nabla_x \varphi(\mathbf{x}; i^*) &= 2(\mathbf{x}-\mathbf{x_0})+ \lambda \cdot \mathbb{I} \{g_{i^*}(\mathbf{x})-g_t(\mathbf{x})>0\} \cdot (\nabla_x g_{i^*}(\mathbf{x}) - \nabla_xg_j(\mathbf{x})) \\
+i^* &= argmax\{ g_j(x^{(k)})\} \\
+\mathbf{x}^{(k+1)} &= \mathbf{x}^{(k)} - \alpha \nabla_x \varphi(\mathbf{x}^{(k)}; i^*)
+\end{align*}
+
+\end{enumerate}
+
+\end{enumerate}
+
+%-------------------------------------------------------------------------------------------------------------------------------------------------------
+\subsection*{Exercise 2}
+\noindent\textbf{Answer}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_0_1}
+  \caption{Original image}
+  \label{fig:original_image}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_0_3}
+  \caption{Classifier result}
+  \label{fig:original_classify_result}
+\end{subfigure}
+
+\caption{Original Cat image}
+\label{fig:}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_2_1}
+  \caption{Perturbed image}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_2_2}
+  \caption{Perturbation}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_2_3}
+  \caption{Classifier result}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_2_4}
+  \caption{$50^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_2_5}
+  \caption{$100^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_2_6}
+  \caption{$150^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_2_7}
+  \caption{$200^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_2_8}
+  \caption{$250^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+
+\caption{CW Attack - Non-Overlapping Patches $\lambda$ = 1}
+\label{fig:}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_1_1}
+  \caption{Perturbed image}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_1_2}
+  \caption{Perturbation}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_1_3}
+  \caption{Classifier result}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_1_4}
+  \caption{$20^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_1_5}
+  \caption{$40^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_1_6}
+  \caption{$60^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_1_7}
+  \caption{$80^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_1_8}
+  \caption{$100^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+
+\caption{CW Attack - Non-Overlapping Patches $\lambda$ = 5}
+\label{fig:}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_3_1}
+  \caption{Perturbed image}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_3_2}
+  \caption{Perturbation}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_3_3}
+  \caption{Classifier result}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_3_4}
+  \caption{$10^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_3_5}
+  \caption{$20^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_3_6}
+  \caption{$30^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_3_7}
+  \caption{$40^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_3_8}
+  \caption{$50^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+
+\caption{CW Attack - Non-Overlapping Patches $\lambda$ = 10}
+\label{fig:}
+\end{figure}
+
+Figure \ref{fig:original_image} is an original cat image. And figure \ref{fig:original_classify_result} is the clasification result.
+The clasifier aim to clasify each pixel into 2 classes: grass represent with black and cat represent in white. 
+The CW attact is used to fool the classifier on cat pixel. The goal is to make classifier unable to detect the cat pixel. Or in the other hand, the classicifation result will be all black. 
+
+Figure 2 - 4 are the result of CW attack with $\lambda$ = 1, 5, and 10 repectively with the Frobenius norm 34.65, 73.68 and 84.46 respectively. For each $\lambda$ value, the final perturbed images are shown in subfigure (a). The limit of iteration is set to 300. Subfigure (b) shows the purturbation and (c) shows the classification result. Subfigure (d), (e), (f), (g), and (h) shows the classification result of purturbed image after certain iteration. 
+
+Number of iteration directly relates to the attack result. The more of iteration, the more purturb on the image which makes the classifier fails to detect the cat images. This support by the number of white pixel disappear when the number of iteration is high. The value of $\lambda$ effect the number of iteration until reaching the final result. With $\lambda$ = 1, there are still plently of white pixel after 300 iteration. While at $\lambda$ = 5, most of the white pixel is disappear after 100 iteration. If the $\lambda$ = 10, most of the white pixel is disapper after 50 iteration. The higher $\lambda$ means the less iteration that requiere to attack the image.
+
+\begin{figure}[H]
+\begin{subfigure}{.3\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_4_1}
+  \caption{$\alpha$ = 0.0001}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_4_2}
+  \caption{$\alpha$ = 0.001}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_4_3}
+  \caption{$\alpha$ = 0.01}
+  \label{fig:}
+\end{subfigure}
+
+\caption{CW Attack with different $\alpha$ ($\lambda$ = 1, limit at 100 iterations)}
+\label{fig:}
+\end{figure}
+
+Figure 5 shows the result of attacking at different $\alpha$ value. It is clear that with higher $\alpha$ value, the more white pixel disappear. With $\alpha$ = 0.001, all white pixel is disspear after 100 iteration and the value of $\lambda$ is set at 1. The perturbation norm is 64.95. If the $alpha$ value is increased to 0.01, the result doesn't change and the perturbation norm is also 64.95. This mean that the output of attacking is already optimized.
+
+
+
+
+%-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+\subsection*{Exercise 3}
+
+\begin{figure}[H]
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_1_1}
+  \caption{Perturbed image}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_1_2}
+  \caption{Perturbation}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_1_3}
+  \caption{Classifier result}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_1_4}
+  \caption{$2^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_1_5}
+  \caption{$4^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_1_6}
+  \caption{$6^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_1_7}
+  \caption{$8^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_1_8}
+  \caption{$10^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+
+\caption{CW Attack - Non-Overlapping Patches $\lambda$ = 5}
+\label{fig:}
+\end{figure}
+
+Figure 6 - 8 show implimentation of CW attack with $l\lambda$ = 5, 1, 0.5 respectively. The $\alpha$ is set to 0.001. Number of iteration is limited to 300 iterations. It is clearly that with higher $\lambda$, the attack requires less iteration to complete. At 10 iterations, there are plently of white pixel if the $\lambda$ is set to 0.5. While, if the $\lambda$ is set to 1, the there are less white pexels. If $\lambda$ is set to 5, after 10 iterations, all pixel is disappeared. 
+
+In the other hand, the higher $\lambda$ can cause the higher norm of perturbation. After 300 iterations, the norm of perturbation is 19.19, 20.32 and 29.16 for $\lambda$ = 0.5, 1, 5 repectively. The purturbation norms are significant smaller than Non-Overlapping pacthes. And from visual inspection, the purturbed image from Overlapping patches are more similar to original image than Non-Overlapping patches.
+
+
+\begin{figure}[H]
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_2_1}
+  \caption{Perturbed image}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_2_2}
+  \caption{Perturbation}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_2_3}
+  \caption{Classifier result}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_2_4}
+  \caption{$5^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_2_5}
+  \caption{$10^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_2_6}
+  \caption{$15^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_2_7}
+  \caption{$20^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_2_8}
+  \caption{$25^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+
+\caption{CW Attack - Non-Overlapping Patches $\lambda$ = 1}
+\label{fig:}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_3_1}
+  \caption{Perturbed image}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_3_2}
+  \caption{Perturbation}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_3_3}
+  \caption{Classifier result}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_3_4}
+  \caption{$5^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_3_5}
+  \caption{$10^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_3_6}
+  \caption{$15^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_3_7}
+  \caption{$20^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.22\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_3_8}
+  \caption{$25^{th}$ iteration}
+  \label{fig:}
+\end{subfigure}
+
+\caption{CW Attack - Overlapping Patches $\lambda$ = 0.5}
+\label{fig:}
+\end{figure}
+
+%-------------------------------------------------------------------------------------------------------------------------------------------------------
+\subsection*{Exercise 4}
+
+
+This defend implimentation aim to restore the correct classification of cat-grass image. The original image and its classifcation result is shown in figure 1. The purturbed image undertest is the figure 7a which is subjected to CW attack with $\lambda$ = 1. After the attack, the classification result is shown in figure 7c. The purturbation is completedly optimized, thus there is no cat (white pixel) detection. 
+
+The nature of adversarial attact is that it tries to change the classifier output from correct class to target class with minimum disturbation. This means that for those pixel that underattack are more likely to be cat pixel. While grass pixels are more likely to be untouched or minimal modification. Defind $g_j(x)$ and $g_t(x)$ are the possibility that $x$ is belong to class $j$ and $t$ respectively or in this particular experiment, they are cat class and grass class repectively. 
+
+In case that the original pixel is belong to target class (glass) that means $g_t(x) - g_j(x)$ is significant greater than 0. In the other hand, in case the original pixel is cat class,  $g_t(x) - g_j(x)$ will be negative. During the attacking process, those pixels in cat class will be modify in the direction that $g_t(x) - g_j(x)$ move to 0 pr possitive value. The value using this strategy, figure 9 shows the value of 
+$g_t(x) - g_j(x)$ and its histrogram.
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_4_1}
+  \caption{$g_t(x) - g_j(x)$}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_4_2}
+  \caption{Histrogram}
+  \label{fig:}
+\end{subfigure}
+\caption{$g_t(x) - g_j(x)$ and its histrogram}
+\label{fig:}
+\end{figure}
+
+There is no distance gap in the histrogram that can explicitly separate the two classes. Base on the assumtion, cat class pixels will be more likely to have lower $g_t(x) - g_j(x)$ value. The first quartile is used as the threshore to find the cat class pixel. However, instead of consider $g_t(x) - g_j(x)$ of individual pixel, the 8x8 patch are used to determind. For each pixel, if the average of $g_t(x) - g_j(x)$ in 8x8 patch is less than the value of the first quartile of $g_t(x) - g_j(x)$ plus standard deviation of $g_t(x) - g_j(x)$, that pixel is belong to cat class. The result is show in figure 10b. And figure 10a shows the result of this defend on original image before perturbation.
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_4_3}
+  \caption{Result from original image}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_4_4}
+  \caption{Result from perturbed image}
+  \label{fig:}
+\end{subfigure}
+\caption{Result of applying defense}
+\label{fig:}
+\end{figure}
+
+Another two baseline methods are used for result comparision. The first defend method is Pixel Deflection (Deflecting Adversarial Attacks with Pixel Deflection (2018), Prakash el at, arXiv:1801.08926). If the deflected is set to 2930, there will be approximately 1 pixel is deflected in any random 8 x 8 patch, as there are 375 x 500 = 187,500 pixel in image undertest. To increase possible of deflected pixel in any random patch, the deflection parameter is set to 24,000. After Pixel, Deflection process, the images are tested with the classifier. The result shows in figure 11. 
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_4_5}
+  \caption{Result from original image}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_4_6}
+  \caption{Result from perturbed image}
+  \label{fig:}
+\end{subfigure}
+\caption{Result of applying Pixel Deflection}
+\label{fig:}
+\end{figure}
+
+Second baseline methon is wavelet denoise from Python's Scikit package. The result shows in figure 12.
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_4_8}
+  \caption{Result from original image}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_4_7}
+  \caption{Result from perturbed image}
+  \label{fig:}
+\end{subfigure}
+\caption{Result of applying wavelet denoise}
+\label{fig:}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{table}
+\end{figure}
+
+The mismatch pixel is count compared to original mask. The method purposed in this study doesn't perform better than wavelet desnoise. However, even the number of mismatch of this defense is more than Pixel deflection, but from visual inspection, this defense can show better cat-grass pattern. This defense has limited capacity only on 2 classes problem.
+
+\newpage
+%-------------------------------------------------------------------------------------------------------------------------------------------------------
+\subsection*{Apendix}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_2_1}
+  \caption{Perturbed image}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_2_2}
+  \caption{Perturbation}
+  \label{fig:}
+\end{subfigure}
+
+
+
+\caption{CW Attack - Non-Overlapping Patches $\lambda$ = 1}
+\label{fig:}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_1_1}
+  \caption{Perturbed image}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_1_2}
+  \caption{Perturbation}
+  \label{fig:}
+\end{subfigure}
+
+\caption{CW Attack - Non-Overlapping Patches $\lambda$ = 5}
+\label{fig:}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_3_1}
+  \caption{Perturbed image}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_2_3_2}
+  \caption{Perturbation}
+  \label{fig:}
+\end{subfigure}
+
+
+\caption{CW Attack - Non-Overlapping Patches $\lambda$ = 10}
+\label{fig:}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_1_1}
+  \caption{Perturbed image}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_1_2}
+  \caption{Perturbation}
+  \label{fig:}
+\end{subfigure}
+
+\caption{CW Attack - Non-Overlapping Patches $\lambda$ = 5}
+\label{fig:}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_2_1}
+  \caption{Perturbed image}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_2_2}
+  \caption{Perturbation}
+  \label{fig:}
+\end{subfigure}
+
+\caption{CW Attack - Non-Overlapping Patches $\lambda$ = 1}
+\label{fig:}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_3_1}
+  \caption{Perturbed image}
+  \label{fig:}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{final_3_3_2}
+  \caption{Perturbation}
+  \label{fig:}
+\end{subfigure}
+
+\caption{CW Attack - Overlapping Patches $\lambda$ = 0.5}
+\label{fig:}
+\end{figure}
+
+
+\end{document}
+

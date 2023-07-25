@@ -1,0 +1,738 @@
+\documentclass[11pt]{article}
+
+% ------
+% LAYOUT
+% ------
+\textwidth 165mm %
+\textheight 230mm %
+\oddsidemargin 0mm %
+\evensidemargin 0mm %
+\topmargin -15mm %
+\parindent= 10mm
+
+\usepackage[dvips]{graphicx}
+\usepackage{multirow,multicol}
+\usepackage[table]{xcolor}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\graphicspath{{./hw1_pic/}} % put all your figures here.
+\usepackage[shortlabels]{enumitem}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+
+
+\begin{document}
+\begin{center}
+\Large{\textbf{ECE 595: Homework 1}}
+
+Thirawat Bureetes, 17
+
+(Spring 2020)
+\end{center}
+
+\subsection*{Exercise 2}
+In this exercise, we will use Python to draw random samples from a 1D Gaussian and visualize the data using a histogram.
+
+\begin{enumerate}[label=(\alph*)]
+\item Let's  $X$ be a random variable with $X \sim N(\mu, \sigma^2)$. The PDF of $X$ is written explicitly as 
+
+\begin{equation}
+f_X(x) = \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x-\mu)^2}{2\sigma^2}}
+\end{equation}
+
+Prove that $\mathbb{E}[X] = \mu$ and Var$[X] = \sigma^2$
+
+\noindent\textbf{Answer}
+
+\begin{align*}
+\mathbb{E}[X]& = \int_{-\infty}^{\infty}xf_X(x) dx \\
+&= \int_{-\infty}^{\infty}\frac{x}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x-\mu)^2}{2\sigma^2}} dx \\
+&= \frac{1}{\sqrt{2\pi\sigma^2}}\int_{-\infty}^{\infty}xe^{-\frac{(x-\mu)^2}{2\sigma^2}} dx \\
+&= \frac{1}{\sqrt{2\pi\sigma^2}}\int_{-\infty}^{\infty}(\sqrt{2}\sigma t+\mu)e^{-t^2} dx && \text{subtitute $t = \frac{x-u}{\sqrt{2}\sigma}$} \\
+&= \frac{1}{\sqrt{2\pi\sigma^2}}\int_{-\infty}^{\infty}(\sqrt{2}\sigma t+\mu)e^{-t^2}\frac{\sqrt{2}\sigma}{\sqrt{2}\sigma} dx \\
+&= \frac{\sqrt{2}\sigma}{\sqrt{2\pi\sigma^2}}\int_{-\infty}^{\infty}(\sqrt{2}\sigma t+\mu)e^{-t^2}dt \\
+&= \frac{1}{\sqrt{\pi}}\int_{-\infty}^{\infty}\sqrt{2}\sigma t  e^{-t^2}+\mu e^{-t^2}dt \\
+&= \frac{1}{\sqrt{\pi}}(\int_{-\infty}^{\infty}\sqrt{2}\sigma t  e^{-t^2}dt+\int_{-\infty}^{\infty}\mu e^{-t^2}dt) \\
+&= \frac{1}{\sqrt{\pi}}(\sqrt{2}\sigma\int_{-\infty}^{\infty} t  e^{-t^2}dt+\mu \int_{-\infty}^{\infty} e^{-t^2}dt) \\
+&= \frac{1}{\sqrt{\pi}}(\sqrt{2}\sigma(-\frac{1}{2} e^{-t^2} \Big|_{-\infty}^{\infty})+\mu \sqrt{\pi}) \\
+&= \frac{1}{\sqrt{\pi}}(\sqrt{2}\sigma(0)+\mu \sqrt{\pi}) \\
+&= \frac{\mu \sqrt{\pi}}{\sqrt{\pi}} \\
+& =\mu \\
+\end{align*}
+
+\begin{align*}
+Var[X]& = \mathbb{E}[X^2]- (\mathbb{E}[X])^2 \\
+&= \mathbb{E}[X^2]-\mu^2 \\
+&= \int_{-\infty}^{\infty}x^2 f_X(x) dx-\mu^2 \\
+&= \int_{-\infty}^{\infty}\frac{x^2}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x-\mu)^2}{2\sigma^2}} dx -\mu^2 \\
+&= \frac{1}{\sqrt{2\pi\sigma^2}}\int_{-\infty}^{\infty}x^2 e^{-\frac{(x-\mu)^2}{2\sigma^2}} dx -\mu^2 \\
+&= \frac{1}{\sqrt{2\pi\sigma^2}}\int_{-\infty}^{\infty}(\sqrt{2}\sigma t+\mu)^2 e^{-t^2} dx -\mu^2 && \text{subtitute $t = \frac{x-u}{\sqrt{2}\sigma}$} \\
+&= \frac{1}{\sqrt{2\pi\sigma^2}}\int_{-\infty}^{\infty}(\sqrt{2}\sigma t+\mu)^2 e^{-t^2} \frac{\sqrt{2}\sigma}{\sqrt{2}\sigma}dx -\mu^2 \\
+&= \frac{\sqrt{2}\sigma}{\sqrt{2\pi\sigma^2}}\int_{-\infty}^{\infty}(\sqrt{2}\sigma t+\mu)^2 e^{-t^2} dt -\mu^2 \\
+&= \frac{1}{\sqrt{\pi}}\int_{-\infty}^{\infty}(2\sigma^2 t^2+2\sqrt{2}\sigma\mu t+\mu^2) e^{-t^2} dt -\mu^2 \\
+&= \frac{1}{\sqrt{\pi}}(\int_{-\infty}^{\infty}2\sigma^2 t^2 e^{-t^2} dt+\int_{-\infty}^{\infty}2\sqrt{2}\sigma\mu t e^{-t^2} dt+\int_{-\infty}^{\infty}\mu^2 e^{-t^2} dt) -\mu^2 \\
+&= \frac{1}{\sqrt{\pi}}(2\sigma^2 \int_{-\infty}^{\infty}t^2 e^{-t^2} dt+2\sqrt{2}\sigma\mu \int_{-\infty}^{\infty}t e^{-t^2} dt+\mu^2\int_{-\infty}^{\infty} e^{-t^2} dt) -\mu^2 \\
+&= \frac{1}{\sqrt{\pi}}(2\sigma^2 \int_{-\infty}^{\infty}t^2 e^{-t^2} dt+2\sqrt{2}\sigma\mu (-\frac{1}{2} e^{-t^2} \Big|_{-\infty}^{\infty})+\mu^2 \sqrt{\pi}) -\mu^2 \\
+&= \frac{1}{\sqrt{\pi}}(2\sigma^2 \int_{-\infty}^{\infty}t^2 e^{-t^2} dt+2\sqrt{2}\sigma\mu (0))+\mu^2  -\mu^2 \\
+&= \frac{2\sigma^2}{\sqrt{\pi}}( \int_{-\infty}^{\infty}t^2 e^{-t^2} dt) \\
+&= \frac{2\sigma^2}{\sqrt{\pi}}( -\frac{t}{2}e^{-t^2}\Big|_{-\infty}^{\infty}+\frac{1}{2}\int_{-\infty}^{\infty} e^{-t^2} dt) \\
+&= \frac{2\sigma^2}{\sqrt{\pi}}( 0+\frac{1}{2}\int_{-\infty}^{\infty} e^{-t^2} dt) \\
+&= \frac{2\sigma^2}{\sqrt{\pi}}( \frac{1}{2}\sqrt{\pi}) \\
+& = \sigma^2 \\
+\end{align*}
+
+\newpage
+\item Let $\mu = 0$ and $\sigma = 1$ so that $X \sim N(0,1)$. Plot $f(x)$ using \texttt{matplotlib.pyplot.plot} for the range $x \in [-3,3]$. Use \texttt{matplotlib.pyplot.savefig} to save your figure.
+
+\noindent\textbf{Answer}
+
+\begin{lstlisting}[language=Python]
+import numpy as np
+import matplotlib.pyplot as plt
+
+scale = 0.01
+x = np.arange(-3, 3+scale, scale)
+
+y = np.exp(-0.5*np.power(x, 2))/(np.sqrt(2*np.pi))
+
+plt.plot(x, y)
+plt.savefig("hw1_2_b.pdf")
+\end{lstlisting}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\linewidth]{hw1_2_b}
+\caption{Normal distribution curve for $X \sim N(0,1)$ for the range $x \in [-3,3]$.}
+\label{fig: figure}
+\end{figure}
+
+\newpage
+\item Let us investigate the use of histograms in data visualization.
+\begin{enumerate}[label=(\roman*)]
+\item Use \texttt{numpy.random.normal} to draw 1000 random samples from $N(0,1)$.
+
+\noindent\textbf{Answer}
+
+\begin{lstlisting}[language=Python]
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+
+x = np.random.normal(0, 1, 1000)
+\end{lstlisting}
+
+\item Make two histogram plots using \texttt{matplotlib.pyplot.hist}, with the number of bins $m$ set to 4 and 1000.
+
+\noindent\textbf{Answer}
+
+\begin{lstlisting}[language=Python]
+fig1 = plt.figure(1)
+ax1 = fig1.add_subplot(111)
+ax1.hist(x, bins=4)
+fig1.savefig("hw1_2_c_1.pdf")
+
+fig2 =  plt.figure(2)
+ax2 = fig2.add_subplot(111)
+ax2.hist(x, bins=1000)
+fig2.savefig("hw1_2_c_2.pdf")
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw1_2_c_1}
+\caption{Histogram of 1000 random $x \in X \sim N(0,1)$ bins = 4.}
+\label{fig: figure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw1_2_c_2}
+\caption{Histogram of 1000 random $x \in X \sim N(0,1)$ bins = 1000.}
+\label{fig: figure}
+\end{figure}
+
+\item Use \texttt{scipy.stats.norm.fit} to estimate the mean and standard deviation of your data. Report the estimated values.
+
+\noindent\textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+mean, var = norm.fit(x)
+print("mean = {:.5f} variance = {:.5f}".format(mean, var))
+\end{lstlisting}
+
+From the Python code above
+
+mean = 0.03073
+
+variance = 0.99976
+
+\item Plot the fitted gaussian curve on the top of the two histogram plots using \texttt{scipy.stats.norm.pdf}.
+
+\noindent\textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+x_ref = np.linspace(-3, 3, num=1000)
+ax3 = ax1.twinx()
+ax3.plot(x_ref, norm.pdf(x_ref), 'r', label='fitted gaussian')
+ax3.legend()
+fig1.savefig("hw1_2_c_3.pdf")
+
+ax4 = ax2.twinx()
+ax4.plot(x_ref, norm.pdf(x_ref), 'r', label='fitted gaussian')
+ax4.legend()
+fig2.savefig("hw1_2_c_4.pdf")
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw1_2_c_3}
+\caption{Histogram of 1000 random $x \in X \sim N(0,1)$ bins = 4, with fitted gaussian curve. }
+\label{fig: figure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw1_2_c_4}
+\caption{Histogram of 1000 random $x \in X \sim N(0,1)$ bins = 1000, with fitted gaussian curve.}
+\label{fig: figure}
+\end{figure}
+
+\item Are the two histograms representative of your data's distribution? How are they different in terms of data representation?
+
+\noindent\textbf{Answer}
+
+Both histrograms are the representative of normal distributed data. However, with bins = 4, the number of bins is too small so the ability to show the distribution of data is limited.
+
+\end{enumerate}
+
+\item A pratical way to estimate the optimal bid width is to make use of what is called the \textbf{cross validation estimator of risk} (CVER) of the dataset. Denoting $h$ = (max data balue - min data value)/$m$ as the bin width, with $m$ = the number of bins (assuming you applied no rescaling to your raw data), 
+we seek $h^*$ that minimizes the CVER $\hat{J}(h)$, espressed as followed: 
+
+\begin{equation}
+\hat{J}(h) = \frac{2}{h(n-1)}-\frac{n+1}{h(n-1)}\sum_{j=1}^m \hat{p_j}^2
+\end{equation}
+
+Where $\{ \hat{p_j} \}_{j=1}^m$ is the empirical probability of a sample falling into each bin, and $n$ is the total number of samples. 
+
+Plot $\hat{J}(h)$ with respect to $m$ the number of bins, for $m$ = 1, 2, ..., 200. Find the $m^*$ that minimizes $\hat{J}(h)$, plot the histogram of your data with that $m^*$, and plot the Gaussian curve fitted to your data on top of your histogram. How is your current histogram different from those you obtained in part (c)?
+
+\noindent\textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+
+n = 1000
+x = np.random.normal(0, 1, n)
+m = np.linspace(1, 200, num=200)
+amax = np.amax(x)
+amin = np.amin(x)
+h = (amax-amin)/m
+j_hat = np.zeros(200)
+
+for j in range(1, 201):
+    p = np.zeros(j)
+    for sample in x:
+        try:
+            p[(int((sample - amin)/h[j-1]))] += 1
+        except IndexError: # Max value case
+            p[j-1] += 1
+            
+    sum_p_square = np.sum(np.power(p/n, 2))
+    j_hat[j-1] = (2 / (h[j-1] * (n-1)) - 
+                  (((n+1) / (h[j-1]*(n-1))) * sum_p_square))
+
+fig1 = plt.figure(1)
+plt.plot(m, j_hat)
+fig1.savefig("hw1_2_d_1.pdf")
+
+m_star = np.argmin(j_hat) + 1
+print(m_star)
+
+fig2 =  plt.figure(2)
+ax2 = fig2.add_subplot(111)
+ax2.hist(x, bins=m_star)
+x_ref = np.linspace(-3, 3, num=1000)
+ax3 = ax2.twinx()
+ax3.plot(x_ref, norm.pdf(x_ref), 'r', label='fitted gaussian')
+ax3.legend()
+fig2.savefig("hw1_2_d_2.pdf")
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw1_2_d_1}
+\caption{$\hat{J}(h)$ with respect to $m$ where $m$ = 1, 2, ..., 200.}
+\label{fig: hw1_2_d_1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw1_2_d_2}
+\caption{Histogram of 1000 random $x \in X \sim N(0,1)$ where bin = $m^*$.}
+\label{fig: hw1_2_d_2}
+\end{figure}
+
+From this set of 1000 random data shown in figure  \ref{fig: hw1_2_d_1}, the $m^*$ that minimizes $\hat{J}(h)$ is 14. The histogram  (figure \ref{fig: hw1_2_d_2}) has more details compared to bins = 4 in part (c) while each bin is not tall small.
+
+\end{enumerate}
+
+\subsection*{Exercise 3}
+In this exercise, we consider the following question: suppose that we are given a random number generator that can only generate zero-mean unit variance Gaussians, i.e., $X \sim N(0,I)$, how do we transform the distribution of $X$ to an arbitary Gaussian distribution? 
+We will first derive a few equations, and then verify them with an empirical example, by drawing samples from the 2D Gaussianm applying the transform to the dataset, and checking if the transformed dataset really takes the form of the desired Gaussian.
+
+\begin{enumerate}[label=(\alph*)]
+\item Let $x \sim N(\mu, \Sigma)$ be a 2D Gaussian. The PDF of $X$ is given by 
+
+\begin{equation}
+f_X(x) = \frac{1}{\sqrt{(2\pi)^2|\Sigma|}}exp \Big\{ -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu)\Big\}
+\end{equation}
+
+Where in this exercise we assume
+
+\begin{equation}
+X = 
+\begin{bmatrix}
+X_1\\
+X_2
+\end{bmatrix}
+, \quad x = 
+\begin{bmatrix}
+x_1\\
+x_2
+\end{bmatrix}
+, \quad \mu =
+\begin{bmatrix}
+2\\
+6
+\end{bmatrix}
+, \quad  and \quad \Sigma = 
+\begin{bmatrix}
+2 & 1\\
+1 & 2
+\end{bmatrix}
+\end{equation}
+
+\begin{enumerate}[label=(\roman*)]
+\item Simplify the expression $f_X(x)$ for the particular choices of $\mu$ and $\Sigma$ here. Show your derivation.
+
+\noindent\textbf{Answer}
+
+\begin{align*}
+f_X(x)& =  f
+\begin{pmatrix}
+x_1\\
+x_2
+\end{pmatrix} \\
+& = \frac{1}{\sqrt{(2\pi)^2
+\begin{vmatrix}
+2 & 1\\
+1 & 2
+\end{vmatrix}
+}}exp \Big\{ -\frac{1}{2} (
+\begin{bmatrix}
+x_1\\
+x_2
+\end{bmatrix}
+-
+\begin{bmatrix}
+2\\
+6
+\end{bmatrix}
+)^T 
+\begin{bmatrix}
+2 & 1\\
+1 & 2
+\end{bmatrix}
+^{-1} (
+\begin{bmatrix}
+x_1\\
+x_2
+\end{bmatrix}
+-
+\begin{bmatrix}
+2\\
+6
+\end{bmatrix}
+)\Big\} \\
+&= \frac{1}{2\pi\sqrt{3}}exp \Big\{ -\frac{1}{6} 
+\begin{bmatrix}
+x_1 - 2\\
+x_2 - 6
+\end{bmatrix}
+^T 
+\begin{bmatrix}
+2 & -1\\
+-1 & 2
+\end{bmatrix}
+\begin{bmatrix}
+x_1 - 2\\
+x_2 - 6
+\end{bmatrix}
+\Big\} \\
+& = \frac{1}{2\pi\sqrt{3}}exp \Big\{ -\frac{1}{6} 
+\begin{bmatrix}
+x_1 - 2 & x_2 - 6
+\end{bmatrix}
+\begin{bmatrix}
+2x_1 - x_2 + 2\\
+-x_1 + 2x_2 - 10
+\end{bmatrix}
+\Big\} \\
+& = \frac{1}{2\pi\sqrt{3}}exp \Big\{ -\frac{1}{6} (x_1 - 2)(2x_1 - x_2 + 2) + (x_2 - 6)(-x_1 + 2x_2 - 10)\Big\} \\
+& = \frac{1}{2\pi\sqrt{3}}exp \Big\{ -\frac{1}{6} (2x_1^2-x_1 x_2 - 2x_1 + 2x_2 -4) + (2x_2^2-x_1 x_2+6x_1-22x_2+60)\Big\} \\
+& = \frac{1}{2\pi\sqrt{3}}exp \Big\{ -\frac{1}{6} (2x_1^2+2x_2^2 - 2x_1 x_2 + 4x_1 -20x_2 +56)\Big\} \\
+\end{align*}
+
+\item Using \texttt{matplotlib.pyplot.contour}, plot the contour of $f_x(x)$ for the range $x \in $ [-1,5] x [0,10].
+
+\noindent\textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+import numpy as np
+import matplotlib.pyplot as plt
+
+delta = 0.01
+x1 = np.arange(-1, 5+delta, delta)
+x2 = np.arange(0, 10+delta, delta)
+X1, X2 = np.meshgrid(x1, x2)
+exp = (2*np.power(X1, 2))+(2*np.power(X2, 2)-2*X1*X2+4*X1-20*X2+56)
+Y = 1/(2*np.pi*np.sqrt(3))*np.exp(exp/-6)
+fig = plt.figure()
+ax1 = fig.add_subplot(111)
+plt.contour(x1, x2, Y)
+ax1.set_xlabel('x1')
+ax1.set_ylabel('x2').set_rotation(0)
+fig.savefig("hw1_3_a_1.pdf")
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw1_3_a_1}
+\caption{The contour of $f_x(x)$ for the range $x \in $ [-1,5] x [0,10].}
+\label{fig: hw1_3_a_1}
+\end{figure}
+
+\end{enumerate}
+
+\item Suppose $X \sim N(0,I)$. We would like to derive a transformation that can map $X$ to an arbitrary Gaussian. 
+
+\begin{enumerate}[label=(\roman*)]
+
+\item Let $X \sim N(0,I)$ be a $d$-dimensional random vector. Let $A \in \mathbb{R}^{d \times d}$ and $b \in \mathbb{R}^d$
+Let $Y = AX + b$ be an affine transformation of $X$. Let $\mu_Y \overset{def}{=} \mathbb{E}[Y]$. be the mean vector and $\Sigma_Y \overset{def}{=} \mathbb{E}[(Y-\mu_Y)(Y-\mu_Y)^T]$ be the covariance matrix. Show that
+
+\begin{equation}
+\mu_Y = b, \quad and \quad \Sigma_Y = AA^T
+\end{equation}
+
+\noindent\textbf{Answer}
+
+\begin{align*}
+\mu_Y& = \mathbb{E}[Y] \\
+& = \mathbb{E}[AX+b] \\
+& = A\mathbb{E}[X]+b \\
+& = A(0)+b && \text{$X \sim N(0,I)$} \\
+& = b
+\end{align*}
+
+\begin{align*}
+\Sigma_Y& = \mathbb{E}[(Y-\mu_Y)(Y-\mu_Y)^T] \\
+& = \mathbb{E}[\big((AX+b)-\mu_Y\big)\big((AX+b)-\mu_Y\big)^T] \\
+& = \mathbb{E}[\big((AX+b)-(A\mu_X+b)\big)\big((AX+b)-(A\mu_X+b)\big)^T] \\
+& = \mathbb{E}[(AX-A\mu_X)(AX-A\mu_X)^T] \\
+& = \mathbb{E}[\big(A(X-\mu_X)\big)\big(A(X-\mu_X)\big)^T] \\
+& = \mathbb{E}[A(X-\mu_X)(X-\mu_X)^TA^T] \\
+& = A\mathbb{E}[(X-\mu_X)(X-\mu_X)^T]A^T \\
+& = A\Sigma_XA^T && \text{$X \sim N(0,I)$} \\
+& = AA^T
+\end{align*}
+
+\item Show that $\Sigma_Y$ is symmetric positive semi-definite.
+
+\noindent\textbf{Answer}
+
+for any $u \in \mathbb{R}^d$
+
+\begin{align*}
+u^T\Sigma_Yu & = u^T[AA^T]u \\
+& = u^TAA^Tu \\ 
+& = \big(u^TA\big)^2 \geq 0 \\  
+\end{align*}
+
+\item Under what condition on $A$ would $\Sigma_Y$ become a symmetric positive definite matrix?
+
+\noindent\textbf{Answer}
+
+ $\Sigma_Y$ become a symmetric positive definite matrix if $\Sigma_Y$ is invertible or $\Sigma_Y^{-1}$ exists
+
+\begin{align*}
+\Sigma_Y^{-1} & = [AA^T]^{-1} \\
+& =  (A^T)^{-1}A^{-1} \\
+& =  (A^{-1})^TA^{-1}\\  
+\end{align*}
+
+$\Sigma_Y^{-1}$ exists if $A^{-1}$ exists. So \textbf{$A$ must be invertible} in order to $\Sigma_Y$ become a symmetric positive definite matrix.
+
+\item Consider a random variable $Y \sim N(\mu_Y,\Sigma_Y)$ such that 
+\begin{center} 
+$\mu_Y = 
+\begin{bmatrix}
+2\\
+6
+\end{bmatrix}
+$, and $\Sigma_Y =
+\begin{bmatrix}
+2 & 1\\
+1 & 2
+\end{bmatrix}
+$
+\end{center}
+
+Determind $A$ and $b$ which could satisfy Equation (5).
+
+\noindent\textbf{Answer}
+
+\begin{align*}
+\mu_Y & = 
+\begin{bmatrix}
+2\\
+6
+\end{bmatrix} = b\\
+\end{align*}
+
+\begin{align*}
+\Sigma_Y & = USV^T\\
+& = USU^)  && \text{$U=V$}\\
+& = U\sqrt{S}\sqrt{S}^TU^T  && \text{$\sqrt{S}=\sqrt{S}^T$}\\
+& = (U\sqrt{S})(U\sqrt{S})^T  \\
+& = AA^T  \\
+\end{align*}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+import numpy as np
+import scipy
+
+sigma = np.array([[2, 1],[1, 2]])
+u, s, vh = np.linalg.svd(sigma, full_matrices=True)
+
+sqrt_s = scipy.linalg.sqrtm(np.diag(s))
+a = np.dot(u, sqrt_s)
+print(a)
+\end{lstlisting}
+
+From calulation $A = 
+\begin{bmatrix}
+-\frac{\sqrt{6}}{2} & -\frac{\sqrt{2}}{2}\\
+-\frac{\sqrt{6}}{2} & \frac{\sqrt{2}}{2}
+\end{bmatrix}
+, U =
+\begin{bmatrix}
+-\frac{\sqrt{2}}{2} & -\frac{\sqrt{2}}{2}\\
+-\frac{\sqrt{2}}{2} & \frac{\sqrt{2}}{2}
+\end{bmatrix} 
+, s =
+\begin{bmatrix}
+3\\
+1
+\end{bmatrix}
+$
+
+\end{enumerate}
+
+\item Now let us verify our results from part (b) with an empirical example.
+
+\begin{enumerate}[label=(\roman*)]
+
+\item Use \texttt{numpy.random.multiveriate\_normal} to draw 5000 random samples from the 2D standard normal distribution, and make a scatter plot of the data point using \texttt{matplotlib.pyplot.scatter}.
+
+\noindent\textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+import numpy as np
+import matplotlib.pyplot as plt
+
+n = 5000
+mean = [0, 0]
+cov = [[1, 0], [0, 1]]
+x = np.random.multivariate_normal(mean, cov, n)
+
+fig1 = plt.figure(1)
+ax1 = fig1.add_subplot(111)
+plt.scatter(x[:,0], x[:,1])
+ax1.set_xlabel('x1')
+ax1.set_ylabel('x2').set_rotation(0)
+fig1.savefig("hw1_3_c_1.pdf")  
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw1_3_c_1}
+\caption{Scatter plot of 5000 random samples from the 2D standard normal distribution.}
+\label{fig: hw1_3_c_1}
+\end{figure}
+
+\item Apply the affine transformation you derived in part (b)(iv) to the data points, and make a scatter plot of the transformed data points. Now check your answer by using Python function \texttt{numpy.linalg.eig} to obtain the transformation and making a new scatter plot of the transformed data points.
+
+\noindent\textbf{Answer}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+a = np.array([[-1*np.sqrt(6)/2, -1*np.sqrt(2)/2],
+              [-1*np.sqrt(6)/2, np.sqrt(2)/2]]) 
+b = np.array([[2, 6]]) 
+y = np.empty((0, 2))
+
+for xi in x[:,]:
+    y = np.append(y, (np.dot(a,xi))+b, axis=0)
+    
+fig2 = plt.figure(2)
+ax2 = fig2.add_subplot(111)
+plt.scatter(y[:,0], y[:,1])
+ax2.set_xlabel('y1')
+ax2.set_ylabel('y2').set_rotation(0)
+fig2.savefig("hw1_3_c_2.pdf")
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{hw1_3_c_2}
+\caption{Scatter plot of $Y=AX+b$ from part (b).}
+\label{fig: hw1_3_c_2}
+\end{figure}
+
+\begin{lstlisting}[language=Python, showstringspaces=false]
+cov_y = np.cov(y.T)
+print("cov = ",cov_y)
+mean = np.mean(y.T, axis=1)
+print("mean = ",mean)
+v, w = np.linalg.eig(cov_y)
+print("v = ", v)
+print("w = ", w)
+\end{lstlisting}
+
+From calulation of transformated data
+
+$\Sigma_Y = 
+\begin{bmatrix}
+2.03094704 & 0.98934482\\
+0.98934482 & 1.92929084
+\end{bmatrix}
+, \mu_Y =
+\begin{bmatrix}
+2.00536156\\
+5.96969194
+\end{bmatrix} 
+$
+
+, $v =
+\begin{bmatrix}
+2.97076856 \\
+0.98946932
+\end{bmatrix}
+u = 
+\begin{bmatrix}
+0.72501995 &-0.68872787\\
+0.68872787 & 0.72501995
+\end{bmatrix}
+$
+
+\item Do your results from part (c)(i) and (ii) support your theoretical findings from part (b)? You are welcome to utilize Python function you find useful and include plot in your answer.
+
+\noindent\textbf{Answer}
+
+Both part (b) and (c) used the normal distribution $X \in N(0, I)$. The figure \ref{fig: hw1_3_c_1} shows that the $X$ in 2 dimensions. In part (b), the $\mu_y$ and $\Sigma_Y$ are fixed and used to find the transformation used in part (c)(ii). 
+Transformed data is shown in figure \ref{fig: hw1_3_c_2}. From calcuation, the $\mu$ and $\Sigma$ of transformed data are close to the vaules defined in part (b)(iv).
+
+\end{enumerate}
+
+\end{enumerate}
+
+\subsection*{Exercise 4}
+
+The aim of this exercise is to reinforce your understanding of the vital concept of norms, the two famous inequalities, eigen-decomposition, and the notion of positive (semi-) definiteness, which will be uniquitous throughout the semester.
+
+\begin{enumerate}[label=(\alph*)]
+
+\item Schur's lemma (one of the several named after Issai Schur) is one of the most commonly used inequalities in estimating quadratic forms. Given a matrix $A \in \mathbb{R}^{m \times n}$, vectors $x \in \mathbb{R}^m$ and $y \in \mathbb{R}^n$, the inequality takes the form
+
+\begin{equation}
+|x^TAy|\leq \sqrt{RC}\|x\|_2\|y\|_2, \quad where \quad  R = \underset{j}{max}\sum_{k=1}^{n} |[A]_{j,k}| C=\underset{k}{max}\sum_{j=1}^{m}|[A]_{j,k}|
+\end{equation}
+
+Prove this inequality
+
+\noindent\textbf{Answer}
+
+\begin{align*}
+|x^TAy| & \leq \sqrt{RC}\|x\|_2\|y\|_2, \\
+\sum_{j=1}^m \sum_{k=1}^n x_j a_{j,k} y_k &\leq \sqrt{RC}\|x\|_2\|y\|_2, \\
+\sum_{j=1}^m \sum_{k=1}^n x_j a_{j,k} y_k &\leq \sqrt{RC}\sqrt{\sum_{j=1}^m x_j^2}\sqrt{\sum_{k=1}^n y_k^2}, \\
+\sum_{j=1}^m \sum_{k=1}^n x_j a_{j,k} y_k &\leq \sqrt{RC\sum_{j=1}^m x_j^2 \sum_{k=1}^n y_k^2}, \\
+\sum_{j=1}^m \sum_{k=1}^n x_j a_{j,k} y_k &\leq \sqrt{\sum_{j=1}^m x_j^2 RC \sum_{k=1}^n y_k^2}, \\
+\end{align*}
+
+\item Recall from the lectures the concepts related to positive (semi-matrices).
+
+\begin{enumerate}[label=(\roman*)]
+
+\item Prove that any positive definite matrix A is invertible.
+
+\noindent\textbf{Answer}
+
+for $x \ne 0$ and $Ax = 0$ then $x$ is an eigenvector with eigenvalue equal to 0 which is not possible by definition of possitive definite matrix
+
+\item Find a function $f: \mathbb{R}^2 \Rightarrow \mathbb{R}$ whose Hessian is invertible but not positive definite anywhere in $\mathbb{R}^2$
+
+\noindent\textbf{Answer}
+
+Define$f: \mathbb{R}^2 \Rightarrow \mathbb{R} = f(x_1, x_2)$ 
+
+And $Hf(x_1, x_2) = 
+\begin{bmatrix}
+\frac{\partial^2 f(x_1, x_2)}{\partial x_1^2} && \frac{\partial^2 f(x_1, x_2)}{\partial x_1 x_2}\\
+\frac{\partial^2 f(x_1, x_2)}{\partial x_2 x_1} && \frac{\partial^2 f(x_1, x_2)}{\partial x_2^2}
+\end{bmatrix}
+$ 
+
+$Hf(x_1, x_2)$ is invertible, when $x = 0$, satisfy $Hf(x_1, x_2) x = 0$
+
+Since $Hf(x_1, x_2)$ has $x = 0$ that makes $Hf(x_1, x_2) x = 0$, so $Hf(x_1, x_2)$ is not positive definite
+
+\item Under what extra condition is any positive semi-definite matrix positive definite? Justify your answer?
+
+\noindent\textbf{Answer}
+
+positive semi-definite matrix $A$ becomes positive definite when $A^{-1}$ exists
+
+\end{enumerate}
+
+\item Recall the concept of eigen-decomposition: for \textbf{any} symmestric $A \in \mathbb{R}^{n \times n}$, there exist a diagonal matrix $\Lambda \in \mathbb{R}^{n \times n} $ with eigenvalues of $A$ on its diagonal, and orthonormal matrix $U \in \mathbb{R}^{n \times n}$ with eigenvectors of $A$ as its columns, such that $A=U\Lambda U^T$. 
+Prove that there exists $A^{\dag} \in \mathbb{R}^{n \times n}$ such that the following holds:
+
+\begin{equation}
+AA^{\dag}A=A
+\end{equation}
+
+\noindent\textbf{Answer}
+
+\begin{align*}
+A &= AA^{\dag}A \\
+&= (U\Lambda U^T)A^{\dag}(U\Lambda U^T) \\
+&= (U\Lambda U^T) (U\Lambda^{-} U^T)(U\Lambda U^T) \\
+&= U\Lambda (U^TU)\Lambda^{-}(U^TU)\Lambda U^T \\
+&= U\Lambda (I)\Lambda^{-}(I)\Lambda U^T \\
+&= U\Lambda \Lambda_{j,j}^{-1}\Lambda U^T \\
+&= U\Lambda (I) U^T \\
+&= U\Lambda U^T \\
+&= A\\
+\end{align*}
+
+\end{enumerate}
+
+\end{document}
+
