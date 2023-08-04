@@ -3,6 +3,7 @@
 <ol>
     <li>ABE53000 - Plant Phenotyping Technology - Prof. Jin - Fall 2018</li>
     <li>ECE56800 - Embedded Systems - Prof. Raghunathan - Spring 2019</li>
+    <li>ME58800 - Machatronics - Prof. Shelton - Spring 2019</li>
     <li>ECE59500 - Machine Learning I - Prof. Chan - Spring 2020</li>
     <li>CS53000 - Introduction to Scientific Visualization - Prof. Tricoche - Spring 2020</li>
     <li>ECE66100 - Computer Vision - Prof. Kak - Fall 2020</li>

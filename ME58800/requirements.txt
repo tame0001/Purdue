@@ -1,0 +1,10 @@
+gpiozero==1.5.0
+rpi.gpio==0.6.5
+hcsr04sensor==1.5.2
+pyserial==3.2.1
+paho-mqtt==1.4.0
+netifaces==0.10.9
+schedule==0.5.0
+smbus2==0.2.3
+redis==3.2.1
+simple-pid==0.2.1
